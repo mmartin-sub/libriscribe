@@ -14,6 +14,12 @@ from libriscribe.agents.chapter_writer import ChapterWriterAgent
 from libriscribe.agents.editor import EditorAgent
 from libriscribe.agents.researcher import ResearcherAgent
 from libriscribe.agents.formatting import FormattingAgent
+from libriscribe.agents.content_reviewer import ContentReviewerAgent
+from libriscribe.agents.style_editor import StyleEditorAgent
+from libriscribe.agents.plagiarism_checker import PlagiarismCheckerAgent
+from libriscribe.agents.fact_checker import FactCheckerAgent
+
+
 from libriscribe.settings import Settings
 from libriscribe.utils.file_utils import write_json_file
 
@@ -24,8 +30,9 @@ class ProjectManagerAgent:
     """Manages the book creation process via the CLI."""
 
     def __init__(self):
-        self.settings = Settings()  # Load settings from a config file
+        self.settings = Settings() 
         self.agents = {
+            "content_reviewer": ContentReviewerAgent(),
             "concept_generator": ConceptGeneratorAgent(),
             "outliner": OutlinerAgent(),
             "character_generator": CharacterGeneratorAgent(),
@@ -34,6 +41,9 @@ class ProjectManagerAgent:
             "editor": EditorAgent(),
             "researcher": ResearcherAgent(),
             "formatting": FormattingAgent(),
+            "style_editor": StyleEditorAgent(),
+            "plagiarism_checker": PlagiarismCheckerAgent(),  
+            "fact_checker": FactCheckerAgent(), 
         }
         self.project_data: Dict[str, Any] = {}
         self.project_dir: Optional[Path] = None
@@ -140,12 +150,12 @@ class ProjectManagerAgent:
       chapter_path = str(self.project_dir / f"chapter_{chapter_number}.md")
       self.run_agent("editor", chapter_path)
 
-    def format_book(self):
+    def format_book(self, output_path: str):
         """Formats the entire book into a single Markdown or PDF file."""
         if not self.project_data:
             print("ERROR: No project initialized. Use 'create' command first.")
             return
-        output_path = typer.prompt("Enter output file path (e.g., manuscript.md or manuscript.pdf)", type=str)
+        #output_path = typer.prompt("Enter output file path (e.g., manuscript.md or manuscript.pdf)", type=str)
         self.run_agent("formatting", str(self.project_dir), output_path)
 
     def research(self, query:str):
@@ -156,3 +166,27 @@ class ProjectManagerAgent:
       logger.info(f"🔍 Agent {self.agents['researcher'].name} researching: '{query}'...")# type: ignore
       self.run_agent("researcher", query, str(self.project_dir/"research_results.md"))
       logger.info(f"🔍 Research on '{query}' completed.")
+
+    def edit_style(self, chapter_number: int):
+        """Refines the writing style of a chapter."""
+        chapter_path = str(self.project_dir / f"chapter_{chapter_number}.md")
+        self.run_agent("style_editor", chapter_path)
+
+    def check_plagiarism(self, chapter_number: int):
+        """Checks a chapter for plagiarism."""
+        chapter_path = str(self.project_dir / f"chapter_{chapter_number}.md")
+        # You might want to store the results somewhere, not just print them
+        results = self.agents["plagiarism_checker"].execute(chapter_path) # type: ignore
+        print(f"Plagiarism check results for chapter {chapter_number}: {results}")
+
+    def check_facts(self, chapter_number: int):
+        """Checks factual claims in a chapter."""
+        chapter_path = str(self.project_dir / f"chapter_{chapter_number}.md")
+        results = self.agents["fact_checker"].execute(chapter_path) # type: ignore
+        print(f"Fact-check results for chapter {chapter_number}: {results}")
+        
+    def review_content(self, chapter_number: int):
+        """Reviews a chapter for consistency, clarity, and plot holes."""
+        chapter_path = str(self.project_dir / f"chapter_{chapter_number}.md")
+        results = self.agents["content_reviewer"].execute(chapter_path)  # type: ignore
+        print(f"Content review results for chapter {chapter_number}:\n{results.get('review', 'No review available.')}")

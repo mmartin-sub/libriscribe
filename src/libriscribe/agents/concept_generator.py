@@ -23,9 +23,9 @@ class ConceptGeneratorAgent(Agent):
 
         try:
             prompt = f"""Generate a detailed book concept for a {project_data['genre']} {project_data['category']}. Initial ideas: {project_data.get('description', 'None')}.
-            Return a JSON object. Include a 'title', a 'logline', and a 'description'(around 200-300 words):
+            Return a JSON object, and make sure it's inside a markdown codeblock. Include a 'title', a 'logline', and a 'description'(around 200-300 words):
 
-            Example:
+            ```json
             {{
                 "title": "My Book Title",
                 "logline": "A one-sentence summary of my book.",

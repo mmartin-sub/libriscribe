@@ -23,13 +23,25 @@ class ChapterWriterAgent(Agent):
         try:
             # Load data
             outline = read_markdown_file(outline_path)
-            characters = read_json_file(character_path)
-            worldbuilding = read_json_file(world_path)
             project_data = {} # Initialize to prevent error if file not found
             project_file = Path(outline_path).parent / "project_data.json"
             if project_file.exists():
-              project_data = read_json_file(str(project_file))
+                project_data = read_json_file(str(project_file))
 
+            # Conditionally load characters and worldbuilding
+            characters = []  # Default to empty list
+            if project_data.get("num_characters", 0) > 0: # Check if needed
+                if Path(character_path).exists(): # Check if file exists.
+                    characters = read_json_file(character_path)
+                else:
+                    self.logger.warning(f"Characters file expected but not found: {character_path}")
+
+            worldbuilding = {}  # Default to empty dict
+            if project_data.get("worldbuilding_needed", False): # Check if needed
+                if Path(world_path).exists(): # Check if file exists
+                    worldbuilding = read_json_file(world_path)
+                else:
+                    self.logger.warning(f"Worldbuilding file expected but not found: {world_path}")
 
             # Extract chapter-specific outline (basic string search)
             chapter_outline = self.extract_chapter_outline(outline, chapter_number)
@@ -73,7 +85,7 @@ class ChapterWriterAgent(Agent):
                 # Try finding with chapter name alone, in case numbering is off.
                 start = outline.find(f"# Chapter {chapter_number_str} ")
                 if start == -1:
-                  return "Chapter outline not found." # Not found
+                    return "Chapter outline not found." # Not found
 
             # Find the next chapter heading or the end of the string
             next_chapter_num = str(chapter_number + 1)
@@ -87,21 +99,21 @@ class ChapterWriterAgent(Agent):
             return ""
 
     def extract_chapter_title(self, outline:str, chapter_number:int) -> str:
-      """Extracts chapter title"""
-      try:
-        chapter_number_str = str(chapter_number)
+        """Extracts chapter title"""
+        try:
+            chapter_number_str = str(chapter_number)
 
-        start = outline.find(f"# Chapter {chapter_number_str}:")
-        if start == -1:
-            return f"Chapter {chapter_number}" # Default title
+            start = outline.find(f"# Chapter {chapter_number_str}:")
+            if start == -1:
+                return f"Chapter {chapter_number}" # Default title
 
-        # Find the end of the title (next newline)
-        end_of_title = outline.find("\n", start)
-        title_line = outline[start:end_of_title].strip()
+            # Find the end of the title (next newline)
+            end_of_title = outline.find("\n", start)
+            title_line = outline[start:end_of_title].strip()
 
-        # Extract title from the line.
-        title = title_line.replace(f"# Chapter {chapter_number_str}:", "").strip()
-        return title
-      except Exception as e:
-          self.logger.exception(f"Error while extracting title for chapter{chapter_number}: {e}")
-          return ""
+            # Extract title from the line.
+            title = title_line.replace(f"# Chapter {chapter_number_str}:", "").strip()
+            return title
+        except Exception as e:
+            self.logger.exception(f"Error while extracting title for chapter{chapter_number}: {e}")
+            return ""

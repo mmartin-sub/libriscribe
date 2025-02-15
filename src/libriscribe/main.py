@@ -284,28 +284,46 @@ def simple_mode():
     # --- Write Chapters (Sequentially) ---
     for i in range(1, num_chapters + 1):
         chapter_path = str(project_manager.project_dir / f"chapter_{i}.md")
-        # Check if chapter file already exists
+
+        # Option 1: Remove the existence check (always overwrite)
+        # if Path(chapter_path).exists():
+        #     print(f"Chapter {i} already exists. Skipping writing.")
+        #     continue  # Skip to the next chapter
+
+        # Option 2: Ask the user if they want to overwrite (more user-friendly)
         if Path(chapter_path).exists():
-            print(f"Chapter {i} already exists. Skipping writing.")
-            continue  # Skip to the next chapter
+            overwrite = typer.confirm(f"Chapter {i} already exists. Overwrite?")
+            if not overwrite:
+                print(f"Skipping chapter {i}.")
+                continue
+
         project_manager.write_chapter(i)
+        project_manager.review_content(i)
+
         if project_manager.project_data.get("review_preference") == "AI":
             project_manager.edit_chapter(i)
-
+        elif project_manager.project_data.get("review_preference") == "Human":
+            print(f"\nChapter {i} written to: {chapter_path}")
+            review = typer.confirm("Do you want to review and edit this chapter now?")
+            if review:
+                typer.edit(filename=chapter_path)
+                print("\nChanges saved.")
+        project_manager.edit_style(i) 
     # --- Format Book ---
     if typer.confirm("Do you want to format the book now?"):
-        output_format = select_from_list("Choose output format:", ["Markdown (.md)", "PDF (.pdf)"])
-        if output_format == "Markdown (.md)":
-            output_path = str(project_manager.project_dir / "manuscript.md")
-        else:
-            output_path = str(project_manager.project_dir / "manuscript.pdf")
-        project_manager.format_book(output_path)
-        print(f"\nBook formatted and saved to: {output_path}")
+         output_format = select_from_list("Choose output format:", ["Markdown (.md)", "PDF (.pdf)"])
+         if output_format == "Markdown (.md)":
+             output_path = str(project_manager.project_dir / "manuscript.md")
+         else:
+             output_path = str(project_manager.project_dir / "manuscript.pdf")
+         project_manager.format_book(output_path)  # Pass output_path here
+         print(f"\nBook formatted and saved to: {output_path}")
     print("\nBook creation process complete (Simple Mode).")
 
 
 def advanced_mode():
     """The more comprehensive, interactive mode."""
+    # ... (All the existing information gathering code) ...
     console.print("\n[bold green]Starting in Advanced Mode...[/bold green]\n")
 
     project_name = typer.prompt("Enter a project name (this will be the directory name)")
@@ -672,10 +690,58 @@ def advanced_mode():
         print(
             f"\nWorldbuilding details generated!  Check the file:{project_manager.project_dir}/world.json"
         )
+     # --- Determine Number of Chapters to Write ---
+    if 'num_chapters' in project_manager.project_data:
+        if isinstance(project_manager.project_data['num_chapters'], tuple):
+            num_chapters = project_manager.project_data['num_chapters'][1] #Max value
+        else:
+            num_chapters = project_manager.project_data['num_chapters']
+    else:
+      num_chapters = 1 # Default
 
-    print(
-        "\nInitial setup complete. You can now use other commands like 'write', 'edit', 'research', and 'format'."
-    )
+    # --- Chapter Writing and Refinement Loop (Advanced Mode) ---
+    for i in range(1, num_chapters + 1):
+        chapter_path = str(project_manager.project_dir / f"chapter_{i}.md")
+
+        # Optional Overwrite Check (consistent with simple_mode)
+        if Path(chapter_path).exists():
+            overwrite = typer.confirm(f"Chapter {i} already exists. Overwrite?")
+            if not overwrite:
+                print(f"Skipping chapter {i}.")
+                continue
+
+        project_manager.write_chapter(i)
+        project_manager.review_content(i)  # Content review comes first
+
+        if project_manager.project_data.get("review_preference") == "AI":
+            project_manager.edit_chapter(i)
+        elif project_manager.project_data.get("review_preference") == "Human":
+            print(f"\nChapter {i} written to: {chapter_path}")
+            review = typer.confirm("Do you want to review and edit this chapter now?")
+            if review:
+                typer.edit(filename=chapter_path)
+                print("\nChanges saved.")
+
+        project_manager.edit_style(i)
+
+        # Optional Plagiarism/Fact-Checking (you can make this conditional)
+        if project_manager.project_data.get("category") in ["non-fiction", "research paper"]:
+            project_manager.check_plagiarism(i)
+            project_manager.check_facts(i)
+    
+    # --- Formatting ---
+    if typer.confirm("Do you want to format the book now?"):
+        output_format = select_from_list("Choose output format:", ["Markdown (.md)", "PDF (.pdf)"])
+        if output_format == "Markdown (.md)":
+             output_path = str(project_manager.project_dir / "manuscript.md")
+        else:
+             output_path = str(project_manager.project_dir / "manuscript.pdf")
+
+        project_manager.format_book(output_path)
+        print(f"\nBook formatted and saved to: {output_path}")
+
+    print("\nInitial setup complete. You can now use other commands like 'write', 'edit', 'research', and 'format'.")
+    print("\nBook creation process complete (Advanced Mode).") # Indicate completion
 
 
 @app.command()
