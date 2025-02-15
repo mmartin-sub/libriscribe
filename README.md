@@ -6,7 +6,6 @@
 
 Your AI-Powered Book Writing Assistant
 
-Your AI-Powered Book Writing Assistant
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-visit%20now-green.svg)](https://guerra2fernando.github.io/libriscribe/)
@@ -143,37 +142,32 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🗺️ LibriScribe Development Roadmap
 
 ### 🤖 LLM Integration & Support
-- [ ] Multi-LLM Support Implementation
-  - Anthropic Claude Models
-  - Google Gemini Models
-  - LLAMA 2 Models
-  - Deepseek Models
-  - Mistral Models
-- [ ] Model Performance Benchmarking
-- [ ] Automatic Model Fallback System
-- [ ] Custom Model Fine-tuning Support
-- [ ] Cost Optimization Engine
-- [ ] Response Quality Monitoring
+- [ ] **Multi-LLM Support Implementation**: Anthropic Claude Models - Google Gemini Models - LLAMA 2 Models - Deepseek Models - Mistral Models
+- [ ] **Model Performance Benchmarking**
+- [ ] **Automatic Model Fallback System**
+- [ ] **Custom Model Fine-tuning Support**
+- [ ] **Cost Optimization Engine**
+- [ ] **Response Quality Monitoring**
 
 ### 🔍 Vector Store & Search Enhancement
-- [ ] Multi-Vector Database Support - ChromaDB Integration - MongoDB Vector Search - Pinecone Integration - Weaviate Implementation
-- [ ] Advanced Search Features - Semantic Search - Hybrid Search (Keywords + Semantic) - Cross-Reference Search - Contextual Query Understanding
-- [ ] Embedding Models Integration - Multiple Embedding Model Support - Custom Embedding Training - Embedding Optimization
+- [ ] **Multi-Vector Database Support**: ChromaDB Integration, MongoDB Vector Search, Pinecone Integration, Weaviate Implementation
+- [ ] **Advanced Search Features**: Semantic Search, Hybrid Search (Keywords + Semantic), Cross-Reference Search, Contextual Query Understanding
+- [ ] **Embedding Models Integration**: Multiple Embedding Model Support, Custom Embedding Training, Embedding Optimization
 
 ### 🔐 Authentication & Authorization
-- [ ] Cerbos Implementation - Role-Based Access Control (RBAC) - Attribute-Based Access Control (ABAC) - Custom Policy Definitions - Policy Testing Framework
-- [ ] User Management System  - User Registration & Authentication - Social Auth Integration - Multi-Factor Authentication - Session Management
-- [ ] Security Features - Audit Logging  - Rate Limiting  - API Key Management  - Security Headers Implementation
+- [ ] **Cerbos Implementation**: Role-Based Access Control (RBAC), Attribute-Based Access Control (ABAC), Custom Policy Definitions, Policy Testing Framework
+- [ ] **User Management System**: User Registration & Authentication, Social Auth Integration, Multi-Factor Authentication, Session Management
+- [ ] **Security Features**: Audit Logging, Rate Limiting, API Key Management, Security Headers Implementation
 
 ### 🌐 API Development
-- [ ] Core API Features - RESTful Endpoints - GraphQL Interface - WebSocket Support - API Documentation (OpenAPI/Swagger)
-- [ ] API Management - Version Control - Rate Limiting - Usage Monitoring - Error Handling
-- [ ] Integration Features - Webhook Support - Event System - Batch Processing - Export/Import Functionality
+- [ ] **Core API Features**: RESTful Endpoints, GraphQL Interface, WebSocket Support, API Documentation (OpenAPI/Swagger)
+- [ ] **API Management**: Version Control, Rate Limiting, Usage Monitoring, Error Handling
+- [ ] **Integration Features**: Webhook Support, Event System, Batch Processing, Export/Import Functionality
 
 ### 🎨 Frontend Application
-- [ ] Dashboard Development - Modern React Interface - Real-time Updates - Progressive Web App Support - Responsive Design
-- [ ] Editor Features - Rich Text Editor - Markdown Support - Real-time Collaboration - Version History
-- [ ] Visualization Tools - Character Relationship Graphs - Plot Timeline Visualization - World Map Generation - Story Arc Visualization
+- [ ] **Dashboard Development**: Modern React Interface, Real-time Updates, Progressive Web App Support, Responsive Design
+- [ ] **Editor Features**: Rich Text Editor, Markdown Support, Real-time Collaboration, Version History
+- [ ] **Visualization Tools**: Character Relationship Graphs, Plot Timeline Visualization, World Map Generation, Story Arc Visualization
 
 
 
