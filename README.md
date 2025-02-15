@@ -49,10 +49,23 @@ pip install -e .
 
 ### 2. Configuration
 
-Create a `.env` file in the root directory:
+*   **LLM API Key:** Get an API key from one of the following services:
+
+    - **OpenAI:** [Get API Key](https://platform.openai.com/signup/)
+    - **Anthropic:** [Get API Key](https://console.anthropic.com/)
+    - **DeepSeek:** [Get API Key](https://platform.deepseek.com/)
+    - **Google AI Studio (Gemini):** [Get API Key](https://aistudio.google.com/)
+    - **Mistral AI:** [Get API Key](https://console.mistral.ai/)
+
+Create a `.env` file in the root directory and fill the api key of the LLM that you want to use:
 ```bash
-OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_API_KEY=your_api_key_here
+GOOGLE_AI_STUDIO_API_KEY=your_api_key_here
+CLAUDE_API_KEY=your_api_key_here
+DEEPSEEK_API_KEY=your_api_key_here
+MISTRAL_API_KEY=your_api_key_here
 ```
+
 
 ### 3. Launch LibriScribe
 
@@ -117,7 +130,7 @@ your_project/
 
 ## ⚠️ Important Notes
 
-- **API Costs:** Monitor your OpenAI API usage and spending limits
+- **API Costs:** Monitor your LLM API usage and spending limits
 - **Content Quality:** Generated content serves as a starting point, not final copy
 - **Review Process:** Always review and edit the AI-generated content
 
