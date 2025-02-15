@@ -1,4 +1,4 @@
-# libriscribe/src/agents/fact_checker.py (Modified)
+# src/libriscribe/agents/fact_checker.py (Modified)
 import asyncio
 import logging
 from typing import Any, Dict, List

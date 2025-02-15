@@ -1,4 +1,4 @@
-# libriscribe/src/utils/file_utils.py (Modified)
+# src/libriscribe/utils/file_utils.py (Modified)
 import json
 import os
 from typing import Dict, Any, Optional

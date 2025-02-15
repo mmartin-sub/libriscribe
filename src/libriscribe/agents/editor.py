@@ -1,4 +1,4 @@
-# libriscribe/src/agents/editor.py
+# src/libriscribe/agents/editor.py
 import asyncio
 import json
 import logging

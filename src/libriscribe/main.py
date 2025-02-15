@@ -1,4 +1,4 @@
-# libriscribe/src/main.py
+# src/libriscribe/main.py
 import typer
 from libriscribe.agents.project_manager import ProjectManagerAgent
 from typing import Optional, List, Dict, Any

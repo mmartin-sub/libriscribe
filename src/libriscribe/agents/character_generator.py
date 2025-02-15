@@ -1,4 +1,4 @@
-# libriscribe/src/agents/character_generator.py
+# src/libriscribe/agents/character_generator.py
 import asyncio
 import json
 import logging

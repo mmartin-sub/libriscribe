@@ -1,4 +1,4 @@
-# libriscribe/src/agents/plagiarism_checker.py (Modified)
+# src/libriscribe/agents/plagiarism_checker.py (Modified)
 
 import asyncio
 import logging

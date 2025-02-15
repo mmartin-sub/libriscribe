@@ -1,4 +1,4 @@
-# libriscribe/src/agents/concept_generator.py
+# src/libriscribe/agents/concept_generator.py
 import asyncio
 import json
 import logging

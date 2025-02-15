@@ -1,4 +1,4 @@
-# libriscribe/src/agents/worldbuilding.py
+# src/libriscribe/agents/worldbuilding.py
 import asyncio
 import json
 import logging

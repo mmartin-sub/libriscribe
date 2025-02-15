@@ -1,4 +1,4 @@
-# libriscribe/src/agents/style_editor.py
+# src/libriscribe/agents/style_editor.py
 import asyncio
 import logging
 from typing import Any, Dict, List

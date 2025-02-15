@@ -1,4 +1,4 @@
-# libriscribe/src/agents/formatting.py
+# src/libriscribe/agents/formatting.py
 import asyncio
 import json
 import logging

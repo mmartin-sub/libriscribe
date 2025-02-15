@@ -1,4 +1,4 @@
-# libriscribe/src/agents/project_manager.py (Slightly Modified)
+# src/libriscribe/agents/project_manager.py
 
 import asyncio
 import logging

@@ -1,4 +1,4 @@
-# libriscribe/src/agents/agent_base.py
+# src/libriscribe/agents/agent_base.py
 # Abstract base class for agents
 import asyncio
 import json

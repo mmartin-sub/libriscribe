@@ -1,4 +1,4 @@
-# libriscribe/src/utils/prompts_context.py
+# src/libriscribe/utils/prompts_context.py
 
 # --- Prompts ---
 OUTLINE_PROMPT = """

@@ -1,4 +1,4 @@
-# libriscribe/src/agents/content_reviewer.py
+# src/libriscribe/agents/content_reviewer.py
 import asyncio
 import logging
 from typing import Any, Dict

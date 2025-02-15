@@ -1,4 +1,4 @@
-# libriscribe/src/agents/chapter_writer.py
+# src/libriscribe/agents/chapter_writer.py
 import asyncio
 import json
 import logging

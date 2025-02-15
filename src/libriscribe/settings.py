@@ -1,4 +1,4 @@
-# libriscribe/src/settings.py
+# src/libriscribe/settings.py
 from pydantic_settings import BaseSettings
 from pathlib import Path
 

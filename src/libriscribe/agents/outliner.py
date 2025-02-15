@@ -1,4 +1,4 @@
-# libriscribe/src/agents/outliner.py
+# src/libriscribe/agents/outliner.py
 
 import asyncio
 import json

@@ -1,4 +1,4 @@
-# libriscribe/src/utils/openai_client.py (Corrected)
+# src/libriscribe/utils/openai_client.py (Corrected)
 
 import openai
 from openai import OpenAI
