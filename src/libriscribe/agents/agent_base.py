@@ -1,13 +1,9 @@
 # src/libriscribe/agents/agent_base.py
-# Abstract base class for agents
-import asyncio
-import json
+
 import logging
-from typing import Any, Dict, List, Optional
-from pathlib import Path
+from typing import Any
 
 from libriscribe.utils.openai_client import OpenAIClient
-from libriscribe.utils import prompts_context as prompts
 
 logger = logging.getLogger(__name__)
 

@@ -1,12 +1,12 @@
 # src/libriscribe/agents/style_editor.py
-import asyncio
+
 import logging
-from typing import Any, Dict, List
+from pathlib import Path
 
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils.openai_client import OpenAIClient
-from libriscribe.utils.file_utils import read_markdown_file, write_markdown_file, read_json_file
-from pathlib import Path
+from libriscribe.utils.file_utils import read_markdown_file, write_markdown_file, read_json_file, extract_json_from_markdown
+from libriscribe.project_data import ProjectData
 
 logger = logging.getLogger(__name__)
 class StyleEditorAgent(Agent):
@@ -15,45 +15,38 @@ class StyleEditorAgent(Agent):
     def __init__(self):
         super().__init__("StyleEditorAgent")
         self.openai_client = OpenAIClient()
-
+        self.project_data: Optional[ProjectData] = None
     def execute(self, chapter_path: str) -> None:
-        """Refines the writing style of a chapter based on project settings.
-          Args:
-            chapter_path: The path to the chapter file.
-        """
-
+        """Refines style based on project settings."""
         chapter_content = read_markdown_file(chapter_path)
         if not chapter_content:
             print(f"ERROR: Chapter file is empty or not found: {chapter_path}")
             return
-
-        # --- Get project data
+        # Get project data
         project_data_path = Path(chapter_path).parent / "project_data.json"
-        project_data = read_json_file(str(project_data_path))
-        if not project_data:
-            print("ERROR: project_data.json not found. Cannot determine style preferences.")
+        if project_data_path.exists():
+            data = read_json_file(str(project_data_path))
+            self.project_data = ProjectData(**data)
+        else:
+            self.logger.error("Project Data was not loaded correctly")
+            print("Error: Failed to load project data")
             return
 
-        # Get style preferences from project data
-        tone = project_data.get('tone', 'Neutral')  # Default to Neutral
-        target_audience = project_data.get('target_audience', 'General')
+        if not self.project_data:
+            print("ERROR: project_data.json not found. Cannot determine style preferences.")
+            return
+        tone = self.project_data.get('tone', 'Neutral')
+        target_audience = self.project_data.get('target_audience', 'General')
 
         prompt = f"""
-        You are a style editor.  Refine the writing style of the following chapter excerpt to match
-        the specified tone and target audience. Focus on improving clarity, word choice, sentence structure,
-        and overall readability.
+        You are a style editor.  Refine the writing style of the following chapter excerpt...
 
         Target Tone: {tone}
         Target Audience: {target_audience}
 
-        Make specific suggestions for changes, and then provide the REVISED text. Output in the following format:
+        Make specific suggestions for changes, and then provide the REVISED text within a Markdown code block.
 
-        ```
-        Suggestions:
-        1.  [Original sentence/phrase] -> [Revised sentence/phrase]: [Reason for change]
-        2.  ...
-
-        Revised Text:
+        ```markdown
         [The full revised chapter content]
         ```
 
@@ -61,35 +54,21 @@ class StyleEditorAgent(Agent):
         ---
         {chapter_content}
         ---
-        """
+        """  # Added Markdown code block
         try:
-            response = self.openai_client.generate_content(prompt, max_tokens=3000)  # Allow for longer responses
-
-            # --- Extract Revised Text ---
-            revised_text = self.extract_revised_text(response)
+            response = self.openai_client.generate_content(prompt, max_tokens=3000)
+            revised_text = self.extract_revised_text(response)  # Use Markdown extraction
             if revised_text:
-                write_markdown_file(chapter_path, revised_text)  # Overwrite with revised version
-                print(f"Style editing complete for {chapter_path}.  Revised version saved.")
+                write_markdown_file(chapter_path, revised_text)
+                print(f"Style editing complete for {chapter_path}. Revised version saved.")
             else:
-                print(f"ERROR:  Could not extract revised text for {chapter_path}.")
-                self.logger.error(f"Could not extract revised text from StyleEditor response for {chapter_path}.")
+                print(f"ERROR: Could not extract revised text for {chapter_path}.")
+                self.logger.error(f"Could not extract from StyleEditor response for {chapter_path}.")
 
         except Exception as e:
             self.logger.exception(f"Error during style editing for {chapter_path}: {e}")
             print(f"ERROR: Failed to edit style for chapter {chapter_path}. See log.")
 
-    def extract_revised_text(self, response:str) -> str:
-        """Extract the revised text portion from the LLM's response."""
-        try:
-            start_marker = "Revised Text:"
-            start_index = response.find(start_marker)
-            if start_index == -1:
-                return "" # Marker not found
-
-            start_index += len(start_marker) # Move past marker
-            revised_content = response[start_index:].strip()
-            return revised_content
-
-        except Exception as e:
-            self.logger.exception(f"Error extracting revised text from style editor: {e}")
-            return""
+    def extract_revised_text(self, response: str) -> str:
+        """Extracts revised text (using Markdown extraction)."""
+        return extract_json_from_markdown(response) or ""

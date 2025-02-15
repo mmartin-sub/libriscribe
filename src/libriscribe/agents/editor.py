@@ -1,14 +1,12 @@
 # src/libriscribe/agents/editor.py
-import asyncio
-import json
+
 import logging
-from typing import Any, Dict, List, Optional
 from pathlib import Path
 
-from libriscribe.utils.openai_client import OpenAIClient
-from libriscribe.utils import prompts_context as prompts
 from libriscribe.agents.agent_base import Agent
-from libriscribe.utils.file_utils import read_markdown_file, write_markdown_file, read_json_file
+from libriscribe.utils import prompts_context as prompts
+from libriscribe.utils.file_utils import read_markdown_file, write_markdown_file, read_json_file, extract_json_from_markdown
+from libriscribe.project_data import ProjectData
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +15,7 @@ class EditorAgent(Agent):
 
     def __init__(self):
         super().__init__("EditorAgent")
+        self.project_data: Optional[ProjectData] = None
 
     def execute(self, chapter_path: str) -> None:
         """Edits a chapter and saves the revised version."""
@@ -25,31 +24,30 @@ class EditorAgent(Agent):
             if not chapter_content:
                 print(f"ERROR: Chapter file is empty: {chapter_path}")
                 return
-
-            # Extract chapter number and title (best effort)
             chapter_number = self.extract_chapter_number(chapter_path)
             chapter_title = self.extract_chapter_title(chapter_content)
 
-            # --- Get project data
-            project_data = {} # Initialize
-            project_file = Path(chapter_path).parent / "project_data.json" # Same dir as chapter
+            #Get Project Data
+            project_file = Path(chapter_path).parent / "project_data.json"
             if project_file.exists():
-                project_data = read_json_file(str(project_file))
-
+                data = read_json_file(str(project_file))
+                self.project_data = ProjectData(**data)
+            else:
+                self.logger.error("Project Data was not loaded correctly")
+                print("ERROR: Failed to load project data")
+                return
             prompt_data = {
                 "chapter_number": chapter_number,
                 "chapter_title": chapter_title,
-                "book_title": project_data.get("title", "Untitled"),
-                "genre": project_data.get("genre", "Unknown Genre"),
-                "chapter_content": chapter_content
+                "book_title": self.project_data.get("title", "Untitled"),
+                "genre": self.project_data.get("genre", "Unknown Genre"),
+                "chapter_content": chapter_content,
             }
             prompt = prompts.EDITOR_PROMPT.format(**prompt_data)
-            edited_response = self.openai_client.generate_content(prompt, max_tokens=4000) # Increased tokens
-
-            # Extract revised chapter (very important to parse correctly)
-            revised_chapter = self.extract_revised_chapter(edited_response)
+            edited_response = self.openai_client.generate_content(prompt, max_tokens=4000)
+            revised_chapter = self.extract_revised_chapter(edited_response)  # Using Markdown extraction
             if revised_chapter:
-                write_markdown_file(chapter_path, revised_chapter)  # Overwrite
+                write_markdown_file(chapter_path, revised_chapter)
             else:
                 print("ERROR: Could not extract revised chapter from editor output.")
                 self.logger.error("Could not extract revised chapter content.")
@@ -59,31 +57,19 @@ class EditorAgent(Agent):
             print(f"ERROR: Failed to edit chapter. See log.")
 
     def extract_chapter_number(self, chapter_path: str) -> int:
-        """Extracts the chapter number from the file path."""
+        """Extracts chapter number."""
         try:
             return int(chapter_path.split("_")[1].split(".")[0])
         except:
-            return -1 # Indicate error
+            return -1
 
-    def extract_chapter_title(self, chapter_content:str) -> str:
-        """Extract chapter title, handles if there's no title"""
+    def extract_chapter_title(self, chapter_content: str) -> str:
+        """Extracts chapter title."""
         lines = chapter_content.split("\n")
         for line in lines:
             if line.startswith("#"):
                 return line.replace("#", "").strip()
-        return "Untitled Chapter" # Default
-
+        return "Untitled Chapter"
     def extract_revised_chapter(self, edited_response: str) -> str:
-        """Extracts the revised chapter content from the editor's output."""
-        try:
-            start_marker = "**Revised Chapter:**"
-            start_index = edited_response.find(start_marker)
-            if start_index == -1:
-                return ""  # Marker not found
-
-            start_index += len(start_marker)  # Move past the marker
-            revised_content = edited_response[start_index:].strip()
-            return revised_content
-        except Exception as e:
-            self.logger.exception(f"Error extracting revised chapter: {e}")
-            return ""
+        """Extracts the revised chapter content from the editor's output (using Markdown extraction)."""
+        return extract_json_from_markdown(edited_response) or ""
