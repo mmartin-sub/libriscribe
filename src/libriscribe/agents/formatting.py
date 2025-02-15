@@ -5,7 +5,7 @@ import logging
 from typing import Any, Dict, List, Optional
 from pathlib import Path
 
-from libriscribe.utils.openai_client import OpenAIClient
+from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils.file_utils import get_chapter_files, read_markdown_file, read_json_file, write_markdown_file
@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 class FormattingAgent(Agent):
     """Formats the book into a single Markdown or PDF file."""
 
-    def __init__(self):
-        super().__init__("FormattingAgent")
+    def __init__(self, llm_client: LLMClient):
+        super().__init__("FormattingAgent", llm_client)
 
     def execute(self, project_dir: str, output_path: str) -> None:
         """Formats the book and saves to output path, handles both Markdown and PDF"""
@@ -38,11 +38,11 @@ class FormattingAgent(Agent):
             project_data_path = Path(project_dir) / "project_data.json"
             project_data = read_json_file(str(project_data_path))
 
-            # Format with OpenAI
+            # Format with LLM
             prompt = prompts.FORMATTING_PROMPT.format(chapters=all_chapters_content)
-            formatted_markdown = self.openai_client.generate_content(prompt, max_tokens=4000) # May need large token limit
+            formatted_markdown = self.llm_client.generate_content(prompt, max_tokens=4000) # May need large token limit
 
-            # Add title page (before OpenAI formatting, for simplicity)
+            # Add title page (before LLM formatting, for simplicity)
             title_page = self.create_title_page(project_data)
             formatted_markdown = title_page + formatted_markdown
 

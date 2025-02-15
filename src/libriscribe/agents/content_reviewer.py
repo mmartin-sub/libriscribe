@@ -4,7 +4,7 @@ import logging
 from typing import Any, Dict
 
 from libriscribe.agents.agent_base import Agent
-from libriscribe.utils.openai_client import OpenAIClient
+from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils.file_utils import read_markdown_file
 
 logger = logging.getLogger(__name__)
@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 class ContentReviewerAgent(Agent):
     """Reviews chapter content for consistency and clarity."""
 
-    def __init__(self):
-        super().__init__("ContentReviewerAgent")
-        self.openai_client = OpenAIClient() # Explicitly create an instance
+    def __init__(self, llm_client: LLMClient):
+        super().__init__("ContentReviewerAgent", llm_client)
+        self.llm_client = llm_client
 
     def execute(self, chapter_path: str) -> Dict[str, Any]:
         """Reviews a chapter for consistency, clarity, and plot holes.
@@ -51,7 +51,7 @@ class ContentReviewerAgent(Agent):
         ---
         """
         try:
-            review_results = self.openai_client.generate_content(prompt, max_tokens=1500)
+            review_results = self.llm_client.generate_content(prompt, max_tokens=1500)
             return {"review": review_results}
         except Exception as e:
             self.logger.exception(f"Error reviewing chapter {chapter_path}: {e}")

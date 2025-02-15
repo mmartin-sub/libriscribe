@@ -5,7 +5,7 @@ import logging
 from typing import Any, Dict, List, Optional
 from pathlib import Path
 
-from libriscribe.utils.openai_client import OpenAIClient
+from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils.file_utils import write_json_file
@@ -16,14 +16,14 @@ logger = logging.getLogger(__name__)
 class CharacterGeneratorAgent(Agent):
     """Generates character profiles."""
 
-    def __init__(self):
-        super().__init__("CharacterGeneratorAgent")
+    def __init__(self, llm_client: LLMClient):
+        super().__init__("CharacterGeneratorAgent", llm_client)
 
     def execute(self, project_data: Dict[str, Any], output_path: str) -> None:
         """Generates character profiles, handling Markdown-wrapped JSON."""
         try:
             prompt = prompts.CHARACTER_PROMPT.format(**project_data)
-            character_json_str = self.openai_client.generate_content(prompt, max_tokens=4000)
+            character_json_str = self.llm_client.generate_content(prompt, max_tokens=4000)
 
             characters = extract_json_from_markdown(character_json_str)
             if characters is None:  # Parsing failed

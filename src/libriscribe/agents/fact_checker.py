@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 class FactCheckerAgent(Agent):
     """Checks factual claims in a chapter."""
 
-    def __init__(self):
-        super().__init__("FactCheckerAgent")
-        self.openai_client = OpenAIClient() # Ensure OpenAIClient is instantiated
+    def __init__(self, llm_client: LLMClient):
+        super().__init__("FactCheckerAgent", llm_client)
+        self.llm_client = llm_client
 
     def execute(self, chapter_path: str) -> List[Dict[str, Any]]:
         """Identifies and checks factual claims, handling Markdown-wrapped JSON."""

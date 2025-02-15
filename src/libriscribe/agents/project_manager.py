@@ -20,37 +20,44 @@ from libriscribe.agents.fact_checker import FactCheckerAgent
 from libriscribe.settings import Settings
 from libriscribe.utils.file_utils import write_json_file, read_json_file
 from libriscribe.project_data import ProjectData  # Import ProjectData
+from libriscribe.utils.llm_client import LLMClient
+
 
 logger = logging.getLogger(__name__)
 
 class ProjectManagerAgent:
     """Manages the book creation process."""
 
-    def __init__(self):
+    def __init__(self, llm_client: LLMClient):
         self.settings = Settings()
-        self.agents = {
-            "content_reviewer": ContentReviewerAgent(),
-            "concept_generator": ConceptGeneratorAgent(),
-            "outliner": OutlinerAgent(),
-            "character_generator": CharacterGeneratorAgent(),
-            "worldbuilding": WorldbuildingAgent(),
-            "chapter_writer": ChapterWriterAgent(),
-            "editor": EditorAgent(),
-            "researcher": ResearcherAgent(),
-            "formatting": FormattingAgent(),
-            "style_editor": StyleEditorAgent(),
-            "plagiarism_checker": PlagiarismCheckerAgent(),
-            "fact_checker": FactCheckerAgent(),
-        }
         self.project_data: Optional[ProjectData] = None  # Use ProjectData type
         self.project_dir: Optional[Path] = None
+        self.llm_client: Optional[LLMClient] = None  # Add LLMClient instance
+        self.agents = {} # Will be initialized after llm
 
+    def initialize_llm_client(self, llm_provider: str):
+        """Initializes the LLMClient and agents."""
+        self.llm_client = LLMClient(llm_provider)
+        self.agents = {
+            "content_reviewer": ContentReviewerAgent(self.llm_client),  # Pass client
+            "concept_generator": ConceptGeneratorAgent(self.llm_client),
+            "outliner": OutlinerAgent(self.llm_client),
+            "character_generator": CharacterGeneratorAgent(self.llm_client),
+            "worldbuilding": WorldbuildingAgent(self.llm_client),
+            "chapter_writer": ChapterWriterAgent(self.llm_client),
+            "editor": EditorAgent(self.llm_client),
+            "researcher": ResearcherAgent(self.llm_client),
+            "formatting": FormattingAgent(self.llm_client),
+            "style_editor": StyleEditorAgent(self.llm_client),
+            "plagiarism_checker": PlagiarismCheckerAgent(self.llm_client),
+            "fact_checker": FactCheckerAgent(self.llm_client),
+        }
     def initialize_project_with_data(self, project_data: ProjectData):
         """Initializes a project using the ProjectData object."""
         self.project_dir = Path(self.settings.projects_dir) / project_data.project_name
         self.project_dir.mkdir(parents=True, exist_ok=True)
         self.project_data = project_data
-        self.save_project_data(str(self.project_dir / "project_data.json")) # Save
+        self.save_project_data(str(self.project_dir / "project_data.json"))
         logger.info(f"🚀 Initialized project: {project_data.project_name}")
         print(f"Project '{project_data.project_name}' initialized in {self.project_dir}")
 

@@ -5,7 +5,7 @@ import logging
 from typing import Any, Dict, List
 
 from libriscribe.agents.agent_base import Agent
-from libriscribe.utils.openai_client import OpenAIClient
+from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils.file_utils import read_markdown_file, extract_json_from_markdown
 
 logger = logging.getLogger(__name__)
@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 class PlagiarismCheckerAgent(Agent):
     """Checks a chapter for potential plagiarism."""
 
-    def __init__(self):
-        super().__init__("PlagiarismCheckerAgent")
-        self.openai_client = OpenAIClient() # Create instance
+    def __init__(self, llm_client: LLMClient):
+        super().__init__("PlagiarismCheckerAgent", llm_client)
+        self.llm_client = llm_client
 
     def execute(self, chapter_path: str) -> List[Dict[str, Any]]:
         """Checks a chapter for potential plagiarism, handling Markdown-wrapped JSON."""
@@ -52,7 +52,7 @@ class PlagiarismCheckerAgent(Agent):
        ---
        """
         try:
-            response_json_str = self.openai_client.generate_content(prompt, max_tokens=500)
+            response_json_str = self.llm_client.generate_content(prompt, max_tokens=500)
             results = extract_json_from_markdown(response_json_str)
             if results is None:
                 return []  # Return empty list on parsing failure

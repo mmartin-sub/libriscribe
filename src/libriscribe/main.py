@@ -2,7 +2,7 @@
 import typer
 from libriscribe.agents.project_manager import ProjectManagerAgent
 from typing import List, Dict, Any
-from libriscribe.utils.openai_client import OpenAIClient
+from libriscribe.utils.llm_client import LLMClient
 import json
 from rich.console import Console
 from rich.prompt import Prompt
@@ -20,9 +20,32 @@ logging.basicConfig(
 console = Console()
 app = typer.Typer()
 project_manager = ProjectManagerAgent()  # Initialize ProjectManager
-openai_client = OpenAIClient()
 
 logger = logging.getLogger(__name__)
+
+def select_llm(project_data: ProjectData):
+    """Lets the user select an LLM provider."""
+    available_llms = []
+    settings = Settings()
+
+    if settings.openai_api_key:
+        available_llms.append("openai")
+    if settings.claude_api_key:
+        available_llms.append("claude")
+    if settings.google_ai_studio_api_key:
+        available_llms.append("google_ai_studio")
+    if settings.deepseek_api_key:
+        available_llms.append("deepseek")
+    if settings.mistral_api_key:
+        available_llms.append("mistral")
+
+    if not available_llms:
+        console.print("[red]No LLM API keys found in .env file.  Please add at least one.[/red]")
+        raise typer.Exit(code=1)
+
+    llm_choice = select_from_list("Select your preferred LLM provider:", available_llms)
+    project_data.set("llm_provider", llm_choice)  # Store the choice
+    return llm_choice
 
 def introduction():
     """Prints a welcome message (same as before)."""
@@ -67,12 +90,17 @@ def save_project_data():
 
 
 def generate_questions_with_llm(category: str, genre: str) -> Dict[str, Any]:
-    """Generates genre-specific questions (same as before, but using OpenAIClient)."""
+    """Generates genre-specific questions (same as before, but using LLMClient)."""
     prompt = f"""
     Generate a list of 5-7 KEY questions ... (rest of the prompt)
     """
+    llm_client = project_manager.llm_client
+    if llm_client is None:
+        console.print("[red] LLM is not selected[/red]")
+        return {}
+
     try:
-        response = openai_client.generate_content(prompt, max_tokens=500)
+        response = llm_client.generate_content(prompt, max_tokens=500)
         questions = json.loads(response)
         return questions
     except (Exception, json.JSONDecodeError) as e:
@@ -208,6 +236,10 @@ def simple_mode():
     project_name, title = get_project_name_and_title()
     project_data = ProjectData(project_name=project_name, title=title)
 
+    # LLM Selection after project name
+    llm_choice = select_llm(project_data)
+    project_manager.initialize_llm_client(llm_choice) # Initialize here
+    
     get_category_and_genre(project_data)
     get_book_length(project_data)
     get_fiction_details(project_data)  # Only called if category is Fiction
@@ -394,7 +426,10 @@ def advanced_mode():
 
     project_name, title = get_project_name_and_title()
     project_data = ProjectData(project_name=project_name, title=title)
-
+    #LLM selection
+    llm_choice = select_llm(project_data)
+    project_manager.initialize_llm_client(llm_choice)
+    
     get_category_and_genre(project_data)
 
     if project_data.get("category") == "Fiction":

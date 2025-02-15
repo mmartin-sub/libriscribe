@@ -7,14 +7,16 @@ from libriscribe.agents.agent_base import Agent
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.utils.file_utils import read_markdown_file, write_markdown_file, read_json_file, extract_json_from_markdown
 from libriscribe.project_data import ProjectData
+from libriscribe.utils.llm_client import LLMClient
+
 
 logger = logging.getLogger(__name__)
 
 class EditorAgent(Agent):
     """Edits and refines chapters."""
 
-    def __init__(self):
-        super().__init__("EditorAgent")
+    def __init__(self, llm_client: LLMClient):
+        super().__init__("EditorAgent", llm_client)
         self.project_data: Optional[ProjectData] = None
 
     def execute(self, chapter_path: str) -> None:
@@ -44,7 +46,7 @@ class EditorAgent(Agent):
                 "chapter_content": chapter_content,
             }
             prompt = prompts.EDITOR_PROMPT.format(**prompt_data)
-            edited_response = self.openai_client.generate_content(prompt, max_tokens=4000)
+            edited_response = self.llm_client.generate_content(prompt, max_tokens=4000)
             revised_chapter = self.extract_revised_chapter(edited_response)  # Using Markdown extraction
             if revised_chapter:
                 write_markdown_file(chapter_path, revised_chapter)

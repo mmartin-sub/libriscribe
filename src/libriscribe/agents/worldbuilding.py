@@ -5,7 +5,7 @@ import logging
 from typing import Any, Dict, List, Optional
 from pathlib import Path
 
-from libriscribe.utils.openai_client import OpenAIClient
+from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils.file_utils import write_json_file, extract_json_from_markdown
@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 class WorldbuildingAgent(Agent):
     """Generates worldbuilding details."""
 
-    def __init__(self):
-        super().__init__("WorldbuildingAgent")
+    def __init__(self, llm_client: LLMClient):
+        super().__init__("WorldbuildingAgent", llm_client)
 
     def execute(self, project_data: Dict[str, Any], output_path: str) -> None:
         """Generates worldbuilding details and saves them to a JSON file."""
@@ -25,7 +25,7 @@ class WorldbuildingAgent(Agent):
             aspects = prompts.WORLDBUILDING_ASPECTS.get(project_data['category'], "")
             prompt = prompts.WORLDBUILDING_PROMPT.format(worldbuilding_aspects=aspects, **project_data)
 
-            worldbuilding_json_str = self.openai_client.generate_content(prompt, max_tokens=4000)
+            worldbuilding_json_str = self.llm_client.generate_content(prompt, max_tokens=4000)
 
 
             # Attempt to parse the JSON, and handle potential errors gracefully

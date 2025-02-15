@@ -5,7 +5,7 @@ import logging
 from typing import Any, Dict, List, Optional
 from pathlib import Path
 
-from libriscribe.utils.openai_client import OpenAIClient
+from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils.file_utils import extract_json_from_markdown
@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 class ConceptGeneratorAgent(Agent):
     """Generates book concepts."""
 
-    def __init__(self):
-        super().__init__("ConceptGeneratorAgent")
+    def __init__(self, llm_client: LLMClient):
+        super().__init__("ConceptGeneratorAgent", llm_client)
 
     def execute(self, project_data: Dict[str, Any]) -> Dict[str, Any]:
         """Generates a book concept and returns it as a dictionary."""
@@ -32,7 +32,7 @@ class ConceptGeneratorAgent(Agent):
                 "description": "A more detailed description of my book (200-300 words)."
             }}
             """
-            concept_details = self.openai_client.generate_content(prompt)
+            concept_details = self.llm_client.generate_content(prompt)
 
             # Use the helper function to extract JSON
             concept_json = extract_json_from_markdown(concept_details)

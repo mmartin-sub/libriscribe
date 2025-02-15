@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from libriscribe.agents.agent_base import Agent
-from libriscribe.utils.openai_client import OpenAIClient
+from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils.file_utils import read_markdown_file, write_markdown_file, read_json_file, extract_json_from_markdown
 from libriscribe.project_data import ProjectData
 
@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 class StyleEditorAgent(Agent):
     """Refines the writing style of a chapter."""
 
-    def __init__(self):
-        super().__init__("StyleEditorAgent")
-        self.openai_client = OpenAIClient()
+    def __init__(self, llm_client: LLMClient):
+        super().__init__("StyleEditorAgent", llm_client)
+        self.llm_client = llm_client
         self.project_data: Optional[ProjectData] = None
     def execute(self, chapter_path: str) -> None:
         """Refines style based on project settings."""
@@ -56,7 +56,7 @@ class StyleEditorAgent(Agent):
         ---
         """  # Added Markdown code block
         try:
-            response = self.openai_client.generate_content(prompt, max_tokens=3000)
+            response = self.llm_client.generate_content(prompt, max_tokens=3000)
             revised_text = self.extract_revised_text(response)  # Use Markdown extraction
             if revised_text:
                 write_markdown_file(chapter_path, revised_text)

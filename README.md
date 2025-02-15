@@ -142,7 +142,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🗺️ LibriScribe Development Roadmap
 
 ### 🤖 LLM Integration & Support
-- [ ] **Multi-LLM Support Implementation**: Anthropic Claude Models - Google Gemini Models - LLAMA 2 Models - Deepseek Models - Mistral Models
+- [X] **Multi-LLM Support Implementation**: Anthropic Claude Models - Google Gemini Models - - Deepseek Models - Mistral Models
 - [ ] **Model Performance Benchmarking**
 - [ ] **Automatic Model Fallback System**
 - [ ] **Custom Model Fine-tuning Support**

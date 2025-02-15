@@ -1,0 +1,128 @@
+# src/libriscribe/utils/llm_client.py
+import openai
+from openai import OpenAI  # For OpenAI
+import logging
+from tenacity import retry, stop_after_attempt, wait_random_exponential
+from libriscribe.settings import Settings
+
+import anthropic  # For Claude
+import google.generativeai as genai  # For Google AI Studio
+import requests  # For DeepSeek and Mistral
+
+logger = logging.getLogger(__name__)
+
+class LLMClient:
+    """Unified LLM client for multiple providers."""
+
+    def __init__(self, llm_provider: str):
+        self.settings = Settings()
+        self.llm_provider = llm_provider
+        self.client = self._get_client()  # Initialize the correct client
+        self.model = self._get_default_model()
+
+    def _get_client(self):
+        """Initializes the appropriate client based on the provider."""
+        if self.llm_provider == "openai":
+            if not self.settings.openai_api_key:
+                raise ValueError("OpenAI API key is not set.")
+            return OpenAI(api_key=self.settings.openai_api_key)
+        elif self.llm_provider == "claude":
+            if not self.settings.claude_api_key:
+                raise ValueError("Claude API key is not set.")
+            return anthropic.Anthropic(api_key=self.settings.claude_api_key)
+        elif self.llm_provider == "google_ai_studio":
+            if not self.settings.google_ai_studio_api_key:
+                raise ValueError("Google AI Studio API key is not set.")
+            genai.configure(api_key=self.settings.google_ai_studio_api_key)
+            return genai  # We don't instantiate a client, we use the module directly
+        elif self.llm_provider == "deepseek":
+             if not self.settings.deepseek_api_key:
+                raise ValueError("DeepSeek API key is not set.")
+             return None  # No client object, we'll use requests directly
+        elif self.llm_provider == "mistral":
+             if not self.settings.mistral_api_key:
+                raise ValueError("Mistral API key is not set")
+             return None
+        else:
+            raise ValueError(f"Unsupported LLM provider: {self.llm_provider}")
+
+    def _get_default_model(self):
+        """Gets the default model name for the selected provider."""
+        if self.llm_provider == "openai":
+            return "gpt-4o-mini"
+        elif self.llm_provider == "claude":
+            return "claude-3-opus-20240229" # Or another appropriate Claude 3 model
+        elif self.llm_provider == "google_ai_studio":
+            return "gemini-1.5-pro-002"
+        elif self.llm_provider == "deepseek":
+             return "deepseek-coder-6.7b-instruct"
+        elif self.llm_provider == "mistral":
+            return "mistral-medium-latest"
+        else:
+            return "unknown"  # Should not happen, but good for safety
+    def set_model(self, model_name: str):
+      self.model = model_name
+    @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
+    def generate_content(self, prompt: str, max_tokens: int = 2000, temperature: float = 0.7) -> str:
+        """Generates text using the selected LLM provider."""
+        try:
+            if self.llm_provider == "openai":
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                )
+                return response.choices[0].message.content.strip()
+
+            elif self.llm_provider == "claude":
+                response = self.client.messages.create(
+                    model=self.model,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                return response.content[0].text.strip()
+
+            elif self.llm_provider == "google_ai_studio":
+                model = self.client.GenerativeModel(model_name=self.model)
+                response = model.generate_content(prompt) # No need for messages list with genai
+                return response.text.strip()
+
+            elif self.llm_provider == "deepseek":
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {self.settings.deepseek_api_key}"
+                }
+                data = {
+                    "model": self.model,
+                    "messages": [{"role": "user", "content": prompt}],
+                    "max_tokens": max_tokens,
+                    "temperature": temperature
+                }
+                response = requests.post("https://api.deepseek.com/v1/chat/completions", headers=headers, json=data, timeout=120) # Timeout
+                response.raise_for_status() # Raise for HTTP errors
+                return response.json()["choices"][0]["message"]["content"].strip()
+            elif self.llm_provider == "mistral":
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {self.settings.mistral_api_key}"
+                }
+                data = {
+                    "model": self.model,
+                    "messages": [{"role": "user", "content": prompt}],
+                    "max_tokens": max_tokens,
+                    "temperature": temperature
+                }
+
+                response = requests.post("https://api.mistral.ai/v1/chat/completions", headers=headers, json=data, timeout=120)
+                response.raise_for_status()
+                return response.json()['choices'][0]['message']['content'].strip()
+
+            else:
+                return "" #  Should not happen, provider checked in init
+
+        except Exception as e:
+            logger.exception(f"Error during {self.llm_provider} API call: {e}")
+            print(f"ERROR: {self.llm_provider} API error: {e}")
+            return ""

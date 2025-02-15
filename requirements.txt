@@ -8,3 +8,9 @@ beautifulsoup4
 requests
 markdown
 fpdf # For PDF generation
+anthropic
+google-generativeai
+requests
+tenacity
+rich
+

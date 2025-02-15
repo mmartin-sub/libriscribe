@@ -5,7 +5,7 @@ import logging
 from typing import Any, Dict, List, Optional
 from pathlib import Path
 
-from libriscribe.utils.openai_client import OpenAIClient
+from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils.file_utils import write_markdown_file
@@ -19,16 +19,16 @@ logger = logging.getLogger(__name__)
 class ResearcherAgent(Agent):
     """Conducts web research."""
 
-    def __init__(self):
-        super().__init__("ResearcherAgent")
+    def __init__(self, llm_client: LLMClient):
+        super().__init__("ResearcherAgent", llm_client)
 
     def execute(self, query: str, output_path: str) -> None:
         """Performs web research and saves the results to a Markdown file."""
 
         try:
-            # Use OpenAI to generate initial research summary
+            # Use LLM to generate initial research summary
             prompt = prompts.RESEARCH_PROMPT.format(query=query)
-            openai_summary = self.openai_client.generate_content(prompt, max_tokens=1000)
+            llm_summary = self.llm_client.generate_content(prompt, max_tokens=1000)
 
 
             # Basic web scraping (example with Google Search - adapt as needed)
@@ -38,8 +38,8 @@ class ResearcherAgent(Agent):
                 scraped_content += f"### [{result['title']}]({result['url']})\n\n"
                 scraped_content += f"{result['snippet']}\n\n"
 
-            # Combine OpenAI summary and scraped content
-            final_report = f"# Research Report: {query}\n\n## AI-Generated Summary\n\n{openai_summary}\n\n## Web Search Results\n\n{scraped_content}"
+            # Combine LLM summary and scraped content
+            final_report = f"# Research Report: {query}\n\n## AI-Generated Summary\n\n{llm_summary}\n\n## Web Search Results\n\n{scraped_content}"
             write_markdown_file(output_path, final_report)
 
 

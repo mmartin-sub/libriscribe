@@ -7,14 +7,16 @@ from libriscribe.agents.agent_base import Agent
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.utils.file_utils import read_markdown_file, read_json_file, write_markdown_file
 from libriscribe.project_data import ProjectData
+from libriscribe.utils.llm_client import LLMClient
+
 
 logger = logging.getLogger(__name__)
 
 class ChapterWriterAgent(Agent):
     """Writes chapters."""
 
-    def __init__(self):
-        super().__init__("ChapterWriterAgent")
+    def __init__(self, llm_client: LLMClient):
+        super().__init__("ChapterWriterAgent", llm_client)
         self.project_data: Optional[ProjectData] = None
 
     def execute(self, outline_path: str, character_path: str, world_path: str, chapter_number: int, output_path: str, project_data: Optional[ProjectData] = None) -> None:
@@ -75,7 +77,7 @@ class ChapterWriterAgent(Agent):
                 "worldbuilding": json.dumps(worldbuilding, indent=2),
             }
             prompt = prompts.CHAPTER_PROMPT.format(**prompt_data)
-            chapter_content = self.openai_client.generate_content(prompt, max_tokens=3000)
+            chapter_content = self.llm_client.generate_content(prompt, max_tokens=3000)
             write_markdown_file(output_path, chapter_content)
 
         except Exception as e:

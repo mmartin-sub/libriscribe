@@ -6,7 +6,7 @@ import logging
 from typing import Any, Dict, List, Optional
 from pathlib import Path
 
-from libriscribe.utils.openai_client import OpenAIClient
+from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.agents.agent_base import Agent
 
@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 class OutlinerAgent(Agent):
     """Generates book outlines."""
 
-    def __init__(self):
-        super().__init__("OutlinerAgent")
+    def __init__(self, llm_client: LLMClient):
+        super().__init__("OutlinerAgent", llm_client)
 
     def execute(self, project_data: Dict[str, Any], output_path: str) -> None:
         """Generates an outline and saves it to a file.
@@ -28,7 +28,7 @@ class OutlinerAgent(Agent):
         """
         try:
             prompt = prompts.OUTLINE_PROMPT.format(**project_data) # Use a prompt template
-            outline_content = self.openai_client.generate_content(prompt, max_tokens=3000)
+            outline_content = self.llm_client.generate_content(prompt, max_tokens=3000)
 
             # Ensure the output directory exists
             Path(output_path).parent.mkdir(parents=True, exist_ok=True)
