@@ -1,0 +1,10 @@
+# libriscribe/requirements.txt
+typer
+openai
+python-dotenv
+pydantic
+pydantic-settings
+beautifulsoup4
+requests
+markdown
+fpdf # For PDF generation
