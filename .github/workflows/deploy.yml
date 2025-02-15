@@ -1,23 +1,24 @@
+# .github/workflows/deploy.yml
 name: Deploy Docusaurus to GitHub Pages
 
 on:
   push:
     branches:
-      - main  # Trigger the workflow on pushes to the main branch
-    paths: # Optional: Only run if files in 'docs' change
+      - main
+    paths:
       - 'docs/**'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    permissions:  # <--- ADD THIS SECTION
+      contents: write  #  <--- Grant write access to the repository contents
       pages: write
       id-token: write
-    concurrency:
+
+    concurrency: # Recommended
       group: "pages"
       cancel-in-progress: false
-
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -25,7 +26,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18'  # Use the same Node.js version you use locally
+        node-version: '18'
         cache: 'npm'
         cache-dependency-path: docs/package-lock.json
 
@@ -41,5 +42,5 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/build # Deploy the contents of the build directory
-        #  cname: example.com  # If you're using a custom domain
+        publish_dir: ./docs/build
+        # cname: example.com  # If using a custom domain
