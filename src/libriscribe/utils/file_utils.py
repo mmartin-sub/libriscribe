@@ -1,10 +1,13 @@
 # src/libriscribe/utils/file_utils.py
+
 import json
 import os
 from typing import Dict, Any, Optional, Type, TypeVar, Union, List
 import logging
 from pathlib import Path
 from pydantic import BaseModel, ValidationError  # Import ValidationError
+#NEW IMPORTS
+from libriscribe.knowledge_base import ProjectKnowledgeBase
 
 logger = logging.getLogger(__name__)
 
@@ -38,13 +41,15 @@ def read_json_file(file_path: str, model: Optional[Type[T]] = None) -> Union[Dic
         return None
 
 
-def write_json_file(file_path: str, data: Union[Dict[str, Any], BaseModel]) -> None:
+def write_json_file(file_path: str, data: Union[Dict[str, Any], BaseModel, ProjectKnowledgeBase]) -> None:
     """Writes data (dict or Pydantic model) to a JSON file."""
     try:
         Path(file_path).parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, "w", encoding="utf-8") as f:
             if isinstance(data, BaseModel):
                 json.dump(data.model_dump(), f, indent=4)  # Use model_dump for Pydantic models
+            elif isinstance(data, ProjectKnowledgeBase):
+                json.dump(data.model_dump(), f, indent=4)
             else:
                 json.dump(data, f, indent=4)
         logger.info(f"Data written to {file_path}")

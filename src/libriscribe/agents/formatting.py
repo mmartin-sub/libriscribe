@@ -11,6 +11,8 @@ from libriscribe.agents.agent_base import Agent
 from libriscribe.utils.file_utils import get_chapter_files, read_markdown_file, read_json_file, write_markdown_file
 # For PDF creation
 from fpdf import FPDF
+#MODIFIED
+from libriscribe.knowledge_base import ProjectKnowledgeBase
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +38,8 @@ class FormattingAgent(Agent):
 
             # Get project data (for title page)
             project_data_path = Path(project_dir) / "project_data.json"
-            project_data = read_json_file(str(project_data_path), ProjectData) # Now using ProjectData
-            if not project_data:
+            project_knowledge_base = ProjectKnowledgeBase.load_from_file(str(project_data_path)) #MODIFIED
+            if not project_knowledge_base:
               print(f"ERROR: Could not load project data from {project_data_path}")
               return
 
@@ -47,7 +49,7 @@ class FormattingAgent(Agent):
             formatted_markdown = self.llm_client.generate_content(prompt, max_tokens=4000) # May need large token limit
 
             # Add title page (before LLM formatting, for simplicity)
-            title_page = self.create_title_page(project_data)
+            title_page = self.create_title_page(project_knowledge_base) #MODIFIED
             formatted_markdown = title_page + formatted_markdown
 
 
@@ -66,11 +68,11 @@ class FormattingAgent(Agent):
             self.logger.exception(f"Error formatting book: {e}")
             print(f"ERROR: Failed to format the book. See log.")
 
-    def create_title_page(self, project_data:ProjectData) -> str: # now accepts ProjectData
+    def create_title_page(self, project_knowledge_base:ProjectKnowledgeBase) -> str: # now accepts ProjectKnowledgeBase
         """Creates a Markdown title page."""
-        title = project_data.get('title', 'Untitled Book')
-        author = project_data.get('author', 'Unknown Author')  # Assuming you might add author later
-        genre = project_data.get('genre', 'Unknown Genre')
+        title = project_knowledge_base.title
+        author = project_knowledge_base.get('author', 'Unknown Author')  # Assuming you might add author later
+        genre = project_knowledge_base.genre
 
         title_page = f"# {title}\n\n"
         title_page += f"## By {author}\n\n"

@@ -6,7 +6,7 @@ from pathlib import Path
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.utils.file_utils import read_markdown_file, write_markdown_file, read_json_file, extract_json_from_markdown
-from libriscribe.project_data import ProjectData
+from libriscribe.knowledge_base import ProjectKnowledgeBase
 from libriscribe.utils.llm_client import LLMClient
 
 
@@ -17,42 +17,27 @@ class EditorAgent(Agent):
 
     def __init__(self, llm_client: LLMClient):
         super().__init__("EditorAgent", llm_client)
-        self.project_data: Optional[ProjectData] = None
 
-    def execute(self, chapter_path: str) -> None:
+    def execute(self, project_knowledge_base: ProjectKnowledgeBase, chapter_number: int) -> None:
         """Edits a chapter and saves the revised version."""
         try:
+            chapter_path = str(Path(project_knowledge_base.project_name).parent / f"chapter_{chapter_number}.md")
             chapter_content = read_markdown_file(chapter_path)
             if not chapter_content:
                 print(f"ERROR: Chapter file is empty: {chapter_path}")
                 return
-            chapter_number = self.extract_chapter_number(chapter_path)
             chapter_title = self.extract_chapter_title(chapter_content)
 
-            #Get Project Data
-            project_file = Path(chapter_path).parent / "project_data.json"
-            if project_file.exists():
-                data = read_json_file(str(project_file), ProjectData)
-                if data:
-                    self.project_data = data
-                else:
-                    self.logger.error("Project Data was not loaded correctly")
-                    print("ERROR: Failed to load project data")
-                    return
-            else:
-                self.logger.error("Project Data was not loaded correctly")
-                print("ERROR: Failed to load project data")
-                return
             prompt_data = {
                 "chapter_number": chapter_number,
                 "chapter_title": chapter_title,
-                "book_title": self.project_data.get("title", "Untitled"),
-                "genre": self.project_data.get("genre", "Unknown Genre"),
+                "book_title": project_knowledge_base.title,
+                "genre": project_knowledge_base.genre,
                 "chapter_content": chapter_content,
             }
             prompt = prompts.EDITOR_PROMPT.format(**prompt_data)
             edited_response = self.llm_client.generate_content(prompt, max_tokens=4000)
-            revised_chapter = self.extract_revised_chapter(edited_response)  # Using Markdown extraction
+            revised_chapter = extract_json_from_markdown(edited_response)  # Using Markdown extraction
             if revised_chapter:
                 write_markdown_file(chapter_path, revised_chapter)
             else:
@@ -77,6 +62,3 @@ class EditorAgent(Agent):
             if line.startswith("#"):
                 return line.replace("#", "").strip()
         return "Untitled Chapter"
-    def extract_revised_chapter(self, edited_response: str) -> str:
-        """Extracts the revised chapter content from the editor's output (using Markdown extraction)."""
-        return extract_json_from_markdown(edited_response) or ""

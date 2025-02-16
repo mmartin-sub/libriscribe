@@ -9,7 +9,8 @@ from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils.file_utils import write_json_file, read_json_file, extract_json_from_markdown # Modified import
-from libriscribe.project_data import ProjectData
+#MODIFIED
+from libriscribe.knowledge_base import ProjectKnowledgeBase, Character
 
 
 logger = logging.getLogger(__name__)
@@ -20,10 +21,10 @@ class CharacterGeneratorAgent(Agent):
     def __init__(self, llm_client: LLMClient):
         super().__init__("CharacterGeneratorAgent", llm_client)
 
-    def execute(self, project_data: ProjectData, output_path: str) -> None: # Use project data
+    def execute(self, project_knowledge_base: ProjectKnowledgeBase, output_path: Optional[str] = None) -> None: # Use project data
         """Generates character profiles, handling Markdown-wrapped JSON."""
         try:
-            prompt = prompts.CHARACTER_PROMPT.format(**project_data.model_dump()) # Use model_dump
+            prompt = prompts.CHARACTER_PROMPT.format(**project_knowledge_base.model_dump()) # Use model_dump
             character_json_str = self.llm_client.generate_content_with_json_repair(prompt, max_tokens=4000) # Use repair
             if not character_json_str:
                 print("ERROR: Character generation failed. See Log")
@@ -37,8 +38,19 @@ class CharacterGeneratorAgent(Agent):
             if not isinstance(characters, list):
                 self.logger.warning("Character data is not a list.")
                 characters = []
+            else:
+                # Process and store characters in knowledge base
+                for char_data in characters:
+                    try:
+                        character = Character(**char_data)
+                        project_knowledge_base.add_character(character)
+                    except Exception as e:
+                        logger.warning(f"Skipping a character because: {e}")
+                        continue
 
-            write_json_file(output_path, characters) # Save using new write
+            if output_path is None:
+                output_path = str(Path(project_knowledge_base.project_name).parent / "characters.json")
+            write_json_file(output_path, characters) # Save data
 
         except Exception as e:
             self.logger.exception(f"Error generating character profiles: {e}")

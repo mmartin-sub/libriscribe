@@ -18,8 +18,9 @@ from libriscribe.agents.plagiarism_checker import PlagiarismCheckerAgent
 from libriscribe.agents.fact_checker import FactCheckerAgent
 
 from libriscribe.settings import Settings
-from libriscribe.utils.file_utils import write_json_file, read_json_file
-from libriscribe.project_data import ProjectData  # Import ProjectData
+from libriscribe.utils.file_utils import write_json_file, read_json_file, write_markdown_file
+#MODIFIED IMPORTS
+from libriscribe.knowledge_base import ProjectKnowledgeBase
 from libriscribe.utils.llm_client import LLMClient
 import typer  # Import typer
 
@@ -31,7 +32,7 @@ class ProjectManagerAgent:
 
     def __init__(self, llm_client: LLMClient = None):
         self.settings = Settings()
-        self.project_data: Optional[ProjectData] = None  # Use ProjectData type
+        self.project_knowledge_base: Optional[ProjectKnowledgeBase] = None  # Use ProjectKnowledgeBase
         self.project_dir: Optional[Path] = None
         self.llm_client: Optional[LLMClient] = llm_client  # Add LLMClient instance
         self.agents = {} # Will be initialized after llm
@@ -53,19 +54,20 @@ class ProjectManagerAgent:
             "plagiarism_checker": PlagiarismCheckerAgent(self.llm_client),
             "fact_checker": FactCheckerAgent(self.llm_client),
         }
-    def initialize_project_with_data(self, project_data: ProjectData):
-        """Initializes a project using the ProjectData object."""
+    def initialize_project_with_data(self, project_data: ProjectKnowledgeBase): #MODIFIED
+        """Initializes a project using the ProjectKnowledgeBase object."""
         self.project_dir = Path(self.settings.projects_dir) / project_data.project_name
         self.project_dir.mkdir(parents=True, exist_ok=True)
-        self.project_data = project_data
-        self.save_project_data(str(self.project_dir / "project_data.json"))
+        self.project_knowledge_base = project_data
+        self.save_project_data()
         logger.info(f"🚀 Initialized project: {project_data.project_name}")
         print(f"Project '{project_data.project_name}' initialized in {self.project_dir}")
 
-    def save_project_data(self, file_path: str):
-        """Saves project data using the ProjectData object."""
-        if self.project_data:
-            write_json_file(file_path, self.project_data) # Now receives the project data
+    def save_project_data(self):
+        """Saves project data using the ProjectKnowledgeBase object."""
+        if self.project_knowledge_base and self.project_dir:
+            file_path = str(self.project_dir / "project_data.json")
+            self.project_knowledge_base.save_to_file(file_path)  # Use the save method
         else:
             logger.warning("Attempted to save project data before initialization.")
 
@@ -75,9 +77,9 @@ class ProjectManagerAgent:
         self.project_dir = Path(self.settings.projects_dir) / project_name
         project_data_path = self.project_dir / "project_data.json"
         if project_data_path.exists():
-            data = read_json_file(str(project_data_path), ProjectData) # Read and validate
+            data = ProjectKnowledgeBase.load_from_file(str(project_data_path)) #MODIFIED
             if data:
-                self.project_data = data
+                self.project_knowledge_base = data
             else:
                 raise ValueError("Failed to load or validate project data.")
 
@@ -91,11 +93,11 @@ class ProjectManagerAgent:
             return
 
         agent = self.agents[agent_name]
-        # Pass project_data to agents that need it
-        if agent_name in ["concept_generator", "outliner", "character_generator", "worldbuilding"]:
-            if self.project_data:
+        # Pass project_knowledge_base to agents that need it
+        if agent_name in ["concept_generator", "outliner", "character_generator", "worldbuilding", "chapter_writer", "editor", "style_editor"]: #MODIFIED
+            if self.project_knowledge_base:
                 try:
-                    agent.execute(self.project_data, *args, **kwargs)  # Pass project_data
+                    agent.execute(self.project_knowledge_base, *args, **kwargs)  # Pass project_knowledge_base
                 except Exception as e:
                     logger.exception(f"Error running agent {agent_name}: {e}")
                     print(f"ERROR: Agent {agent_name} failed. See log for details.")
@@ -109,53 +111,49 @@ class ProjectManagerAgent:
                 print(f"ERROR: Agent {agent_name} failed. See log for details.")
 
 
-    # --- Command Handlers (using ProjectData) ---
+    # --- Command Handlers (using ProjectKnowledgeBase) ---
 
     def generate_concept(self):
         """Generates a detailed book concept."""
-        if self.project_data is None:
+        if self.project_knowledge_base is None:
             print("ERROR: No project initialized.")
             return
-        # Now it correctly passes the output path.
-        updated_project_data = self.agents["concept_generator"].execute(self.project_data, str(self.project_dir / "project_data.json")) # type: ignore
-
-        if updated_project_data:
-          self.project_data = updated_project_data
-          self.save_project_data(str(self.project_dir / "project_data.json"))
+        self.run_agent("concept_generator") # type: ignore
+        self.save_project_data() # Save after update
 
 
     def generate_outline(self):
         """Generates a book outline."""
-        self.run_agent("outliner", str(self.project_dir / "outline.md")) # type: ignore
+        self.run_agent("outliner") # type: ignore
+        self.save_project_data() # Save after update
+
 
 
     def generate_characters(self):
         """Generates character profiles."""
-        self.run_agent("character_generator", str(self.project_dir / "characters.json")) # type: ignore
+        self.run_agent("character_generator") # type: ignore
+        self.save_project_data() #save after update
 
     def generate_worldbuilding(self):
         """Generates worldbuilding details."""
-        self.run_agent("worldbuilding", str(self.project_dir / "world.json")) # type: ignore
+        self.run_agent("worldbuilding") # type: ignore
+        self.save_project_data()# save after update
 
     def write_chapter(self, chapter_number: int):
         """Writes a specific chapter."""
-        outline_path = str(self.project_dir / "outline.md") # type: ignore
-        character_path = str(self.project_dir / "characters.json")# type: ignore
-        world_path = str(self.project_dir / "world.json")# type: ignore
-        output_path = str(self.project_dir / f"chapter_{chapter_number}.md")# type: ignore
-
-        # Now we pass the project_data object.
-        self.agents["chapter_writer"].execute(outline_path, character_path, world_path, chapter_number, output_path, project_data=self.project_data)
+        #Now it receives the project knowledge base and saves it after
+        self.run_agent("chapter_writer", chapter_number=chapter_number)
+        self.save_project_data()
 
     def write_and_review_chapter(self, chapter_number: int):
         """Writes, reviews, and potentially edits a chapter (centralized review logic)."""
         self.write_chapter(chapter_number)  # Write the chapter
         self.review_content(chapter_number)  # Review for content issues
 
-        if self.project_data and self.project_data.review_preference == "AI":
+        if self.project_knowledge_base and self.project_knowledge_base.review_preference == "AI":
             self.edit_chapter(chapter_number)  # AI editing
             self.edit_style(chapter_number)  # AI style editing
-        elif self.project_data and self.project_data.review_preference == "Human":
+        elif self.project_knowledge_base and self.project_knowledge_base.review_preference == "Human":
             chapter_path = str(self.project_dir / f"chapter_{chapter_number}.md") # type: ignore
             print(f"\nChapter {chapter_number} written to: {chapter_path}")
             if typer.confirm("Do you want to review and edit this chapter now?"):
@@ -168,11 +166,13 @@ class ProjectManagerAgent:
 
     def edit_chapter(self, chapter_number: int):
         """Refines an existing chapter (Editor Agent)."""
-        chapter_path = str(self.project_dir / f"chapter_{chapter_number}.md") # type: ignore
-        self.run_agent("editor", chapter_path)
+        self.run_agent("editor", chapter_number=chapter_number)
+        self.save_project_data()
+
 
     def format_book(self, output_path: str):
         """Formats the entire book."""
+        #Now we pass the entire dir, and internally, we'll use the knowledge base
         self.run_agent("formatting", str(self.project_dir), output_path) # type: ignore
 
     def research(self, query: str):
@@ -181,8 +181,8 @@ class ProjectManagerAgent:
 
     def edit_style(self, chapter_number: int):
         """Refines writing style."""
-        chapter_path = str(self.project_dir / f"chapter_{chapter_number}.md")# type: ignore
-        self.run_agent("style_editor", chapter_path)
+        self.run_agent("style_editor", chapter_number=chapter_number)
+        self.save_project_data()
 
     def check_plagiarism(self, chapter_number: int):
         """Checks for plagiarism."""
@@ -208,10 +208,5 @@ class ProjectManagerAgent:
         return chapter_path.exists()
 
     def checkpoint(self):
-        """Saves the current project state (project_data) to a checkpoint file."""
-        if self.project_data and self.project_dir:
-            checkpoint_path = self.project_dir / "checkpoint.json"
-            self.save_project_data(str(checkpoint_path))
-            logger.info("Project state checkpointed.")
-        else:
-            logger.warning("Cannot create checkpoint: project data or directory not initialized.")
+        """Saves the current project state (project_knowledge_base) to a checkpoint file."""
+        self.save_project_data() # Now it's the same as save

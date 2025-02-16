@@ -9,7 +9,8 @@ from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils.file_utils import extract_json_from_markdown, read_json_file, write_json_file
-from libriscribe.project_data import ProjectData
+#MODIFIED
+from libriscribe.knowledge_base import ProjectKnowledgeBase
 
 logger = logging.getLogger(__name__)
 
@@ -19,11 +20,11 @@ class ConceptGeneratorAgent(Agent):
     def __init__(self, llm_client: LLMClient):
         super().__init__("ConceptGeneratorAgent", llm_client)
 
-    def execute(self, project_data: ProjectData, output_path: Optional[str] = None) -> Optional[ProjectData]:
+    def execute(self, project_knowledge_base: ProjectKnowledgeBase, output_path: Optional[str] = None) -> None:
         """Generates a book concept using an iterative refinement process."""
         try:
             # --- Step 1: Initial Concept Generation ---
-            initial_prompt = f"""Generate a detailed book concept for a {project_data.genre} {project_data.category}. Initial ideas: {project_data.description}.
+            initial_prompt = f"""Generate a detailed book concept for a {project_knowledge_base.genre} {project_knowledge_base.category}. Initial ideas: {project_knowledge_base.description}.
             Return a JSON object, and make sure it's inside a markdown codeblock. Include a 'title', a 'logline', and a 'description'(around 200-300 words):
 
             ```json
@@ -83,14 +84,11 @@ class ConceptGeneratorAgent(Agent):
                 return None
             # --- Step 4: Update and Return ProjectData ---
 
-            project_data.title = refined_concept_json.get('title', 'Untitled')
-            project_data.logline = refined_concept_json.get('logline', 'No logline provided.')
-            project_data.description = refined_concept_json.get('description', 'No description provided.')
-            logger.info(f"Concept generated (refined): Title: {project_data.title}, Logline: {project_data.logline}")
+            project_knowledge_base.title = refined_concept_json.get('title', 'Untitled')
+            project_knowledge_base.logline = refined_concept_json.get('logline', 'No logline provided.')
+            project_knowledge_base.description = refined_concept_json.get('description', 'No description provided.')
+            logger.info(f"Concept generated (refined): Title: {project_knowledge_base.title}, Logline: {project_knowledge_base.logline}")
 
-            if output_path:  # Save if output_path is provided
-                write_json_file(output_path, project_data)
-            return project_data
 
         except Exception as e:
             self.logger.exception(f"Error generating concept: {e}")
