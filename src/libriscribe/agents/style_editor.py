@@ -25,8 +25,13 @@ class StyleEditorAgent(Agent):
         # Get project data
         project_data_path = Path(chapter_path).parent / "project_data.json"
         if project_data_path.exists():
-            data = read_json_file(str(project_data_path))
-            self.project_data = ProjectData(**data)
+            data = read_json_file(str(project_data_path), ProjectData)
+            if data:
+                self.project_data = data
+            else:
+                self.logger.error("Project Data was not loaded correctly")
+                print("Error: Failed to load project data")
+                return
         else:
             self.logger.error("Project Data was not loaded correctly")
             print("Error: Failed to load project data")

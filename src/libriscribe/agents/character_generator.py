@@ -8,8 +8,9 @@ from pathlib import Path
 from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.agents.agent_base import Agent
-from libriscribe.utils.file_utils import write_json_file
-from libriscribe.utils.file_utils import extract_json_from_markdown
+from libriscribe.utils.file_utils import write_json_file, read_json_file, extract_json_from_markdown # Modified import
+from libriscribe.project_data import ProjectData
+
 
 logger = logging.getLogger(__name__)
 
@@ -19,11 +20,14 @@ class CharacterGeneratorAgent(Agent):
     def __init__(self, llm_client: LLMClient):
         super().__init__("CharacterGeneratorAgent", llm_client)
 
-    def execute(self, project_data: Dict[str, Any], output_path: str) -> None:
+    def execute(self, project_data: ProjectData, output_path: str) -> None: # Use project data
         """Generates character profiles, handling Markdown-wrapped JSON."""
         try:
-            prompt = prompts.CHARACTER_PROMPT.format(**project_data)
-            character_json_str = self.llm_client.generate_content(prompt, max_tokens=4000)
+            prompt = prompts.CHARACTER_PROMPT.format(**project_data.model_dump()) # Use model_dump
+            character_json_str = self.llm_client.generate_content_with_json_repair(prompt, max_tokens=4000) # Use repair
+            if not character_json_str:
+                print("ERROR: Character generation failed. See Log")
+                return
 
             characters = extract_json_from_markdown(character_json_str)
             if characters is None:  # Parsing failed
@@ -34,7 +38,7 @@ class CharacterGeneratorAgent(Agent):
                 self.logger.warning("Character data is not a list.")
                 characters = []
 
-            write_json_file(output_path, characters)
+            write_json_file(output_path, characters) # Save using new write
 
         except Exception as e:
             self.logger.exception(f"Error generating character profiles: {e}")

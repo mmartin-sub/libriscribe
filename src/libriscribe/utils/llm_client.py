@@ -62,6 +62,7 @@ class LLMClient:
             return "unknown"  # Should not happen, but good for safety
     def set_model(self, model_name: str):
       self.model = model_name
+
     @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
     def generate_content(self, prompt: str, max_tokens: int = 2000, temperature: float = 0.7) -> str:
         """Generates text using the selected LLM provider."""
@@ -126,3 +127,23 @@ class LLMClient:
             logger.exception(f"Error during {self.llm_provider} API call: {e}")
             print(f"ERROR: {self.llm_provider} API error: {e}")
             return ""
+
+    @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(3))
+    def generate_content_with_json_repair(self, original_prompt: str, max_tokens:int = 2000, temperature:float=0.7) -> str:
+        """Generates content and attempts to repair JSON errors."""
+        response_text = self.generate_content(original_prompt, max_tokens, temperature)
+        if response_text:
+            json_data = extract_json_from_markdown(response_text)
+            if json_data is not None:
+                return response_text # Return the original markdown
+            else:
+                logger.warning("Attempting JSON repair...")
+                repair_prompt = f"You are a helpful AI that only returns valid JSON.  Fix the following broken JSON:\n\n```json\n{response_text}\n```"
+                repaired_response = self.generate_content(repair_prompt, max_tokens=max_tokens, temperature=0.2) #Low temp for corrections
+                if repaired_response:
+                    repaired_json = extract_json_from_markdown(repaired_response)
+                    if repaired_json is not None:
+                        logger.info("JSON repair successful.")
+                        return f"```json\n{repaired_response}\n```" # Wrap in markdown
+        logger.error("JSON repair failed.")
+        return "" # Return empty

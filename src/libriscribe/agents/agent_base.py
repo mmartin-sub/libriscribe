@@ -1,5 +1,4 @@
 # src/libriscribe/agents/agent_base.py
-
 import logging
 from typing import Any
 

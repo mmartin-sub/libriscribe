@@ -4,7 +4,7 @@ import logging
 from typing import Any, Dict, List
 
 from libriscribe.agents.agent_base import Agent
-from libriscribe.utils.openai_client import OpenAIClient
+from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils.file_utils import read_markdown_file, extract_json_from_markdown
 # For web scraping
 import requests
@@ -41,7 +41,7 @@ class FactCheckerAgent(Agent):
         """
 
         try:
-            claims_json_str = self.openai_client.generate_content(identify_claims_prompt, max_tokens=1000)
+            claims_json_str = self.llm_client.generate_content(identify_claims_prompt, max_tokens=1000)
             claims = extract_json_from_markdown(claims_json_str)
             if claims is None:
                 print("ERROR: Invalid claims data received.")
@@ -75,7 +75,7 @@ class FactCheckerAgent(Agent):
         """
 
         try:
-            result_json_str = self.openai_client.generate_content(prompt, max_tokens=500)
+            result_json_str = self.llm_client.generate_content(prompt, max_tokens=500)
             result = extract_json_from_markdown(result_json_str)
             if result is None:
                 return {"claim":claim, "result": "Error", "explanation": "Failed to parse LLM Response", "sources": []}

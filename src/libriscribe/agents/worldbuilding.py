@@ -8,7 +8,9 @@ from pathlib import Path
 from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.agents.agent_base import Agent
-from libriscribe.utils.file_utils import write_json_file, extract_json_from_markdown
+from libriscribe.utils.file_utils import write_json_file, read_json_file, extract_json_from_markdown
+from libriscribe.project_data import ProjectData
+
 
 logger = logging.getLogger(__name__)
 
@@ -18,14 +20,17 @@ class WorldbuildingAgent(Agent):
     def __init__(self, llm_client: LLMClient):
         super().__init__("WorldbuildingAgent", llm_client)
 
-    def execute(self, project_data: Dict[str, Any], output_path: str) -> None:
+    def execute(self, project_data: ProjectData, output_path: str) -> None: # Use project data
         """Generates worldbuilding details and saves them to a JSON file."""
         try:
             # Select the appropriate aspects based on category
-            aspects = prompts.WORLDBUILDING_ASPECTS.get(project_data['category'], "")
-            prompt = prompts.WORLDBUILDING_PROMPT.format(worldbuilding_aspects=aspects, **project_data)
+            aspects = prompts.WORLDBUILDING_ASPECTS.get(project_data.category, "")
+            prompt = prompts.WORLDBUILDING_PROMPT.format(worldbuilding_aspects=aspects, **project_data.model_dump())
 
-            worldbuilding_json_str = self.llm_client.generate_content(prompt, max_tokens=4000)
+            worldbuilding_json_str = self.llm_client.generate_content_with_json_repair(prompt, max_tokens=4000) #Use json repair
+            if not worldbuilding_json_str:
+                print("ERROR: Worldbuilding generation failed. See Log")
+                return
 
 
             # Attempt to parse the JSON, and handle potential errors gracefully
@@ -38,7 +43,7 @@ class WorldbuildingAgent(Agent):
                     worldbuilding_data = {} # Use an empty dict
 
 
-            write_json_file(output_path, worldbuilding_data)
+            write_json_file(output_path, worldbuilding_data) # Save data
 
         except Exception as e:
             self.logger.exception(f"Error generating worldbuilding details: {e}")

@@ -36,7 +36,11 @@ class FormattingAgent(Agent):
 
             # Get project data (for title page)
             project_data_path = Path(project_dir) / "project_data.json"
-            project_data = read_json_file(str(project_data_path))
+            project_data = read_json_file(str(project_data_path), ProjectData) # Now using ProjectData
+            if not project_data:
+              print(f"ERROR: Could not load project data from {project_data_path}")
+              return
+
 
             # Format with LLM
             prompt = prompts.FORMATTING_PROMPT.format(chapters=all_chapters_content)
@@ -62,7 +66,7 @@ class FormattingAgent(Agent):
             self.logger.exception(f"Error formatting book: {e}")
             print(f"ERROR: Failed to format the book. See log.")
 
-    def create_title_page(self, project_data:Dict[str, Any]) -> str:
+    def create_title_page(self, project_data:ProjectData) -> str: # now accepts ProjectData
         """Creates a Markdown title page."""
         title = project_data.get('title', 'Untitled Book')
         author = project_data.get('author', 'Unknown Author')  # Assuming you might add author later

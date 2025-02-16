@@ -21,6 +21,7 @@ from libriscribe.settings import Settings
 from libriscribe.utils.file_utils import write_json_file, read_json_file
 from libriscribe.project_data import ProjectData  # Import ProjectData
 from libriscribe.utils.llm_client import LLMClient
+import typer  # Import typer
 
 
 logger = logging.getLogger(__name__)
@@ -28,11 +29,11 @@ logger = logging.getLogger(__name__)
 class ProjectManagerAgent:
     """Manages the book creation process."""
 
-    def __init__(self, llm_client: LLMClient):
+    def __init__(self, llm_client: LLMClient = None):
         self.settings = Settings()
         self.project_data: Optional[ProjectData] = None  # Use ProjectData type
         self.project_dir: Optional[Path] = None
-        self.llm_client: Optional[LLMClient] = None  # Add LLMClient instance
+        self.llm_client: Optional[LLMClient] = llm_client  # Add LLMClient instance
         self.agents = {} # Will be initialized after llm
 
     def initialize_llm_client(self, llm_provider: str):
@@ -64,7 +65,7 @@ class ProjectManagerAgent:
     def save_project_data(self, file_path: str):
         """Saves project data using the ProjectData object."""
         if self.project_data:
-            write_json_file(file_path, self.project_data.model_dump())
+            write_json_file(file_path, self.project_data) # Now receives the project data
         else:
             logger.warning("Attempted to save project data before initialization.")
 
@@ -74,8 +75,12 @@ class ProjectManagerAgent:
         self.project_dir = Path(self.settings.projects_dir) / project_name
         project_data_path = self.project_dir / "project_data.json"
         if project_data_path.exists():
-            data = read_json_file(str(project_data_path))
-            self.project_data = ProjectData(**data)
+            data = read_json_file(str(project_data_path), ProjectData) # Read and validate
+            if data:
+                self.project_data = data
+            else:
+                raise ValueError("Failed to load or validate project data.")
+
         else:
             raise FileNotFoundError(f"Project data not found for project: {project_name}")
 
@@ -111,8 +116,12 @@ class ProjectManagerAgent:
         if self.project_data is None:
             print("ERROR: No project initialized.")
             return
-        self.agents["concept_generator"].execute(self.project_data) # type: ignore
-        self.save_project_data(str(self.project_dir / "project_data.json")) # type: ignore
+        # Now it correctly passes the output path.
+        updated_project_data = self.agents["concept_generator"].execute(self.project_data, str(self.project_dir / "project_data.json")) # type: ignore
+
+        if updated_project_data:
+          self.project_data = updated_project_data
+          self.save_project_data(str(self.project_dir / "project_data.json"))
 
 
     def generate_outline(self):
@@ -134,7 +143,9 @@ class ProjectManagerAgent:
         character_path = str(self.project_dir / "characters.json")# type: ignore
         world_path = str(self.project_dir / "world.json")# type: ignore
         output_path = str(self.project_dir / f"chapter_{chapter_number}.md")# type: ignore
-        self.run_agent("chapter_writer", outline_path, character_path, world_path, chapter_number, output_path)
+
+        # Now we pass the project_data object.
+        self.agents["chapter_writer"].execute(outline_path, character_path, world_path, chapter_number, output_path, project_data=self.project_data)
 
     def write_and_review_chapter(self, chapter_number: int):
         """Writes, reviews, and potentially edits a chapter (centralized review logic)."""
@@ -195,3 +206,12 @@ class ProjectManagerAgent:
         """Checks if a chapter file exists."""
         chapter_path = self.project_dir / f"chapter_{chapter_number}.md" # type: ignore
         return chapter_path.exists()
+
+    def checkpoint(self):
+        """Saves the current project state (project_data) to a checkpoint file."""
+        if self.project_data and self.project_dir:
+            checkpoint_path = self.project_dir / "checkpoint.json"
+            self.save_project_data(str(checkpoint_path))
+            logger.info("Project state checkpointed.")
+        else:
+            logger.warning("Cannot create checkpoint: project data or directory not initialized.")

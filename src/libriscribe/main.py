@@ -9,6 +9,8 @@ from rich.prompt import Prompt
 from rich.panel import Panel
 import logging
 from libriscribe.project_data import ProjectData  # Import the new class
+from libriscribe.settings import Settings
+from rich.progress import track  # Import track
 
 # Configure logging (same as before)
 logging.basicConfig(
@@ -19,8 +21,8 @@ logging.basicConfig(
 
 console = Console()
 app = typer.Typer()
-project_manager = ProjectManagerAgent()  # Initialize ProjectManager
-
+#project_manager = ProjectManagerAgent()  # Initialize ProjectManager
+project_manager = ProjectManagerAgent(llm_client=None)
 logger = logging.getLogger(__name__)
 
 def select_llm(project_data: ProjectData):
@@ -85,8 +87,11 @@ def select_from_list(prompt: str, options: List[str], allow_custom: bool = False
 
 def save_project_data():
     """Saves project data (using new method)."""
-    project_data_path = project_manager.project_dir / "project_data.json"
-    project_manager.save_project_data(str(project_data_path))
+    if project_manager.project_dir:  # Check if project_dir is initialized
+        project_data_path = project_manager.project_dir / "project_data.json"
+        project_manager.save_project_data(str(project_data_path))
+    else:
+        logger.warning("Project directory not initialized. Cannot save project data.")
 
 
 def generate_questions_with_llm(category: str, genre: str) -> Dict[str, Any]:
@@ -172,6 +177,7 @@ def get_description(project_data: ProjectData):
 def generate_and_review_concept(project_data: ProjectData):
     print("\nGenerating a detailed book concept...")
     project_manager.generate_concept()
+    project_manager.checkpoint() # Checkpoint
     print(f"\nConcept generated. Here's the refined information:")
     print(f"  Title: {project_data.get('title', 'Untitled')}")
     print(f"  Logline: {project_data.get('logline', 'No logline available')}")
@@ -182,6 +188,7 @@ def generate_and_review_concept(project_data: ProjectData):
 def generate_and_edit_outline(project_data: ProjectData):
     print("\nGenerating outline...")
     project_manager.generate_outline()
+    project_manager.checkpoint()  # Checkpoint after outline
     print(f"\nOutline generated! Check the file: {project_manager.project_dir}/outline.md")
 
     if typer.confirm("Do you want to review and edit the outline now?"):
@@ -190,17 +197,19 @@ def generate_and_edit_outline(project_data: ProjectData):
 
 
 def generate_characters_if_needed(project_data: ProjectData):
-     if project_data.get("num_characters") > 0:
+     if project_data.get("num_characters", 0) > 0:  # Use get with default
         if typer.confirm("Do you want to generate character profiles?"):
             print("\nGenerating characters...")
             project_manager.generate_characters()
+            project_manager.checkpoint() # Checkpoint
             print(f"\nCharacter profiles generated! Check the file: {project_manager.project_dir}/characters.json")
 
 def generate_worldbuilding_if_needed(project_data: ProjectData):
-    if project_data.get("worldbuilding_needed"):
+    if project_data.get("worldbuilding_needed", False):  # Use get with default
         if typer.confirm("Do you want to generate worldbuilding details?"):
             print("\nGenerating worldbuilding...")
             project_manager.generate_worldbuilding()
+            project_manager.checkpoint() # Checkpoint
             print(f"\nWorldbuilding details generated! Check the file: {project_manager.project_dir}/world.json")
 
 def write_and_review_chapters(project_data: ProjectData):
@@ -216,7 +225,9 @@ def write_and_review_chapters(project_data: ProjectData):
             if not overwrite:
                 print(f"Skipping chapter {i}.")
                 continue
-        project_manager.write_and_review_chapter(i)
+        for step in track(range(100), description=f"Writing Chapter {i}..."): # Added progress bar
+            project_manager.write_and_review_chapter(i)
+        project_manager.checkpoint() #Checkpoint
 
 def format_book(project_data: ProjectData):
     if typer.confirm("Do you want to format the book now?"):
@@ -239,7 +250,7 @@ def simple_mode():
     # LLM Selection after project name
     llm_choice = select_llm(project_data)
     project_manager.initialize_llm_client(llm_choice) # Initialize here
-    
+
     get_category_and_genre(project_data)
     get_book_length(project_data)
     get_fiction_details(project_data)  # Only called if category is Fiction
@@ -429,7 +440,7 @@ def advanced_mode():
     #LLM selection
     llm_choice = select_llm(project_data)
     project_manager.initialize_llm_client(llm_choice)
-    
+
     get_category_and_genre(project_data)
 
     if project_data.get("category") == "Fiction":
@@ -548,6 +559,57 @@ def format():
 def research(query: str = typer.Option(..., prompt="Research query")):
     """Performs web research on a given query."""
     project_manager.research(query)
+
+@app.command()
+def resume(project_name: str = typer.Option(..., prompt="Project name to resume")):
+    """Resumes a project from the last checkpoint."""
+    try:
+        project_manager.load_project_data(project_name)
+        print(f"Project '{project_name}' loaded. Resuming...")
+
+        # Determine where to resume from.  This logic is simplified for now
+        # and assumes you'll mostly resume chapter writing. A more robust
+        # solution would inspect more files.
+
+        if not project_manager.project_data:
+            print("ERROR resuming project")
+            return
+
+        if project_manager.project_dir and (project_manager.project_dir / "outline.md").exists():
+            # Find the last written chapter
+            last_chapter = 0
+            num_chapters = project_manager.project_data.get("num_chapters",1)
+            if isinstance(num_chapters, tuple):
+                num_chapters = num_chapters[1]
+
+            for i in range(1, num_chapters + 1):  # Iterate in order
+                if (project_manager.project_dir / f"chapter_{i}.md").exists():
+                    last_chapter = i
+                else:
+                    break  # Stop at the first missing chapter
+
+            print(f"Last written chapter: {last_chapter}")
+
+            # Check the project data and files to determine next steps
+            for i in range(last_chapter + 1, num_chapters + 1):
+                 project_manager.write_and_review_chapter(i)
+            if typer.confirm("Do you want to format now the book?"):
+                format()
+
+        elif project_manager.project_data:  # Project data exists, but no outline
+            # Resume from outline generation (this is a simplification)
+            print("Resuming from outline generation...")
+            project_manager.generate_outline()
+            # ... (rest of the logic, similar to simple/advanced mode)
+
+        else:
+            print("No checkpoint found to resume from.")
+
+
+    except FileNotFoundError:
+        print(f"Project '{project_name}' not found.")
+    except ValueError as e:
+        print(f"Error loading project data: {e}")
 
 
 

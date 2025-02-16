@@ -8,7 +8,8 @@ from pathlib import Path
 from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.agents.agent_base import Agent
-from libriscribe.utils.file_utils import extract_json_from_markdown
+from libriscribe.utils.file_utils import extract_json_from_markdown, read_json_file, write_json_file
+from libriscribe.project_data import ProjectData
 
 logger = logging.getLogger(__name__)
 
@@ -18,11 +19,11 @@ class ConceptGeneratorAgent(Agent):
     def __init__(self, llm_client: LLMClient):
         super().__init__("ConceptGeneratorAgent", llm_client)
 
-    def execute(self, project_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Generates a book concept and returns it as a dictionary."""
-
+    def execute(self, project_data: ProjectData, output_path: Optional[str] = None) -> Optional[ProjectData]:
+        """Generates a book concept using an iterative refinement process."""
         try:
-            prompt = f"""Generate a detailed book concept for a {project_data['genre']} {project_data['category']}. Initial ideas: {project_data.get('description', 'None')}.
+            # --- Step 1: Initial Concept Generation ---
+            initial_prompt = f"""Generate a detailed book concept for a {project_data.genre} {project_data.category}. Initial ideas: {project_data.description}.
             Return a JSON object, and make sure it's inside a markdown codeblock. Include a 'title', a 'logline', and a 'description'(around 200-300 words):
 
             ```json
@@ -31,25 +32,67 @@ class ConceptGeneratorAgent(Agent):
                 "logline": "A one-sentence summary of my book.",
                 "description": "A more detailed description of my book (200-300 words)."
             }}
+            ```"""
+            initial_concept_md = self.llm_client.generate_content_with_json_repair(initial_prompt)
+            if not initial_concept_md:
+                logger.error("Initial concept generation failed.")
+                return None
+            initial_concept_json = extract_json_from_markdown(initial_concept_md)
+            if not initial_concept_json:
+                logger.error("Initial concept parsing failed.")
+                return None
+
+            # --- Step 2: Critique the Concept ---
+            critique_prompt = f"""You are a helpful AI assistant. Critique the following book concept:
+
+            ```json
+            {json.dumps(initial_concept_json)}
+            ```
+
+            Identify any weaknesses, areas for improvement, or potential issues. Be specific.
             """
-            concept_details = self.llm_client.generate_content(prompt)
+            critique = self.llm_client.generate_content(critique_prompt)
 
-            # Use the helper function to extract JSON
-            concept_json = extract_json_from_markdown(concept_details)
-            if concept_json:
-                project_data['title'] = concept_json.get('title', 'Untitled')
-                project_data['logline'] = concept_json.get('logline', 'No logline provided.')
-                project_data['description'] = concept_json.get('description', 'No description provided.')
-            else:
-                # Keep original project_data if parsing fails
-                self.logger.error(f"Concept generator returned invalid JSON: {concept_details}")
-                print("ERROR: Invalid concept data received.")
+            # --- Step 3: Refine the Concept ---
+            refine_prompt = f"""Based on the following critique, refine the book concept.  Address the weaknesses identified and improve the concept overall.
 
+            Original Concept:
+            ```json
+            {json.dumps(initial_concept_json)}
+            ```
 
-            self.logger.info(f"Concept generated: Title: {project_data.get('title')}, Logline: {project_data.get('logline')}")
+            Critique:
+            {critique}
+
+            Return the REFINED concept as a JSON object inside a Markdown code block, with the same structure as before:
+             ```json
+            {{
+                "title": "My Book Title",
+                "logline": "A one-sentence summary of my book.",
+                "description": "A more detailed description of my book (200-300 words)."
+            }}
+            ```
+            """
+            refined_concept_md = self.llm_client.generate_content_with_json_repair(refine_prompt)
+            if not refined_concept_md:
+                logger.error("Refined concept generation failed.")
+                return None
+            refined_concept_json = extract_json_from_markdown(refined_concept_md)
+            if not refined_concept_json:
+                logger.error("Refined concept parsing failed")
+                return None
+            # --- Step 4: Update and Return ProjectData ---
+
+            project_data.title = refined_concept_json.get('title', 'Untitled')
+            project_data.logline = refined_concept_json.get('logline', 'No logline provided.')
+            project_data.description = refined_concept_json.get('description', 'No description provided.')
+            logger.info(f"Concept generated (refined): Title: {project_data.title}, Logline: {project_data.logline}")
+
+            if output_path:  # Save if output_path is provided
+                write_json_file(output_path, project_data)
             return project_data
 
         except Exception as e:
             self.logger.exception(f"Error generating concept: {e}")
             print(f"ERROR: Failed to generate concept. See log for details.")
-            return project_data
+            return None

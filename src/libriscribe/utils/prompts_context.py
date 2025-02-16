@@ -264,4 +264,3 @@ Table of Contents (Optional): If requested, generate a table of contents with li
 
 Output: Return the complete book manuscript in Markdown format.
 """
-

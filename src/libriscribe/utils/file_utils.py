@@ -1,42 +1,58 @@
-# src/libriscribe/utils/file_utils.py (Modified)
+# src/libriscribe/utils/file_utils.py
 import json
 import os
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Type, TypeVar, Union, List
 import logging
 from pathlib import Path
+from pydantic import BaseModel, ValidationError  # Import ValidationError
 
 logger = logging.getLogger(__name__)
 
-def read_json_file(file_path: str) -> Dict[str, Any]:
-    """Reads a JSON file and returns its content."""
+# Generic type for Pydantic models
+T = TypeVar('T', bound=BaseModel)
+
+def read_json_file(file_path: str, model: Optional[Type[T]] = None) -> Union[Dict[str, Any], T, None]:
+    """Reads a JSON file, optionally validating it against a Pydantic model."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+            if model:
+                try:
+                    return model.model_validate(data)  # Use model_validate
+                except ValidationError as e:
+                    logger.error(f"JSON validation error in {file_path}: {e}")
+                    print(f"ERROR: Invalid JSON data in {file_path}. See log for details.")
+                    return None  # Or raise, or return a default instance of the model
+            return data
     except FileNotFoundError:
         logger.error(f"File not found: {file_path}")
         print(f"ERROR: File not found: {file_path}")
-        return {}  # Return an empty dictionary
+        return None
     except json.JSONDecodeError:
-        logger.exception(f"Invalid JSON in file: {file_path}")
-        print(f"ERROR: Invalid JSON in file: {file_path}")
-        return {}
+        logger.exception(f"Invalid JSON in {file_path}")
+        print(f"ERROR: Invalid JSON in {file_path}")
+        return None
     except Exception as e:
         logger.exception(f"Error reading JSON file {file_path}: {e}")
         print(f"ERROR: Could not read {file_path}")
-        return {}
-def write_json_file(file_path: str, data: Dict[str, Any]) -> None:
-    """Writes data to a JSON file."""
-    try:
-        # Ensure the directory exists
-        Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+        return None
 
+
+def write_json_file(file_path: str, data: Union[Dict[str, Any], BaseModel]) -> None:
+    """Writes data (dict or Pydantic model) to a JSON file."""
+    try:
+        Path(file_path).parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=4)
+            if isinstance(data, BaseModel):
+                json.dump(data.model_dump(), f, indent=4)  # Use model_dump for Pydantic models
+            else:
+                json.dump(data, f, indent=4)
         logger.info(f"Data written to {file_path}")
     except Exception as e:
         logger.exception(f"Error writing to JSON file {file_path}: {e}")
-        print(f"ERROR: Failed to write to {file_path}.  See log.")
+        print(f"ERROR: Failed to write to {file_path}. See log.")
 
+# The read_markdown and write_markdown will not change, so they remain the same
 def read_markdown_file(file_path: str) -> str:
     """Reads a Markdown file and returns its content as a string."""
     try:

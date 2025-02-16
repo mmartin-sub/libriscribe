@@ -15,20 +15,21 @@ class ProjectData(BaseModel):
     review_preference: str = "AI"  # Default to AI review
     book_length: str = ""
     logline: str = "No logline available"
-    tone: Optional[str] = None  # Optional fields can be None
-    target_audience: Optional[str] = None
-    inspired_by: Optional[str] = None
-    author_experience: Optional[str] = None
-    key_takeaways: Optional[str] = None
-    case_studies: Optional[bool] = None
-    actionable_advice: Optional[bool] = None
-    marketing_focus: Optional[str] = None
-    sales_focus: Optional[str] = None
-    research_question: Optional[str] = None
-    hypothesis: Optional[str] = None
-    methodology: Optional[str] = None
+    tone: str = "Neutral"  # Provide defaults for previously Optionals
+    target_audience: str = "General"
+    inspired_by: str = ""
+    author_experience: str = ""
+    key_takeaways: str = ""
+    case_studies: bool = False
+    actionable_advice: bool = False
+    marketing_focus: str = ""
+    sales_focus: str = ""
+    research_question: str = ""
+    hypothesis: str = ""
+    methodology: str = ""
     num_chapters: Union[int, Tuple[int, int]] = 1
     num_chapters_str: str = ""
+    llm_provider: str = "openai"
 
     # Store dynamic questions and their answers.
     dynamic_questions: Dict[str, str] = {}
