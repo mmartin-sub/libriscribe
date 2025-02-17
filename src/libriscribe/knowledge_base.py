@@ -3,6 +3,7 @@
 from typing import Any, Dict, Optional, List, Union, Tuple
 from pydantic import BaseModel, Field, validator
 import json
+from pathlib import Path
 
 class Character(BaseModel):
     name: str
@@ -34,6 +35,7 @@ class Chapter(BaseModel):
     # We don't store the full chapter text *here*, just metadata and scenes.
 
 class Worldbuilding(BaseModel):
+    #Keep this empty for now, and we will use it on the agents
     geography: str = ""
     culture_and_society: str = ""
     history: str = ""
@@ -86,33 +88,24 @@ class ProjectKnowledgeBase(BaseModel):
     genre: str = "Unknown Genre"
     description: str = "No description provided."
     category: str = "Unknown Category"
-    num_characters: Union[int, Tuple[int, int]] = 0
-    num_characters_str: str = ""
-    worldbuilding_needed: bool = False
+    num_characters: Union[int, Tuple[int, int]] = 0  # Keep, used by character generator
+    num_characters_str: str = "" #Keep for advanced
+    worldbuilding_needed: bool = False #Keep, used by worldbuilding generator
     review_preference: str = "AI"
     book_length: str = ""
     logline: str = "No logline available"
-    tone: str = "Neutral"
-    target_audience: str = "General"
-    inspired_by: str = ""
-    author_experience: str = ""
-    key_takeaways: str = ""
-    case_studies: bool = False
-    actionable_advice: bool = False
-    marketing_focus: str = ""
-    sales_focus: str = ""
-    research_question: str = ""
-    hypothesis: str = ""
-    methodology: str = ""
-    num_chapters: Union[int, Tuple[int, int]] = 1
-    num_chapters_str: str = ""
+    #REMOVED TONE, TARGET AUDIENCE...
+    num_chapters: Union[int, Tuple[int, int]] = 1  # Keep for chapter generation, advanced mode
+    num_chapters_str: str = "" #Keep for advanced
     llm_provider: str = "openai"
-    dynamic_questions: Dict[str, str] = {}
+    dynamic_questions: Dict[str, str] = {} #Keep for advanced
 
     characters: Dict[str, Character] = {}  # Character name -> Character object
     worldbuilding: Worldbuilding = Field(default_factory=Worldbuilding)
     chapters: Dict[int, Chapter] = {}  # Chapter number -> Chapter object
     outline: str = "" # Store outline as markdown
+    project_dir: Optional[Path] = None
+
 
     @validator("num_characters", "num_chapters", pre=True)
     def parse_range_or_plus(cls, value):

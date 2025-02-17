@@ -30,7 +30,7 @@ class ContentReviewerAgent(Agent):
         if not chapter_content:
             print(f"ERROR: Chapter file is empty or not found: {chapter_path}")
             return {}
-
+        console.print(f"{self.name} is: Reviewing content for Chapter in path {chapter_path}...")
         prompt = f"""
         You are a meticulous content reviewer. Review the following chapter for:
 

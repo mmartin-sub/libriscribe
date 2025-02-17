@@ -2,14 +2,16 @@
 
 import logging
 from pathlib import Path
-
+from typing import Optional, Dict, List
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.utils.file_utils import read_markdown_file, read_json_file, write_markdown_file
 from libriscribe.knowledge_base import ProjectKnowledgeBase, Chapter, Scene
 from libriscribe.utils.llm_client import LLMClient
 import json
+from rich.console import Console
 
+console = Console()
 
 logger = logging.getLogger(__name__)
 
@@ -21,63 +23,65 @@ class ChapterWriterAgent(Agent):
 
 
     def execute(self, project_knowledge_base: ProjectKnowledgeBase, chapter_number: int, output_path: Optional[str] = None) -> None:
-        """Writes a chapter with paragraph planning."""
+        """Writes a chapter with paragraph planning and improved feedback."""
         try:
+            # Get chapter data
             chapter = project_knowledge_base.get_chapter(chapter_number)
             if not chapter:
-                print(f"ERROR: Chapter {chapter_number} not found in knowledge base.")
+                console.print(f"[red]ERROR: Chapter {chapter_number} not found in knowledge base.[/red]")
                 return
 
+            console.print(f"\n[cyan]Writing Chapter {chapter_number}: {chapter.title}[/cyan]")
+
             # --- Step 1: Generate Paragraph Plan ---
+            console.print(f"{self.name} is: Generating Paragraph Plan for chapter {chapter_number}...")
             paragraph_plan_prompt = prompts.PARAGRAPH_PLAN_PROMPT.format(
                 chapter_title=chapter.title,
                 chapter_summary=chapter.summary,
-                scenes=[scene.model_dump() for scene in chapter.scenes],
-                characters=json.dumps(project_knowledge_base.characters),  # Pass characters as JSON
-                worldbuilding=json.dumps(project_knowledge_base.worldbuilding.model_dump()) #pass worldbuilding as JSON
+                scenes=json.dumps([scene.model_dump() for scene in chapter.scenes]) if chapter.scenes else "[]",
+                characters=json.dumps(project_knowledge_base.characters),
+                worldbuilding=json.dumps(project_knowledge_base.worldbuilding.model_dump()),
+                genre=project_knowledge_base.genre # Added this line!
             )
-
             paragraph_plan_str = self.llm_client.generate_content(paragraph_plan_prompt, max_tokens=2000)
             if not paragraph_plan_str:
-                logger.error(f"Failed to generate paragraph plan for chapter {chapter_number}.")
+                console.print("[red]Failed to generate paragraph plan for chapter.[/red]")
                 return
 
             paragraph_plan = self.process_paragraph_plan(paragraph_plan_str)
-            #Store paragraph plan in scene
             self.store_paragraph_plan(chapter, paragraph_plan)
+            console.print("[green]✓ Paragraph plan generated[/green]")
 
-            # --- Step 2: Generate Full Chapter (using paragraph plan) ---
+            # --- Step 2: Generate Full Chapter ---
+            console.print(f"{self.name} is: Generating Full Chapter {chapter_number}...")
             full_chapter_prompt = prompts.CHAPTER_PROMPT.format(
                 chapter_number=chapter_number,
                 chapter_title=chapter.title,
                 book_title=project_knowledge_base.title,
                 genre=project_knowledge_base.genre,
                 category=project_knowledge_base.category,
-                chapter_summary = chapter.summary,
+                chapter_summary=chapter.summary,
                 scenes=[scene.model_dump() for scene in chapter.scenes],
                 characters=json.dumps(project_knowledge_base.characters),
                 worldbuilding=json.dumps(project_knowledge_base.worldbuilding.model_dump()),
                 paragraph_plan=json.dumps(paragraph_plan),
-                outline = project_knowledge_base.outline #Pass the entire outline
-
+                outline=project_knowledge_base.outline
             )
 
-
-            chapter_content = self.llm_client.generate_content(full_chapter_prompt, max_tokens=5000) #Increased tokens
+            chapter_content = self.llm_client.generate_content(full_chapter_prompt, max_tokens=5000)
             if not chapter_content:
-                 self.logger.error(f"Failed to generate chapter {chapter_number}.")
-                 return
+                console.print("[red]Failed to generate chapter content.[/red]")
+                return
 
             # --- Step 3: Save Chapter ---
             if output_path is None:
-                output_path = str(Path(project_knowledge_base.project_name).parent / f"chapter_{chapter_number}.md")
+                output_path = str(Path(project_knowledge_base.project_dir) / f"chapter_{chapter_number}.md")
             write_markdown_file(output_path, chapter_content)
-
-
+            console.print(f"[green]✓ Chapter {chapter_number} saved successfully to {output_path}[/green]")
 
         except Exception as e:
             self.logger.exception(f"Error writing chapter {chapter_number}: {e}")
-            print(f"ERROR: Failed to write chapter {chapter_number}. See log.")
+            console.print(f"[red]ERROR: Failed to write chapter {chapter_number}. See log for details.[/red]")
 
     def process_paragraph_plan(self, paragraph_plan_str: str) -> List[Dict[str, str]]:
         """Parses the paragraph plan (assumes it's returned as a JSON array)."""

@@ -45,6 +45,7 @@ class FormattingAgent(Agent):
 
 
             # Format with LLM
+            console.print(f"{self.name} is: Formatting the Book...")
             prompt = prompts.FORMATTING_PROMPT.format(chapters=all_chapters_content)
             formatted_markdown = self.llm_client.generate_content(prompt, max_tokens=4000) # May need large token limit
 

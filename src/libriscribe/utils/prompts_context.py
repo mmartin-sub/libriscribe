@@ -103,25 +103,33 @@ Conclude the chapter with a satisfying resolution or a compelling cliffhanger, a
 """
 
 OUTLINE_PROMPT = """
-Create a detailed outline for a {genre} book titled "{title}" which is categorized as {category}.
+Create a structured outline for a {genre} book titled "{title}" which is categorized as {category}.
 
 Description: {description}
 
-The outline should include:
+IMPORTANT: Format your response EXACTLY as shown below, with consistent header formatting and numbering:
 
-A brief summary of the entire book.
+# Book Summary
+[Write a brief summary of the entire book here, 2-3 paragraphs]
 
-A breakdown of chapters, with each chapter having:
+# Chapter List
+[Total number of chapters, definitively stated. NO optional chapters.]
 
-A title.
+# Chapter Details
 
-A short summary of the events in the chapter.
+## Chapter 1: [Chapter Title]
+### Summary
+[Detailed chapter summary, 1-2 paragraphs]
 
-Key plot points.
+### Key Events
+- [Event 1]
+- [Event 2]
+- [Event 3]
 
-(For fiction) Scene descriptions, character interactions, and emotional beats.
+[Repeat the Chapter structure for each chapter, maintaining EXACT same formatting]
 
-Return the outline in Markdown format. Make it very detailed.
+Note: For short stories, use 1-2 chapters. For novellas, use 5-10 chapters. For novels, use 10+ chapters.
+Return the outline using this EXACT Markdown structure. Do not include any optional or conditional chapters.
 """
 
 CHARACTER_PROMPT = """

@@ -27,7 +27,7 @@ class StyleEditorAgent(Agent):
 
         tone = project_knowledge_base.tone
         target_audience = project_knowledge_base.target_audience
-
+        console.print(f"{self.name} is: Editing style for Chapter {chapter_number}...")
         prompt = f"""
         You are a style editor.  Refine the writing style of the following chapter excerpt...
 

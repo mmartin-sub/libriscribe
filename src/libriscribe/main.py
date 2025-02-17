@@ -9,7 +9,7 @@ from rich.prompt import Prompt
 from rich.panel import Panel
 import logging
 #MODIFIED
-from libriscribe.knowledge_base import ProjectKnowledgeBase  # Import the new class
+from libriscribe.knowledge_base import ProjectKnowledgeBase, Chapter  # Import the new class
 from libriscribe.settings import Settings
 from rich.progress import track  # Import track
 
@@ -159,9 +159,6 @@ def get_fiction_details(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
         project_knowledge_base.set("num_characters", num_characters)
         worldbuilding_needed = typer.confirm("Does this book require extensive worldbuilding?")
         project_knowledge_base.set("worldbuilding_needed", worldbuilding_needed)
-    else:
-        project_knowledge_base.set("num_characters", 0)
-        project_knowledge_base.set("worldbuilding_needed", False)
 
 def get_review_preference(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
     review_preference = select_from_list("How would you like the book to be reviewed?", ["Human", "AI"])
@@ -172,18 +169,15 @@ def get_description(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
     project_knowledge_base.set("description", description)
 
 def generate_and_review_concept(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
-    print("\nGenerating a detailed book concept...")
     project_manager.generate_concept()
     project_manager.checkpoint() # Checkpoint
-    print(f"\nConcept generated. Here's the refined information:")
-    print(f"  Title: {project_knowledge_base.get('title', 'Untitled')}")
-    print(f"  Logline: {project_knowledge_base.get('logline', 'No logline available')}")
-    print(f"  Description:\n{project_knowledge_base.get('description', 'No description available')}")
+    print(f"\nRefined Concept:") # Clarified Output
+    print(f"  Title: {project_knowledge_base.title}")  # Use direct attributes
+    print(f"  Logline: {project_knowledge_base.logline}")
+    print(f"  Description:\n{project_knowledge_base.description}")
     return typer.confirm("Do you want to proceed with generating an outline based on this concept?")
 
-
 def generate_and_edit_outline(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
-    print("\nGenerating outline...")
     project_manager.generate_outline()
     project_manager.checkpoint()  # Checkpoint after outline
     print(f"\nOutline generated! Check the file: {project_manager.project_dir}/outline.md")
@@ -209,22 +203,50 @@ def generate_worldbuilding_if_needed(project_knowledge_base: ProjectKnowledgeBas
             project_manager.checkpoint() # Checkpoint
             print(f"\nWorldbuilding details generated! Check the file: {project_manager.project_dir}/world.json")
 
-def write_and_review_chapters(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
+def write_and_review_chapters(project_knowledge_base: ProjectKnowledgeBase):
+    """Write and review chapters with better progress tracking and error handling."""
     num_chapters = project_knowledge_base.get("num_chapters", 1)
     if isinstance(num_chapters, tuple):
         num_chapters = num_chapters[1]
 
+    console.print(f"\n[bold]Starting chapter writing process. Total chapters: {num_chapters}[/bold]")
+
     for i in range(1, num_chapters + 1):
-        chapter_path = str(project_manager.project_dir / f"chapter_{i}.md")
+        chapter = project_knowledge_base.get_chapter(i)
+        if chapter is None:
+            console.print(f"[yellow]WARNING: Chapter {i} not found in outline. Creating basic structure...[/yellow]")
+            chapter = Chapter(
+                chapter_number=i,
+                title=f"Chapter {i}",
+                summary="To be written"
+            )
+            project_knowledge_base.add_chapter(chapter)  # Add to knowledge base!
+
+        console.print(f"\n[bold cyan]Writing Chapter {i}: {chapter.title}[/bold cyan]")
 
         if project_manager.does_chapter_exist(i):
-            overwrite = typer.confirm(f"Chapter {i} already exists. Overwrite?")
-            if not overwrite:
-                print(f"Skipping chapter {i}.")
+            if not typer.confirm(f"Chapter {i} already exists. Overwrite?"):
+                console.print(f"[yellow]Skipping chapter {i}...[/yellow]")
                 continue
-        for step in track(range(100), description=f"Writing Chapter {i}..."): # Added progress bar
+
+        try:
             project_manager.write_and_review_chapter(i)
-        project_manager.checkpoint() #Checkpoint
+            project_manager.checkpoint()
+            console.print(f"[green]✓ Chapter {i} completed successfully[/green]")
+        except Exception as e:
+            console.print(f"[red]ERROR writing chapter {i}: {str(e)}[/red]")
+            logger.exception(f"Error writing chapter {i}")
+            if not typer.confirm("Continue with next chapter?"):
+                break
+
+        if i < num_chapters:
+            if not typer.confirm("\nContinue to next chapter?"):
+                break
+
+    console.print("\n[bold green]Chapter writing process completed![/bold green]")
+
+
+
 
 def format_book(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
     if typer.confirm("Do you want to format the book now?"):
@@ -238,30 +260,43 @@ def format_book(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
 
 # --- Simple Mode (Refactored) ---
 def simple_mode():
-    """The original simple mode, now with sequential execution and broken down into functions."""
     print("\nStarting in Simple Mode...\n")
 
     project_name, title = get_project_name_and_title()
-    project_knowledge_base = ProjectKnowledgeBase(project_name=project_name, title=title) #MODIFIED
+    project_knowledge_base = ProjectKnowledgeBase(project_name=project_name, title=title)
 
-    # LLM Selection after project name
-    llm_choice = select_llm(project_knowledge_base) #MODIFIED
-    project_manager.initialize_llm_client(llm_choice) # Initialize here
+    llm_choice = select_llm(project_knowledge_base)
+    project_manager.initialize_llm_client(llm_choice)
 
-    get_category_and_genre(project_knowledge_base) #MODIFIED
-    get_book_length(project_knowledge_base) #MODIFIED
-    get_fiction_details(project_knowledge_base)  # Only called if category is Fiction #MODIFIED
-    get_review_preference(project_knowledge_base) #MODIFIED
-    get_description(project_knowledge_base) #MODIFIED
+    get_category_and_genre(project_knowledge_base)
+    get_book_length(project_knowledge_base)
+    get_fiction_details(project_knowledge_base)
+    get_review_preference(project_knowledge_base)
+    get_description(project_knowledge_base)
 
-    project_manager.initialize_project_with_data(project_knowledge_base) # Initialize #MODIFIED
+    project_manager.initialize_project_with_data(project_knowledge_base)
 
-    if generate_and_review_concept(project_knowledge_base): #MODIFIED
-        generate_and_edit_outline(project_knowledge_base) #MODIFIED
-        generate_characters_if_needed(project_knowledge_base) #MODIFIED
-        generate_worldbuilding_if_needed(project_knowledge_base) #MODIFIED
-        write_and_review_chapters(project_knowledge_base) #MODIFIED
-        format_book(project_knowledge_base) #MODIFIED
+    if generate_and_review_concept(project_knowledge_base):
+        generate_and_edit_outline(project_knowledge_base)
+        generate_characters_if_needed(project_knowledge_base)
+        generate_worldbuilding_if_needed(project_knowledge_base)
+
+        project_manager.checkpoint() 
+        # Ensure chapters are written
+        num_chapters = project_knowledge_base.get("num_chapters", 1)
+        if isinstance(num_chapters, tuple):
+            num_chapters = num_chapters[1]
+
+        print(f"\nPreparing to write {num_chapters} chapters...")
+        for chapter_num in range(1, num_chapters + 1):
+            if not typer.confirm(f"\nWrite chapter {chapter_num}?"):
+                break
+            project_manager.write_and_review_chapter(chapter_num)
+            project_manager.checkpoint()
+
+        # Only format after chapters are written
+        if typer.confirm("\nDo you want to format the book now?"):
+            format_book(project_knowledge_base)
     else:
         print("Exiting.")
         return
@@ -460,9 +495,8 @@ def advanced_mode():
         generate_and_edit_outline(project_knowledge_base) #MODIFIED
         generate_characters_if_needed(project_knowledge_base) #MODIFIED
         generate_worldbuilding_if_needed(project_knowledge_base) #MODIFIED
-        write_and_review_chapters(project_knowledge_base) #MODIFIED
-        format_book(project_knowledge_base) #MODIFIED
-
+        write_and_review_chapters(project_knowledge_base)
+        format_book(project_knowledge_base)
     else:
         print("Exiting.")
         return
@@ -481,35 +515,7 @@ def start():
         advanced_mode()
 
 
-@app.command()
-def create(
-    project_name: str = typer.Option(..., prompt="Project name"),
-    title: str = typer.Option(..., prompt="Book title"),
-    genre: str = typer.Option(..., prompt="Genre"),
-    description: str = typer.Option(..., prompt="Brief description"),
-    category: str = typer.Option(
-        ..., prompt="Category (fiction, non-fiction, business, research paper)"
-    ),
-    num_characters: int = typer.Option(0, prompt="Number of main characters (if fiction)"),
-    worldbuilding_needed: bool = typer.Option(
-        False, prompt="Extensive worldbuilding needed? (if fiction)"
-    ),
-):
-    """Creates a new book project (non-interactive version)."""
-    project_knowledge_base = ProjectKnowledgeBase( #MODIFIED
-        project_name=project_name,
-        title=title,
-        genre=genre,
-        description=description,
-        category=category,
-        num_characters=num_characters,
-        worldbuilding_needed=worldbuilding_needed,
-        review_preference="AI",  # Default to AI review
-        book_length="Novel" if category == "fiction" else "Full Book",  # Default book length
-    )
-    project_manager.initialize_project_with_data(project_knowledge_base) #MODIFIED
-
-
+# Removed the create command
 
 @app.command()
 def outline():

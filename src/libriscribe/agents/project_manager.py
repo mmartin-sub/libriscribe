@@ -59,6 +59,8 @@ class ProjectManagerAgent:
         self.project_dir = Path(self.settings.projects_dir) / project_data.project_name
         self.project_dir.mkdir(parents=True, exist_ok=True)
         self.project_knowledge_base = project_data
+        #CRITICAL: Set project_dir in project_knowledge_base
+        self.project_knowledge_base.project_dir = self.project_dir
         self.save_project_data()
         logger.info(f"🚀 Initialized project: {project_data.project_name}")
         print(f"Project '{project_data.project_name}' initialized in {self.project_dir}")
@@ -66,12 +68,30 @@ class ProjectManagerAgent:
     def save_project_data(self):
         """Saves project data using the ProjectKnowledgeBase object."""
         if self.project_knowledge_base and self.project_dir:
-            file_path = str(self.project_dir / "project_data.json")
-            self.project_knowledge_base.save_to_file(file_path)  # Use the save method
+            try:
+                # Debug logs before save
+                logger.info("Saving project data...")
+                logger.info(f"Number of chapters: {self.project_knowledge_base.num_chapters}")
+                logger.info(f"Chapters in knowledge base: {list(self.project_knowledge_base.chapters.keys())}")
+                
+                file_path = str(self.project_dir / "project_data.json")
+                self.project_knowledge_base.save_to_file(file_path)
+                
+                # Verify save
+                if Path(file_path).exists():
+                    # Read back and verify
+                    loaded_data = ProjectKnowledgeBase.load_from_file(file_path)
+                    if loaded_data:
+                        logger.info(f"Verified saved data - Chapters: {list(loaded_data.chapters.keys())}")
+                    else:
+                        logger.error("Failed to verify saved data!")
+                else:
+                    logger.error(f"File not created: {file_path}")
+            except Exception as e:
+                logger.exception(f"Error saving project data: {e}")
+                print(f"ERROR: Failed to save project data. See log.")
         else:
             logger.warning("Attempted to save project data before initialization.")
-
-
     def load_project_data(self, project_name: str):
         """Loads project data."""
         self.project_dir = Path(self.settings.projects_dir) / project_name
@@ -79,7 +99,9 @@ class ProjectManagerAgent:
         if project_data_path.exists():
             data = ProjectKnowledgeBase.load_from_file(str(project_data_path)) #MODIFIED
             if data:
-                self.project_knowledge_base = data
+                self.                self.project_knowledge_base = data
+                #CRITICAL: Set project_dir in project_knowledge_base
+                self.project_knowledge_base.project_dir = self.project_dir
             else:
                 raise ValueError("Failed to load or validate project data.")
 
@@ -97,7 +119,7 @@ class ProjectManagerAgent:
         if agent_name in ["concept_generator", "outliner", "character_generator", "worldbuilding", "chapter_writer", "editor", "style_editor"]: #MODIFIED
             if self.project_knowledge_base:
                 try:
-                    agent.execute(self.project_knowledge_base, *args, **kwargs)  # Pass project_knowledge_base
+                    agent.execute(project_knowledge_base=self.project_knowledge_base, *args, **kwargs)  # Pass project_knowledge_base
                 except Exception as e:
                     logger.exception(f"Error running agent {agent_name}: {e}")
                     print(f"ERROR: Agent {agent_name} failed. See log for details.")
@@ -141,9 +163,9 @@ class ProjectManagerAgent:
 
     def write_chapter(self, chapter_number: int):
         """Writes a specific chapter."""
-        #Now it receives the project knowledge base and saves it after
-        self.run_agent("chapter_writer", chapter_number=chapter_number)
+        self.run_agent("chapter_writer",  chapter_number=chapter_number, output_path=str(self.project_dir / f"chapter_{chapter_number}.md"))
         self.save_project_data()
+
 
     def write_and_review_chapter(self, chapter_number: int):
         """Writes, reviews, and potentially edits a chapter (centralized review logic)."""

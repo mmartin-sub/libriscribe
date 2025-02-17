@@ -38,7 +38,7 @@ class PlagiarismCheckerAgent(Agent):
 
     def check_plagiarism(self, text_chunk: str) -> List[Dict[str, Any]]:
         """Checks a text chunk, using extract_json_from_markdown."""
-
+        console.print(f"{self.name} is: Checking Plagiarism for Chapter in path {chapter_path}...")
         prompt = f"""
        You are a plagiarism detection expert. Analyze the following text for potential plagiarism.
        Do NOT compare it to the entire internet. Instead, focus on identifying common phrases, sentence structures,

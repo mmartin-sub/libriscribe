@@ -9,7 +9,15 @@ import anthropic  # For Claude
 import google.generativeai as genai  # For Google AI Studio
 import requests  # For DeepSeek and Mistral
 
+# ADDED THIS: Import the function
+from libriscribe.utils.file_utils import extract_json_from_markdown
+
 logger = logging.getLogger(__name__)
+
+# Configure httpx logger to be less verbose
+httpx_logger = logging.getLogger("httpx")
+httpx_logger.setLevel(logging.WARNING)  # Or ERROR, to suppress even warnings
+
 
 class LLMClient:
     """Unified LLM client for multiple providers."""
@@ -144,6 +152,7 @@ class LLMClient:
                     repaired_json = extract_json_from_markdown(repaired_response)
                     if repaired_json is not None:
                         logger.info("JSON repair successful.")
-                        return f"```json\n{repaired_response}\n```" # Wrap in markdown
+                        # CRITICAL CHANGE:  Return the JSON *string*, not wrapped in Markdown.
+                        return repaired_response  # <--- THIS WAS THE KEY FIX
         logger.error("JSON repair failed.")
         return "" # Return empty

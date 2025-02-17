@@ -35,6 +35,7 @@ class EditorAgent(Agent):
                 "genre": project_knowledge_base.genre,
                 "chapter_content": chapter_content,
             }
+            console.print(f"{self.name} is: Editing Chapter {chapter_number}...")
             prompt = prompts.EDITOR_PROMPT.format(**prompt_data)
             edited_response = self.llm_client.generate_content(prompt, max_tokens=4000)
             revised_chapter = extract_json_from_markdown(edited_response)  # Using Markdown extraction
