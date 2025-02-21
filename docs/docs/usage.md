@@ -11,7 +11,7 @@ This guide explains how to use LibriScribe.
 After installation, simply run:
 
 ```bash
-libriscribe create
+libriscribe start
 ```
 
 This will start the LibriScribe CLI.

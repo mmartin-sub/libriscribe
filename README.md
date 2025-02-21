@@ -70,7 +70,7 @@ MISTRAL_API_KEY=your_api_key_here
 ### 3. Launch LibriScribe
 
 ```bash
-libriscribe create
+libriscribe start
 ```
 
 Choose between:
@@ -81,7 +81,7 @@ Choose between:
 
 ### Project Creation
 ```bash
-python src/libriscribe/main.py create \
+python src/libriscribe/main.py start \
     --project-name my_book \
     --title "My Awesome Book" \
     --genre fantasy \
