@@ -71,7 +71,7 @@ class ProjectManagerAgent:
             
         self.save_project_data()
         self.logger.info(f"🚀 Initialized project: {project_data.project_name}")
-        print(f"Project '{project_data.project_name}' initialized in {self.project_dir}")
+        console.print(f"✨ Project [bold green]'{project_name}'[/bold green] initialized successfully!")
     
     def save_project_data(self):
         """Saves project data using the ProjectKnowledgeBase object."""
@@ -233,7 +233,7 @@ class ProjectManagerAgent:
             self.edit_style(chapter_number)  # AI style editing
         elif self.project_knowledge_base and self.project_knowledge_base.review_preference == "Human":
             chapter_path = str(self.project_dir / f"chapter_{chapter_number}.md") # type: ignore
-            print(f"\nChapter {chapter_number} written to: {chapter_path}")
+            console.print(f"\n📄 Chapter {chapter_number} ready for review!")
             if typer.confirm("Do you want to review and edit this chapter now?"):
                 typer.edit(filename=chapter_path)
                 print("\nChanges saved.")
@@ -304,10 +304,10 @@ class ProjectManagerAgent:
             # Save as Markdown or PDF (original version)
             if original_output_path.endswith(".md"):
                 write_markdown_file(original_output_path, formatted_original)
-                console.print(f"[green]Original version formatted and saved to: {original_output_path}[/green]")
+                console.print(f"[bold green]📚 Original version formatted and saved![/bold green]")
             elif original_output_path.endswith(".pdf"):
                 self.markdown_to_pdf(formatted_original, original_output_path)
-                console.print(f"[green]Original version formatted and saved to: {original_output_path}[/green]")
+                console.print(f"[bold green]📚 Original version formatted and saved![/bold green]")
             else:
                 console.print(f"[red]ERROR: Unsupported output format: {original_output_path}. Must be .md or .pdf[/red]")
                 return

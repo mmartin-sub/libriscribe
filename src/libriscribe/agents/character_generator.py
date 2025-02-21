@@ -24,7 +24,7 @@ class CharacterGeneratorAgent(Agent):
 
     def execute(self, project_knowledge_base: ProjectKnowledgeBase, output_path: Optional[str] = None) -> None:
         try:
-            console.print(f"{self.name} is: Generating characters and their personalities...")
+            console.print(f"👥 [bold cyan]Creating character profiles...[/bold cyan]")
             prompt = prompts.CHARACTER_PROMPT.format(
                 title=project_knowledge_base.title,
                 genre=project_knowledge_base.genre,
@@ -135,7 +135,7 @@ class CharacterGeneratorAgent(Agent):
                             project_knowledge_base.add_character(character)
 
                         processed_characters.append(character.model_dump())
-                        console.print(f"[green]Generated character: {character.name}[/green]")
+                        console.print(f"[bold green]✅ Created character: {character.name}[/bold green]")
 
                         # Print all fields for verification
                         for key, value in character.model_dump().items():
@@ -153,7 +153,7 @@ class CharacterGeneratorAgent(Agent):
             if output_path is None:
                 output_path = str(Path(project_knowledge_base.project_dir) / "characters.json")
             write_json_file(output_path, processed_characters)  # Save characters
-            console.print(f"Character profiles saved to: {output_path}")
+            console.print(f"[bold green]💾 Character profiles saved![/bold green]")
 
         except Exception as e:
             self.logger.exception(f"Error generating character profiles: {e}")

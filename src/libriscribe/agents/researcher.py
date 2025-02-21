@@ -28,7 +28,7 @@ class ResearcherAgent(Agent):
 
         try:
             # Use LLM to generate initial research summary
-            console.print(f"{self.name} is: Researching for query {query}...")
+            console.print(f"🔎 [bold cyan]Researching: {query}...[/bold cyan]")
             prompt = prompts.RESEARCH_PROMPT.format(query=query)
             llm_summary = self.llm_client.generate_content(prompt, max_tokens=1000)
 

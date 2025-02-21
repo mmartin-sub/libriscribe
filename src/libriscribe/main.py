@@ -16,8 +16,11 @@ from rich.progress import track  # Import track
 # Configure logging (same as before)
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
+    format="%(message)s",  # Remove timestamp and level info from user-visible logs
+    handlers=[
+        logging.FileHandler("libriscribe.log"),  # Send detailed logs to file instead
+        logging.StreamHandler()  # Simplified logs to console
+    ]
 )
 
 console = Console()
@@ -171,16 +174,16 @@ def get_description(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
 def generate_and_review_concept(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
     project_manager.generate_concept()
     project_manager.checkpoint() # Checkpoint
-    print(f"\nRefined Concept:") # Clarified Output
-    print(f"  Title: {project_knowledge_base.title}")  # Use direct attributes
-    print(f"  Logline: {project_knowledge_base.logline}")
-    print(f"  Description:\n{project_knowledge_base.description}")
+    console.print(f"\n[bold cyan]✨ Refined Concept:[/bold cyan]")
+    console.print(f"  [bold]Title:[/bold] {project_knowledge_base.title}")
+    console.print(f"  [bold]Logline:[/bold] {project_knowledge_base.logline}")
+    console.print(f"  [bold]Description:[/bold]\n{project_knowledge_base.description}")
     return typer.confirm("Do you want to proceed with generating an outline based on this concept?")
 
 def generate_and_edit_outline(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
     project_manager.generate_outline()
     project_manager.checkpoint()  # Checkpoint after outline
-    print(f"\nOutline generated! Check the file: {project_manager.project_dir}/outline.md")
+    console.print(f"\n[bold green]📝 Outline generated![/bold green]")
 
     if typer.confirm("Do you want to review and edit the outline now?"):
         typer.edit(filename=str(project_manager.project_dir / "outline.md"))
@@ -190,18 +193,18 @@ def generate_and_edit_outline(project_knowledge_base: ProjectKnowledgeBase): #MO
 def generate_characters_if_needed(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
      if project_knowledge_base.get("num_characters", 0) > 0:  # Use get with default
         if typer.confirm("Do you want to generate character profiles?"):
-            print("\nGenerating characters...")
+            console.print("\n[bold cyan]👥 Generating character profiles...[/bold cyan]")
             project_manager.generate_characters()
             project_manager.checkpoint() # Checkpoint
-            print(f"\nCharacter profiles generated! Check the file: {project_manager.project_dir}/characters.json")
+            console.print(f"\n[bold green]✅ Character profiles generated![/bold green]")
 
 def generate_worldbuilding_if_needed(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
     if project_knowledge_base.get("worldbuilding_needed", False):  # Use get with default
         if typer.confirm("Do you want to generate worldbuilding details?"):
-            print("\nGenerating worldbuilding...")
+            console.print("\n[bold cyan]🏔️ Creating worldbuilding details...[/bold cyan]")
             project_manager.generate_worldbuilding()
             project_manager.checkpoint() # Checkpoint
-            print(f"\nWorldbuilding details generated! Check the file: {project_manager.project_dir}/world.json")
+            console.print(f"\n[bold green]✅ Worldbuilding details generated![/bold green]")
 
 def write_and_review_chapters(project_knowledge_base: ProjectKnowledgeBase):
     """Write and review chapters with better progress tracking and error handling."""
@@ -232,7 +235,7 @@ def write_and_review_chapters(project_knowledge_base: ProjectKnowledgeBase):
         try:
             project_manager.write_and_review_chapter(i)
             project_manager.checkpoint()
-            console.print(f"[green]✓ Chapter {i} completed successfully[/green]")
+            console.print(f"[bold green]✅ Chapter {i} completed successfully[/bold green]")
         except Exception as e:
             console.print(f"[red]ERROR writing chapter {i}: {str(e)}[/red]")
             logger.exception(f"Error writing chapter {i}")
@@ -256,7 +259,8 @@ def format_book(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
         else:
             output_path = str(project_manager.project_dir / "manuscript.pdf")
         project_manager.format_book(output_path)
-        print(f"\nBook formatted and saved to: {output_path}")
+        console.print(f"\n[bold green]📘 Book formatted and saved![/bold green]")
+
 
 # --- Simple Mode (Refactored) ---
 def simple_mode():
@@ -301,7 +305,7 @@ def simple_mode():
         print("Exiting.")
         return
 
-    print("\nBook creation process complete (Simple Mode).")
+    console.print("\n[bold green]🎉 Book creation process complete![/bold green]")
 
 # --- Helper Functions for Advanced Mode ---
 

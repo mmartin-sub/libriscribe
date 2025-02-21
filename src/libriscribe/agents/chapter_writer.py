@@ -49,7 +49,8 @@ class ChapterWriterAgent(Agent):
                 project_knowledge_base.add_chapter(chapter)
                 console.print(f"[yellow]Created default chapter {chapter_number} to proceed.[/yellow]")
 
-            console.print(f"\n[cyan]Writing Chapter {chapter_number}: {chapter.title}[/cyan]")
+            console.print(f"\n[bold cyan]📝 Writing Chapter {chapter_number}: {chapter.title}[/bold cyan]")
+
             
             # Make sure there's at least one scene
             if not chapter.scenes:
@@ -70,8 +71,8 @@ class ChapterWriterAgent(Agent):
             scene_contents = []
             
             for scene in ordered_scenes:
-                console.print(f"Writing Scene {scene.scene_number} of {len(ordered_scenes)}...")
-                
+                console.print(f"🎬 Creating Scene/Section {scene.scene_number} of {len(ordered_scenes)}...")
+
                 # Generate a scene title if none exists
                 scene_title = f"Scene {scene.scene_number}: {scene.summary[:30]}..." if len(scene.summary) > 30 else f"Scene {scene.scene_number}: {scene.summary}"
                 
@@ -117,7 +118,7 @@ class ChapterWriterAgent(Agent):
                 output_path = str(Path(project_knowledge_base.project_dir) / f"chapter_{chapter_number}.md")
             write_markdown_file(output_path, chapter_content)
             
-            console.print(f"[green]✓ Chapter {chapter_number} saved successfully with {len(ordered_scenes)} scenes.[/green]")
+            console.print(f"[bold green]✅ Chapter {chapter_number} completed with {len(ordered_scenes)} scenes![/bold green]")
             
         except Exception as e:
             self.logger.exception(f"Error writing chapter {chapter_number}: {e}")

@@ -59,7 +59,7 @@ class EditorAgent(Agent):
                 "review_feedback": review_results.get("review", "")
             }
 
-            console.print(f"{self.name} is: Editing Chapter {chapter_number} based on reviewer feedback...")
+            console.print(f"✏️ [bold cyan]Editing Chapter {chapter_number} based on feedback...[/bold cyan]")
             prompt = prompts.EDITOR_PROMPT.format(**prompt_data) + scene_titles_instruction
             edited_response = self.llm_client.generate_content(prompt, max_tokens=8000)
             # --- KEY FIX: Use extract_json_from_markdown and check for None ---
@@ -92,7 +92,7 @@ class EditorAgent(Agent):
                  #--- FIX: Save as chapter_{chapter_number}_revised.md ---
                 revised_chapter_path = str(Path(project_knowledge_base.project_dir) / f"chapter_{chapter_number}_revised.md")
                 write_markdown_file(revised_chapter_path, revised_chapter)
-                print(f"Edited chapter saved to: {revised_chapter_path}")
+                console.print(f"[bold green]✅ Edited chapter saved![/bold green]")
             else:
                 print("ERROR: Could not extract revised chapter from editor output.")
                 self.logger.error("Could not extract revised chapter content.")
