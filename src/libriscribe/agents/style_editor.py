@@ -8,7 +8,8 @@ from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils.file_utils import read_markdown_file, write_markdown_file, read_json_file, extract_json_from_markdown
 #MODIFIED
 from libriscribe.knowledge_base import ProjectKnowledgeBase
-
+from rich.console import Console
+console = Console()
 logger = logging.getLogger(__name__)
 class StyleEditorAgent(Agent):
     """Refines the writing style of a chapter."""

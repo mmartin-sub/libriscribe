@@ -25,7 +25,6 @@ class Scene(BaseModel):
     setting: str = ""
     goal: str = ""  # What's the purpose of this scene?
     emotional_beat: str = "" # What's the primary emotion conveyed?
-    paragraph_plan: List[Dict[str, str]] = [] # List of {"paragraph_number": int, "summary": str}
 
 class Chapter(BaseModel):
     chapter_number: int

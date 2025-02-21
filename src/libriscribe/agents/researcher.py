@@ -9,7 +9,8 @@ from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils.file_utils import write_markdown_file
-
+from rich.console import Console
+console = Console()
 # Third-party imports for web scraping (requests and BeautifulSoup)
 import requests
 from bs4 import BeautifulSoup

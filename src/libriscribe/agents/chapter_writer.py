@@ -5,9 +5,10 @@ from pathlib import Path
 from typing import Optional, Dict, List
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils import prompts_context as prompts
-from libriscribe.utils.file_utils import read_markdown_file, read_json_file, write_markdown_file
+from libriscribe.utils.file_utils import read_markdown_file, read_json_file, write_markdown_file, extract_json_from_markdown
 from libriscribe.knowledge_base import ProjectKnowledgeBase, Chapter, Scene
 from libriscribe.utils.llm_client import LLMClient
+
 import json
 from rich.console import Console
 
@@ -23,7 +24,7 @@ class ChapterWriterAgent(Agent):
 
 
     def execute(self, project_knowledge_base: ProjectKnowledgeBase, chapter_number: int, output_path: Optional[str] = None) -> None:
-        """Writes a chapter with paragraph planning and improved feedback."""
+        """Writes a chapter scene by scene."""
         try:
             # Get chapter data
             chapter = project_knowledge_base.get_chapter(chapter_number)
@@ -32,98 +33,53 @@ class ChapterWriterAgent(Agent):
                 return
 
             console.print(f"\n[cyan]Writing Chapter {chapter_number}: {chapter.title}[/cyan]")
-
-            # --- Step 1: Generate Paragraph Plan ---
-            console.print(f"{self.name} is: Generating Paragraph Plan for chapter {chapter_number}...")
-            paragraph_plan_prompt = prompts.PARAGRAPH_PLAN_PROMPT.format(
-                chapter_title=chapter.title,
-                chapter_summary=chapter.summary,
-                scenes=json.dumps([scene.model_dump() for scene in chapter.scenes]) if chapter.scenes else "[]",
-                characters=json.dumps(project_knowledge_base.characters),
-                worldbuilding=json.dumps(project_knowledge_base.worldbuilding.model_dump()),
-                genre=project_knowledge_base.genre # Added this line!
-            )
-            paragraph_plan_str = self.llm_client.generate_content(paragraph_plan_prompt, max_tokens=2000)
-            if not paragraph_plan_str:
-                console.print("[red]Failed to generate paragraph plan for chapter.[/red]")
-                return
-
-            paragraph_plan = self.process_paragraph_plan(paragraph_plan_str)
-            self.store_paragraph_plan(chapter, paragraph_plan)
-            console.print("[green]✓ Paragraph plan generated[/green]")
-
-            # --- Step 2: Generate Full Chapter ---
-            console.print(f"{self.name} is: Generating Full Chapter {chapter_number}...")
-            full_chapter_prompt = prompts.CHAPTER_PROMPT.format(
-                chapter_number=chapter_number,
-                chapter_title=chapter.title,
-                book_title=project_knowledge_base.title,
-                genre=project_knowledge_base.genre,
-                category=project_knowledge_base.category,
-                chapter_summary=chapter.summary,
-                scenes=[scene.model_dump() for scene in chapter.scenes],
-                characters=json.dumps(project_knowledge_base.characters),
-                worldbuilding=json.dumps(project_knowledge_base.worldbuilding.model_dump()),
-                paragraph_plan=json.dumps(paragraph_plan),
-                outline=project_knowledge_base.outline
-            )
-
-            chapter_content = self.llm_client.generate_content(full_chapter_prompt, max_tokens=5000)
-            if not chapter_content:
-                console.print("[red]Failed to generate chapter content.[/red]")
-                return
-
-            # --- Step 3: Save Chapter ---
+            
+            # Make sure scenes are ordered by scene number
+            ordered_scenes = sorted(chapter.scenes, key=lambda s: s.scene_number)
+            
+            # Process each scene individually
+            scene_contents = []
+            
+            for scene in ordered_scenes:
+                console.print(f"Writing Scene {scene.scene_number} of {len(ordered_scenes)}...")
+                
+                # Create a prompt for this specific scene
+                scene_prompt = prompts.SCENE_PROMPT.format(
+                    chapter_number=chapter_number,
+                    chapter_title=chapter.title,
+                    book_title=project_knowledge_base.title,
+                    genre=project_knowledge_base.genre,
+                    category=project_knowledge_base.category,
+                    chapter_summary=chapter.summary,
+                    scene_number=scene.scene_number,
+                    scene_summary=scene.summary,
+                    characters=", ".join(scene.characters) if scene.characters else "None specified",
+                    setting=scene.setting if scene.setting else "None specified",
+                    goal=scene.goal if scene.goal else "None specified",
+                    emotional_beat=scene.emotional_beat if scene.emotional_beat else "None specified",
+                    total_scenes=len(ordered_scenes)
+                )
+                
+                # Generate the scene content
+                scene_content = self.llm_client.generate_content(scene_prompt, max_tokens=2000)
+                if not scene_content:
+                    console.print(f"[yellow]Warning: Failed to generate content for Scene {scene.scene_number}. Using placeholder.[/yellow]")
+                    scene_content = f"[Scene {scene.scene_number} content unavailable]"
+                
+                scene_contents.append(scene_content)
+            
+            # Combine scenes into a complete chapter
+            chapter_content = f"## Chapter {chapter_number}: {chapter.title}\n\n"
+            chapter_content += "\n\n".join(scene_contents)
+            
+            # Save the chapter
             if output_path is None:
                 output_path = str(Path(project_knowledge_base.project_dir) / f"chapter_{chapter_number}.md")
             write_markdown_file(output_path, chapter_content)
-            console.print(f"[green]✓ Chapter {chapter_number} saved successfully to {output_path}[/green]")
-
+            
+            console.print(f"[green]✓ Chapter {chapter_number} saved successfully with {len(ordered_scenes)} scenes.[/green]")
+            
         except Exception as e:
             self.logger.exception(f"Error writing chapter {chapter_number}: {e}")
             console.print(f"[red]ERROR: Failed to write chapter {chapter_number}. See log for details.[/red]")
-
-    def process_paragraph_plan(self, paragraph_plan_str: str) -> List[Dict[str, str]]:
-        """Parses the paragraph plan (assumes it's returned as a JSON array)."""
-        try:
-            plan = json.loads(paragraph_plan_str)
-            if not isinstance(plan, list):
-                logger.warning("Paragraph plan is not a list.")
-                return []
-            return plan
-        except json.JSONDecodeError:
-            logger.error("Invalid JSON in paragraph plan.")
-            return []
-        except Exception as e:
-            logger.exception(f"Error processing paragraph plan: {e}")
-            return []
-
-    def store_paragraph_plan(self, chapter: Chapter, paragraph_plan: List[Dict[str, str]]):
-        """Stores paragraph plan, grouping by scene."""
-        current_scene = None
-
-        for plan_item in paragraph_plan:
-            if "scene_number" in plan_item:
-                try:
-                    scene_num = int(plan_item["scene_number"])
-                    current_scene = next((s for s in chapter.scenes if s.scene_number == scene_num), None)
-                except (ValueError, TypeError):
-                    logger.warning(f"Invalid scene number in paragraph plan: {plan_item.get('scene_number')}")
-                    current_scene = None
-
-            if current_scene:
-                try:
-                    paragraph_number = int(plan_item["paragraph_number"])
-                    current_scene.paragraph_plan.append({
-                        "paragraph_number": paragraph_number,
-                        "summary": plan_item.get("summary", "")
-                    })
-                except (ValueError, TypeError):
-                    logger.warning(f"Invalid paragraph number in paragraph plan: {plan_item.get('paragraph_number')}")
-                    # Don't add if invalid
-
-            #No scene number, just ignore
-
-        #Sort the paragraphs
-        for scene in chapter.scenes:
-            scene.paragraph_plan.sort(key=lambda x: x["paragraph_number"])
+   

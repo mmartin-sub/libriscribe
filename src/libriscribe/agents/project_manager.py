@@ -71,8 +71,6 @@ class ProjectManagerAgent:
             try:
                 # Debug logs before save
                 logger.info("Saving project data...")
-                logger.info(f"Number of chapters: {self.project_knowledge_base.num_chapters}")
-                logger.info(f"Chapters in knowledge base: {list(self.project_knowledge_base.chapters.keys())}")
                 
                 file_path = str(self.project_dir / "project_data.json")
                 self.project_knowledge_base.save_to_file(file_path)
@@ -81,10 +79,6 @@ class ProjectManagerAgent:
                 if Path(file_path).exists():
                     # Read back and verify
                     loaded_data = ProjectKnowledgeBase.load_from_file(file_path)
-                    if loaded_data:
-                        logger.info(f"Verified saved data - Chapters: {list(loaded_data.chapters.keys())}")
-                    else:
-                        logger.error("Failed to verify saved data!")
                 else:
                     logger.error(f"File not created: {file_path}")
             except Exception as e:

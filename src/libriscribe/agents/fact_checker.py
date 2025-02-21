@@ -9,7 +9,8 @@ from libriscribe.utils.file_utils import read_markdown_file, extract_json_from_m
 # For web scraping
 import requests
 from bs4 import BeautifulSoup
-
+from rich.console import Console
+console = Console()
 
 logger = logging.getLogger(__name__)
 

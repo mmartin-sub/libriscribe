@@ -145,14 +145,12 @@ class LLMClient:
             if json_data is not None:
                 return response_text # Return the original markdown
             else:
-                logger.warning("Attempting JSON repair...")
                 repair_prompt = f"You are a helpful AI that only returns valid JSON.  Fix the following broken JSON:\n\n```json\n{response_text}\n```"
                 repaired_response = self.generate_content(repair_prompt, max_tokens=max_tokens, temperature=0.2) #Low temp for corrections
                 if repaired_response:
                     repaired_json = extract_json_from_markdown(repaired_response)
                     if repaired_json is not None:
-                        logger.info("JSON repair successful.")
                         # CRITICAL CHANGE:  Return the JSON *string*, not wrapped in Markdown.
-                        return repaired_response  # <--- THIS WAS THE KEY FIX
+                        return repaired_response 
         logger.error("JSON repair failed.")
         return "" # Return empty

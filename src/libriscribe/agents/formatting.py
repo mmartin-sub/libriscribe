@@ -13,7 +13,8 @@ from libriscribe.utils.file_utils import get_chapter_files, read_markdown_file, 
 from fpdf import FPDF
 #MODIFIED
 from libriscribe.knowledge_base import ProjectKnowledgeBase
-
+from rich.console import Console
+console = Console()
 logger = logging.getLogger(__name__)
 
 class FormattingAgent(Agent):

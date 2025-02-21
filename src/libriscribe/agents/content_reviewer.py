@@ -6,7 +6,8 @@ from typing import Any, Dict
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils.file_utils import read_markdown_file
-
+from rich.console import Console
+console = Console()
 logger = logging.getLogger(__name__)
 
 class ContentReviewerAgent(Agent):

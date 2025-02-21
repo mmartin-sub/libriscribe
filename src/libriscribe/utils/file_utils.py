@@ -80,7 +80,6 @@ def write_markdown_file(file_path: str, content: str) -> None:
 
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
-        logger.info(f"Markdown content written to {file_path}")
 
     except Exception as e:
         logger.exception(f"Error writing to Markdown file {file_path}: {e}")
@@ -113,8 +112,6 @@ def extract_json_from_markdown(markdown_text: str) -> Optional[Dict[str, Any]]:
         return json.loads(json_str)
 
     except json.JSONDecodeError:
-        logger.error(f"Failed to decode JSON: {markdown_text}")
-        print("ERROR: Invalid JSON data received.")
         return None
     except Exception as e:
         logger.exception(f"Error extracting JSON from Markdown: {e}")

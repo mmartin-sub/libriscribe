@@ -7,7 +7,8 @@ from typing import Any, Dict, List
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils.file_utils import read_markdown_file, extract_json_from_markdown
-
+from rich.console import Console
+console = Console()
 logger = logging.getLogger(__name__)
 
 class PlagiarismCheckerAgent(Agent):
