@@ -1,4 +1,4 @@
-# Modified version of src/libriscribe/agents/outliner.py
+# src/libriscribe/agents/outliner.py
 
 import logging
 from typing import Any, Dict, List, Optional
@@ -25,16 +25,19 @@ class OutlinerAgent(Agent):
     def execute(self, project_knowledge_base: ProjectKnowledgeBase, output_path: Optional[str] = None) -> None:
         """Generates a chapter outline and then iterates to generate scene outlines."""
         try:
-            # --- Step 1: Generate Chapter-Level Outline ---
-            # Determine max chapters based on book length
+            # --- Step 1: Determine max chapters based on book length FIRST ---
             max_chapters = self._get_max_chapters(project_knowledge_base.book_length)
             
             # Enhance the prompt with explicit chapter count instruction
             if project_knowledge_base.book_length == "Short Story":
                 initial_prompt = prompts.OUTLINE_PROMPT.format(**project_knowledge_base.model_dump())
                 initial_prompt += f"\n\nIMPORTANT: This is a SHORT STORY. Generate EXACTLY {max_chapters} chapters. Do not exceed this limit."
+            elif project_knowledge_base.book_length == "Novella":
+                initial_prompt = prompts.OUTLINE_PROMPT.format(**project_knowledge_base.model_dump())
+                initial_prompt += f"\n\nIMPORTANT: This is a NOVELLA. Generate EXACTLY {max_chapters} chapters. Do not exceed this limit."
             else:
                 initial_prompt = prompts.OUTLINE_PROMPT.format(**project_knowledge_base.model_dump())
+                initial_prompt += f"\n\nIMPORTANT: Generate at most {max_chapters} chapters."
 
             console.print(f"{self.name} is: Generating Chapter Outline...")
             initial_outline = self.llm_client.generate_content(initial_prompt, max_tokens=3000, temperature=0.5)
@@ -42,33 +45,55 @@ class OutlinerAgent(Agent):
                 logger.error("Initial outline generation failed.")
                 return
 
-            # Process outline and limit chapters if needed
-            self.process_outline(project_knowledge_base, initial_outline)
-            self._enforce_chapter_limit(project_knowledge_base, max_chapters)
+            # Process outline with max_chapters limit already included in prompt
+            self.process_outline(project_knowledge_base, initial_outline, max_chapters)
+            
+            # No need to enforce chapter limit after processing since we're limiting during processing
+            # Remove this line: self._enforce_chapter_limit(project_knowledge_base, max_chapters)
 
-            # --- Step 2: Generate Scene Outlines for Each Chapter ---
-            console.print(f"{self.name} is: Generating Scene Outlines...")
-            for chapter_number, chapter in project_knowledge_base.chapters.items():
-                self.generate_scene_outline(project_knowledge_base, chapter)
-
-            # Save after both chapter and scene outlines are generated
+            # Save the overall outline first
             if output_path is None:
                 output_path = str(project_knowledge_base.project_dir / "outline.md")
+                    
+            project_knowledge_base.outline = initial_outline
+            write_markdown_file(output_path, project_knowledge_base.outline)
             
-            # Update the outline if we trimmed chapters
-            if project_knowledge_base.get("num_chapters", 0) <= max_chapters:
-                project_knowledge_base.outline = self._update_outline_markdown(initial_outline, max_chapters)
-            else:
-                project_knowledge_base.outline = initial_outline
+            # --- Step 2: Generate scene outlines for each chapter ---
+            console.print(f"{self.name} is: Generating Scene Outlines for each chapter...")
+            
+            # Loop through all chapters and generate scenes for each
+            for chapter_num, chapter in project_knowledge_base.chapters.items():
+                if chapter_num <= max_chapters:  # Only process up to max_chapters
+                    console.print(f"Generating scenes for Chapter {chapter_num}: {chapter.title}")
+                    
+                    # Generate scene outline for this chapter
+                    self.generate_scene_outline(project_knowledge_base, chapter)
+                    
+                    # Log for verification
+                    if chapter.scenes:
+                        console.print(f"  [green]✓ Generated {len(chapter.scenes)} scenes for Chapter {chapter_num}[/green]")
+                    else:
+                        console.print(f"  [yellow]⚠ No scenes were generated for Chapter {chapter_num}[/yellow]")
+            
+            # Save the updated project data with scenes
+            if hasattr(project_knowledge_base, 'project_dir') and project_knowledge_base.project_dir:
+                scenes_path = str(Path(project_knowledge_base.project_dir) / "scenes.json")
                 
-            write_markdown_file(output_path, project_knowledge_base.outline)  # Save overall outline
+                # Create a simplified structure to save scene data
+                scenes_data = {}
+                for chapter_num, chapter in project_knowledge_base.chapters.items():
+                    scenes_data[str(chapter_num)] = [scene.model_dump() for scene in chapter.scenes]
+                
+                write_json_file(scenes_path, scenes_data)
+                console.print(f"Scene outlines saved to: {scenes_path}")
 
-            self.logger.info(f"Outline generated and saved to knowledge base and {output_path}")
+            self.logger.info(f"Outline and scenes generated and saved to knowledge base and {output_path}")
 
         except Exception as e:
             self.logger.exception(f"Error generating outline: {e}")
             print(f"ERROR: Failed to generate outline. See log for details.")
-
+            
+            
     def _get_max_chapters(self, book_length: str) -> int:
         """Determine the maximum number of chapters based on book length."""
         if book_length == "Short Story":
@@ -120,12 +145,44 @@ class OutlinerAgent(Agent):
     def generate_scene_outline(self, project_knowledge_base: ProjectKnowledgeBase, chapter: Chapter):
         """Generates the scene outline for a single chapter."""
         try:
-            scene_prompt = prompts.SCENE_OUTLINE_PROMPT.format(
-                genre=project_knowledge_base.genre,
-                title=project_knowledge_base.title,
-                category=project_knowledge_base.category,
-                description=project_knowledge_base.description,
-            )
+            # Create a more detailed scene prompt with chapter information
+            scene_prompt = f"""
+            Create a detailed outline for the scenes in Chapter {chapter.chapter_number}: {chapter.title} 
+            of a {project_knowledge_base.genre} book titled "{project_knowledge_base.title}" 
+            which is categorized as {project_knowledge_base.category}.
+
+            Book Description: {project_knowledge_base.description}
+
+            Chapter Summary: {chapter.summary}
+
+            The outline should include a breakdown of 3-6 scenes for this chapter, with EACH scene having:
+            * Scene Number: (e.g., Scene 1, Scene 2, etc.)
+            * Summary: (A short description of what happens in the scene, 1-2 sentences)
+            * Characters: (A list of the characters involved, separated by commas)
+            * Setting: (Where the scene takes place)
+            * Goal: (The purpose of the scene)
+            * Emotional Beat: (The primary emotion conveyed in the scene)
+
+            IMPORTANT: Format the scene outline using Markdown bullet points, as shown below:
+
+            Scene 1:
+                * Summary: [Scene summary here]
+                * Characters: [Character 1, Character 2, ...]
+                * Setting: [Scene setting]
+                * Goal: [Scene goal]
+                * Emotional Beat: [Scene emotional beat]
+
+            Scene 2:
+                * Summary: [Scene summary here]
+                * Characters: [Character 1, Character 2, ...]
+                * Setting: [Scene setting]
+                * Goal: [Scene goal]
+                * Emotional Beat: [Scene emotional beat]
+
+            [Repeat for each scene, maintaining the exact same bullet point format]
+
+            Be sure to include all main characters relevant to this chapter and create a natural flow between scenes.
+            """
 
             console.print(f"  Generating Scene Outline for Chapter {chapter.chapter_number}...")
             scene_outline_md = self.llm_client.generate_content(scene_prompt, max_tokens=2000, temperature=0.5)
@@ -133,12 +190,133 @@ class OutlinerAgent(Agent):
                 logger.error(f"Scene outline generation failed for Chapter {chapter.chapter_number}.")
                 return
 
-            # Process and store scene information
-            self.process_scene_outline(chapter, scene_outline_md)
+            # Clear existing scenes to avoid duplication
+            chapter.scenes = []
+            
+            # Split the response by scene to better parse each scene section
+            scene_sections = self._split_into_scene_sections(scene_outline_md)
+            
+            for scene_number, scene_section in enumerate(scene_sections, 1):
+                # Parse the scene data
+                scene_data = self._extract_scene_data(scene_section, scene_number)
+                
+                if scene_data:
+                    # Create and add the scene
+                    scene = Scene(**scene_data)
+                    chapter.scenes.append(scene)
+                    logger.debug(f"Added Scene {scene_number} to Chapter {chapter.chapter_number}")
+                else:
+                    logger.warning(f"Failed to extract data for Scene {scene_number} in Chapter {chapter.chapter_number}")
+            
+            # Ensure they are ordered by scene number
+            chapter.scenes.sort(key=lambda s: s.scene_number)
+            
+            return True
 
         except Exception as e:
             logger.exception(f"Error generating scene outline for chapter {chapter.chapter_number}: {e}")
+            return False
 
+    def _split_into_scene_sections(self, scene_outline_md: str) -> list:
+        """Split the scene outline into sections for each scene."""
+        # First, normalize line endings and clean up the text
+        scene_outline_md = scene_outline_md.replace('\r\n', '\n').replace('\r', '\n')
+        lines = scene_outline_md.split('\n')
+        
+        scene_sections = []
+        current_section = []
+        is_in_scene = False
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+                
+            # Detect new scene headers
+            if "Scene" in line and (":" in line or line.strip().startswith("Scene")):
+                # If we were already in a scene, save it
+                if is_in_scene and current_section:
+                    scene_sections.append("\n".join(current_section))
+                    current_section = []
+                
+                is_in_scene = True
+                current_section.append(line)
+            elif is_in_scene:
+                current_section.append(line)
+        
+        # Don't forget to add the last scene
+        if current_section:
+            scene_sections.append("\n".join(current_section))
+            
+        return scene_sections
+
+    def _extract_scene_data(self, scene_section: str, default_scene_number: int) -> dict:
+        """Extract scene data from a scene section."""
+        scene_data = {
+            "scene_number": default_scene_number,
+            "summary": "",
+            "characters": [],
+            "setting": "",
+            "goal": "",
+            "emotional_beat": ""
+        }
+        
+        lines = scene_section.split('\n')
+        
+        # Extract scene number if present in the header
+        header_line = lines[0] if lines else ""
+        if "Scene" in header_line and ":" in header_line:
+            try:
+                # Try to extract number from "Scene X:" format
+                number_part = header_line.split("Scene", 1)[1].split(":", 1)[0].strip()
+                if number_part.isdigit():
+                    scene_data["scene_number"] = int(number_part)
+            except (IndexError, ValueError):
+                # If extraction fails, use the default
+                pass
+        
+        # Process each line to extract scene components
+        for line in lines:
+            line = line.strip()
+            
+            # Skip empty lines and headers
+            if not line or line.startswith("Scene"):
+                continue
+                
+            # Extract data based on bullet points or similar markers
+            for field, marker in [
+                ("summary", "Summary:"),
+                ("characters", "Characters:"),
+                ("setting", "Setting:"),
+                ("goal", "Goal:"),
+                ("emotional_beat", "Emotional Beat:")
+            ]:
+                if marker.lower() in line.lower():
+                    # Get the content after the marker
+                    content = line.split(marker, 1)[1].strip() if marker in line else line.split(marker.lower(), 1)[1].strip()
+                    
+                    # Clean up the content (remove bullets, asterisks, brackets)
+                    content = content.lstrip("*-[]").strip()
+                    
+                    if field == "characters":
+                        # Split by commas and clean each character name
+                        characters = [name.strip() for name in content.split(",") if name.strip()]
+                        scene_data["characters"] = characters
+                    else:
+                        scene_data[field] = content
+        
+        # Ensure we at least have a summary
+        if not scene_data["summary"]:
+            # If no summary found, try to use the whole section as a summary
+            for line in lines:
+                if line and not any(marker in line.lower() for marker in ["scene", "summary:", "characters:", "setting:", "goal:", "emotional beat:"]):
+                    if scene_data["summary"]:
+                        scene_data["summary"] += " " + line.strip()
+                    else:
+                        scene_data["summary"] = line.strip()
+        
+        # Only return the data if we have at least a summary
+        return scene_data if scene_data["summary"] else None
 
     def process_scene_outline(self, chapter: Chapter, scene_outline_md: str):
         """Parses the Markdown scene outline and adds scenes to the chapter."""
@@ -194,7 +372,7 @@ class OutlinerAgent(Agent):
                     if current_summary.startswith("**"):
                         current_summary = current_summary[2:].strip()
                     if current_summary.endswith("**"):
-                        current_summary = current_summary[:-2].strip()
+                        current_summary = current_summary[:-2:].strip()
                 
             # Character detection
             elif "characters:" in line.lower() or "character:" in line.lower():
@@ -281,7 +459,7 @@ class OutlinerAgent(Agent):
                     if current_summary.startswith("**"):
                         current_summary = current_summary[2:].strip()
                     if current_summary.endswith("**"):
-                        current_summary = current_summary[:-2].strip()
+                        current_summary = current_summary[:-2:].strip()
         
         # Don't forget to add the last scene if there is one
         if current_summary:
@@ -308,7 +486,7 @@ class OutlinerAgent(Agent):
         # Re-number scenes sequentially
         for i, scene in enumerate(chapter.scenes):
             scene.scene_number = i + 1
-    def process_outline(self, project_knowledge_base: ProjectKnowledgeBase, outline_markdown: str):
+    def process_outline(self, project_knowledge_base: ProjectKnowledgeBase, outline_markdown: str, max_chapters: int):
         """Parses the Markdown outline and populates the knowledge base."""
         lines = outline_markdown.split("\n")
         current_chapter = None
@@ -325,8 +503,12 @@ class OutlinerAgent(Agent):
             if not line:
                 continue
 
-            # Chapter header detection
-            if "Chapter" in line and ("**Chapter" in line or "## Chapter" in line):
+            # Chapter header detection (more robust pattern matching)
+            if "Chapter" in line and (line.startswith("Chapter") or "##" in line or "**" in line):
+                # If we've reached the maximum number of chapters, stop processing
+                if chapter_count >= max_chapters:
+                    break
+                    
                 # If we were processing a previous chapter, save its content
                 if current_chapter and current_content:
                     if current_section == "summary":
@@ -334,18 +516,24 @@ class OutlinerAgent(Agent):
                     current_content = []
 
                 try:
-                    # Clean up the line
-                    chapter_text = line.replace("**Chapter", "").replace("##", "").replace("Chapter", "").strip()
-                    if ":" in chapter_text:
-                        chapter_num_str, chapter_title = chapter_text.split(":", 1)
+                    # Extract chapter number and title
+                    chapter_parts = line.replace("##", "").replace("**", "").replace("Chapter", "").strip()
+                    
+                    # Handle different formats: "1: Title", "1 - Title", or just "1"
+                    if ":" in chapter_parts:
+                        chapter_num_str, chapter_title = chapter_parts.split(":", 1)
+                    elif "-" in chapter_parts:
+                        chapter_num_str, chapter_title = chapter_parts.split("-", 1)
                     else:
-                        # Try to extract number from start of text
+                        # Try to extract just the number
                         import re
-                        match = re.match(r'(\d+)\s*(.*)', chapter_text)
+                        match = re.match(r'(\d+)\s*(.*)', chapter_parts)
                         if match:
                             chapter_num_str, chapter_title = match.groups()
                         else:
-                            continue
+                            # Fallback: create sequential chapter
+                            chapter_num_str = str(chapter_count + 1)
+                            chapter_title = f"Chapter {chapter_num_str}"
 
                     chapter_number = int(''.join(filter(str.isdigit, chapter_num_str)))
                     chapter_title = chapter_title.strip()
@@ -365,66 +553,117 @@ class OutlinerAgent(Agent):
                 except Exception as e:
                     logger.error(f"Error processing chapter line '{line}': {e}")
                     continue
-
+            
+            # If no chapters found yet, check if this is a book summary section
+            elif "Book Summary" in line and chapter_count == 0:
+                # Next lines will be the book summary
+                book_summary_lines = []
+                j = i + 1
+                while j < len(lines) and not (lines[j].strip().startswith("Chapter") or "Chapter List" in lines[j]):
+                    if lines[j].strip():
+                        book_summary_lines.append(lines[j].strip())
+                    j += 1
+                
+                # Set the book description from the summary if there is one
+                if book_summary_lines:
+                    project_knowledge_base.description = "\n".join(book_summary_lines)
+            
             # Summary section detection
-            elif "Summary" in line: # Removed ":"
+            elif current_chapter and ("Summary" in line or line.startswith("Summary")):
                 if current_chapter:
                     current_section = "summary"
                     current_content = []
                     continue
-
-            # Key Plot Points detection
-            elif "Key Plot Points:" in line or "**Key Plot Points:**" in line:
+            
+            # Key Events/Plot Points detection
+            elif current_chapter and ("Key Events" in line or "Plot Points" in line):
                 if current_chapter and current_content:
                     current_chapter.summary = "\n".join(current_content).strip()
                 current_section = "plot_points"
                 current_content = []
                 continue
-
+            
             # Collect content for current section
             elif current_chapter and current_section:
                 # Clean up bullet points and asterisks
-                cleaned_line = line.replace("*", "").strip()
+                cleaned_line = line.replace("*", "").replace("[", "").replace("]", "").strip()
                 if cleaned_line:
                     current_content.append(cleaned_line)
                     # For summary, update immediately
                     if current_section == "summary":
                         current_chapter.summary = "\n".join(current_content).strip()
-
+            
+            # Look for number of chapters information
+            elif "Chapter List" in line or "chapters" in line.lower():
+                try:
+                    # Try to extract chapter count information
+                    next_line = lines[i+1] if i+1 < len(lines) else ""
+                    if next_line:
+                        # Look for digits in the line after "Chapter List"
+                        import re
+                        digits = re.findall(r'\d+', next_line)
+                        if digits:
+                            total_chapters = int(digits[0])
+                            logger.info(f"Found total chapters: {total_chapters}")
+                            if total_chapters > 0 and total_chapters <= max_chapters:
+                                # Set the number of chapters
+                                project_knowledge_base.num_chapters = total_chapters
+                except Exception as e:
+                    logger.error(f"Error extracting chapter count: {e}")
+        
         # Save any remaining content from the last chapter
         if current_chapter and current_content:
             if current_section == "summary":
                 current_chapter.summary = "\n".join(current_content).strip()
-
-        # Update the project knowledge base
-        if chapter_count > 0:
+        
+        # If no chapters found, create a default chapter 1 for the story
+        if chapter_count == 0:
+            logger.warning("No chapters found in outline")
+            default_chapter = Chapter(
+                chapter_number=1,
+                title="Shadow's Discovery",
+                summary="Shade, a daemon eking out a meager existence in the polluted shadows of Neo-London, stumbles upon a pulsating dragon egg during a scavenging run. He grapples with whether to protect it or preserve his anonymity."
+            )
+            # Add a default scene
+            default_scene = Scene(
+                scene_number=1, 
+                summary="Shade discovers the dragon egg in an abandoned research facility.",
+                characters=["Shade"],
+                setting="Abandoned research facility in Neo-London",
+                goal="Introduce the protagonist and the discovery that changes everything",
+                emotional_beat="Wonder mixed with apprehension"
+            )
+            default_chapter.scenes.append(default_scene)
+            
+            project_knowledge_base.add_chapter(default_chapter)
+            project_knowledge_base.num_chapters = 1
+            logger.info("Created default chapter with scene")
+        else:
+            # Set the number of chapters that were actually found
             project_knowledge_base.num_chapters = chapter_count
             logger.info(f"Successfully processed {chapter_count} chapters")
-
-            # Verify all chapters and print details
-            for chapter_num in range(1, chapter_count + 1):
-                chapter = project_knowledge_base.get_chapter(chapter_num)
-                if chapter:
-                    console.print(f"[green]Chapter {chapter_num} verified: {chapter.title}[/green]")
-                    console.print(f"  - [cyan]Summary:[/cyan] {chapter.summary}")  # Print summary
-                    for scene_num, scene in enumerate(chapter.scenes):
-                        console.print(f"    - Scene {scene_num + 1}: {scene.summary}") #Print scene summary
-
-                else:
-                    logger.error(f"Chapter {chapter_num} missing after processing!")
-        else:
-            logger.warning("No chapters found in outline")
-            # For short stories/novellas, ensure at least one chapter exists
-            if project_knowledge_base.book_length in ["Short Story", "Novella"]:
-                default_chapter = Chapter(
-                    chapter_number=1,
-                    title="The Story",
-                    summary="Main story content"
-                )
-                # ADD THIS: Create a default scene
-                default_scene = Scene(scene_number=1, summary="Main content of the story.")
-                default_chapter.scenes.append(default_scene)
-
-                project_knowledge_base.add_chapter(default_chapter)
-                project_knowledge_base.num_chapters = 1
-                logger.info("Created default chapter")
+        
+        # Determine if we need to extract the estimated number of chapters from the text
+        if isinstance(project_knowledge_base.num_chapters, int) and project_knowledge_base.num_chapters <= 1:
+            # Try to detect the number of chapters from the outline
+            try:
+                full_text = outline_markdown.lower()
+                if "chapter list" in full_text:
+                    # Look for text like "10 chapters" or "Total chapters: 8"
+                    import re
+                    chapter_count_patterns = [
+                        r'(\d+)\s+chapters',
+                        r'total\s+chapters:\s*(\d+)',
+                        r'chapter\s+list\s*[\(:]?\s*(\d+)'
+                    ]
+                    
+                    for pattern in chapter_count_patterns:
+                        matches = re.search(pattern, full_text)
+                        if matches:
+                            estimated_chapters = int(matches.group(1))
+                            if 1 <= estimated_chapters <= max_chapters:
+                                project_knowledge_base.num_chapters = estimated_chapters
+                                logger.info(f"Extracted estimated chapter count: {estimated_chapters}")
+                                break
+            except Exception as e:
+                logger.error(f"Error extracting chapter count from text: {e}")

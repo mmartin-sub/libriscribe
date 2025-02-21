@@ -55,7 +55,7 @@ def introduction():
     console.print(
         Panel(
             "[bold blue]📚✨ Welcome to Libriscribe! ✨📚[/bold blue]\n\n"
-            "Libriscribe is an AI-powered open-source book creation system ... (rest of the message)",
+            "Libriscribe is an AI-powered open-source book creation system made by Fernando Guerra",
             title="[bold blue]Libriscribe[/bold blue]",
             border_style="blue",
         )

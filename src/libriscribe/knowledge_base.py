@@ -9,7 +9,7 @@ class Character(BaseModel):
     name: str
     age: str = ""
     physical_description: str = ""
-    personality_traits: List[str] = []
+    personality_traits: str = ""
     background: str = ""
     motivations: str = ""
     relationships: Dict[str, str] = {}  # Character name -> Relationship description
@@ -93,7 +93,8 @@ class ProjectKnowledgeBase(BaseModel):
     review_preference: str = "AI"
     book_length: str = ""
     logline: str = "No logline available"
-    #REMOVED TONE, TARGET AUDIENCE...
+    tone: str = "Informative"
+    target_audience: str = "General"
     num_chapters: Union[int, Tuple[int, int]] = 1  # Keep for chapter generation, advanced mode
     num_chapters_str: str = "" #Keep for advanced
     llm_provider: str = "openai"
@@ -183,3 +184,16 @@ class ProjectKnowledgeBase(BaseModel):
         except Exception as e:
             print(f"ERROR loading knowledge base from {file_path}: {e}")
             return None
+    
+    worldbuilding_needed: bool = False
+    # Make worldbuilding conditional on worldbuilding_needed
+    worldbuilding: Optional[Worldbuilding] = None
+    
+    # Add a validator to ensure worldbuilding is None when not needed
+    @validator("worldbuilding", pre=True, always=True)
+    def set_worldbuilding(cls, v, values):
+        if not values.get("worldbuilding_needed", False):
+            return None
+        if v is None and values.get("worldbuilding_needed", False):
+            return Worldbuilding()
+        return v

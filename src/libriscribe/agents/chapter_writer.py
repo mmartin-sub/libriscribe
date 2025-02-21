@@ -30,18 +30,50 @@ class ChapterWriterAgent(Agent):
             chapter = project_knowledge_base.get_chapter(chapter_number)
             if not chapter:
                 console.print(f"[red]ERROR: Chapter {chapter_number} not found in knowledge base.[/red]")
-                return
+                # Create a default chapter if not found
+                chapter = Chapter(
+                    chapter_number=chapter_number,
+                    title=f"Chapter {chapter_number}",
+                    summary="A new chapter in the unfolding story."
+                )
+                # Add a default scene
+                default_scene = Scene(
+                    scene_number=1,
+                    summary="The story continues with new developments.",
+                    characters=["Shade"],
+                    setting="Neo-London",
+                    goal="Advance the plot",
+                    emotional_beat="Tension"
+                )
+                chapter.scenes.append(default_scene)
+                project_knowledge_base.add_chapter(chapter)
+                console.print(f"[yellow]Created default chapter {chapter_number} to proceed.[/yellow]")
 
             console.print(f"\n[cyan]Writing Chapter {chapter_number}: {chapter.title}[/cyan]")
             
+            # Make sure there's at least one scene
+            if not chapter.scenes:
+                console.print(f"[yellow]No scenes found for Chapter {chapter_number}. Creating a default scene.[/yellow]")
+                default_scene = Scene(
+                    scene_number=1,
+                    summary="The story continues with new developments.",
+                    characters=["Shade"],
+                    setting="Neo-London",
+                    goal="Advance the plot",
+                    emotional_beat="Tension"
+                )
+                chapter.scenes.append(default_scene)
+            
             # Make sure scenes are ordered by scene number
             ordered_scenes = sorted(chapter.scenes, key=lambda s: s.scene_number)
-            
             # Process each scene individually
             scene_contents = []
             
             for scene in ordered_scenes:
                 console.print(f"Writing Scene {scene.scene_number} of {len(ordered_scenes)}...")
+                
+                # Generate a scene title if none exists
+                scene_title = f"Scene {scene.scene_number}: {scene.summary[:30]}..." if len(scene.summary) > 30 else f"Scene {scene.scene_number}: {scene.summary}"
                 
                 # Create a prompt for this specific scene
                 scene_prompt = prompts.SCENE_PROMPT.format(
@@ -60,13 +92,21 @@ class ChapterWriterAgent(Agent):
                     total_scenes=len(ordered_scenes)
                 )
                 
+                scene_prompt += f"\n\nIMPORTANT: Begin the scene with the title: **{scene_title}**"
+
+                
                 # Generate the scene content
                 scene_content = self.llm_client.generate_content(scene_prompt, max_tokens=2000)
                 if not scene_content:
                     console.print(f"[yellow]Warning: Failed to generate content for Scene {scene.scene_number}. Using placeholder.[/yellow]")
                     scene_content = f"[Scene {scene.scene_number} content unavailable]"
                 
+                # Ensure the scene title is included
+                if not scene_content.startswith(f"**{scene_title}**") and not scene_content.startswith(f"# {scene_title}"):
+                    scene_content = f"**{scene_title}**\n\n{scene_content}"
+                
                 scene_contents.append(scene_content)
+            
             
             # Combine scenes into a complete chapter
             chapter_content = f"## Chapter {chapter_number}: {chapter.title}\n\n"

@@ -76,7 +76,6 @@ class CharacterGeneratorAgent(Agent):
                                     flattened_relationships[rel_key] = json.dumps(rel_value)
                             relationships = flattened_relationships
 
-
                         # Flatten any other nested dictionaries (like we did for worldbuilding)
                         flattened_char_data = {}
                         for key, value in char_data.items():
@@ -96,18 +95,27 @@ class CharacterGeneratorAgent(Agent):
                             else:
                                 flattened_char_data[key] = json.dumps(value)
 
-                        personality_traits = flattened_char_data.get("personality_traits", [])
-                        if isinstance(personality_traits, str):
-                            personality_traits = [trait.strip() for trait in personality_traits.split(",") if trait.strip()]
-                        elif not isinstance(personality_traits, list):  # Handle cases where it's neither string nor list
-                            personality_traits = []
-
+                        # --- MODIFIED PERSONALITY TRAITS HANDLING ---
+                        personality_traits = flattened_char_data.get("personality_traits", "")
+                        
+                        # Convert to string format instead of array
+                        if isinstance(personality_traits, list):
+                            # Join list into a comma-separated string
+                            personality_traits = ", ".join([str(trait).strip() for trait in personality_traits if trait])
+                        elif isinstance(personality_traits, str):
+                            # Keep it as a string, just ensure it's properly formatted
+                            personality_traits = personality_traits.strip()
+                        
+                        # Only use default if we have an empty string after processing
+                        if not personality_traits:
+                            personality_traits = "Resourceful, Cautious, Determined"  # Default traits as string
+                        
                         # Create character using the flattened data
                         character = Character(
                             name=flattened_char_data.get("name", ""),
                             age=str(flattened_char_data.get("age", "")),
                             physical_description=flattened_char_data.get("physical description", ""),
-                            personality_traits=personality_traits,
+                            personality_traits=personality_traits,  # Now using string instead of list
                             background=flattened_char_data.get("background", "") or flattened_char_data.get("background/backstory", ""),
                             motivations=flattened_char_data.get("motivations", ""),
                             relationships=relationships,
@@ -117,7 +125,6 @@ class CharacterGeneratorAgent(Agent):
                             character_arc=flattened_char_data.get("character arc", "") or flattened_char_data.get("character_arc", ""),
                         )
 
-
                         # --- Update/Add Character ---
                         existing_character = project_knowledge_base.get_character(character.name)
                         if existing_character:
@@ -126,7 +133,6 @@ class CharacterGeneratorAgent(Agent):
                                     setattr(existing_character, key, value)
                         else:
                             project_knowledge_base.add_character(character)
-
 
                         processed_characters.append(character.model_dump())
                         console.print(f"[green]Generated character: {character.name}[/green]")
@@ -142,7 +148,7 @@ class CharacterGeneratorAgent(Agent):
                 print("ERROR: Invalid JSON data received after repair attempts.")
                 return
             except Exception as e:
-                print("Error",e)
+                print("Error:", e)
                 return
             if output_path is None:
                 output_path = str(Path(project_knowledge_base.project_dir) / "characters.json")
