@@ -83,6 +83,7 @@ class ChapterWriterAgent(Agent):
                     book_title=project_knowledge_base.title,
                     genre=project_knowledge_base.genre,
                     category=project_knowledge_base.category,
+                    language=project_knowledge_base.language,  # Add language parameter
                     chapter_summary=chapter.summary,
                     scene_number=scene.scene_number,
                     scene_summary=scene.summary,
@@ -123,4 +124,3 @@ class ChapterWriterAgent(Agent):
         except Exception as e:
             self.logger.exception(f"Error writing chapter {chapter_number}: {e}")
             console.print(f"[red]ERROR: Failed to write chapter {chapter_number}. See log for details.[/red]")
-   

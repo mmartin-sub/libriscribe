@@ -29,7 +29,7 @@ class ResearcherAgent(Agent):
         try:
             # Use LLM to generate initial research summary
             console.print(f"🔎 [cyan]Researching: {query}...[/cyan]")
-            prompt = prompts.RESEARCH_PROMPT.format(query=query)
+            prompt = prompts.RESEARCH_PROMPT.format(query=query, language=project_knowledge_base.language)
             llm_summary = self.llm_client.generate_content(prompt, max_tokens=1000)
 
 

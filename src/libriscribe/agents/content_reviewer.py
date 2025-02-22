@@ -35,6 +35,8 @@ class ContentReviewerAgent(Agent):
         prompt = f"""
         You are a meticulous content reviewer. Review the following chapter for:
 
+        Language: {project_knowledge_base.language}
+        
         1.  **Internal Consistency:** Are character actions, dialogue, and motivations consistent with their established personalities and the overall plot?
         2.  **Clarity:** Are there any confusing passages, ambiguous descriptions, or unclear plot points?
         3.  **Plot Holes:** Are there any logical inconsistencies or unresolved questions within the chapter's narrative?

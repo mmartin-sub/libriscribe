@@ -43,6 +43,8 @@ class PlagiarismCheckerAgent(Agent):
 
         prompt = f"""
        You are a plagiarism detection expert. Analyze the following text for potential plagiarism.
+       The text is written in {project_knowledge_base.language}.
+       
        Do NOT compare it to the entire internet. Instead, focus on identifying common phrases, sentence structures,
        or ideas that might indicate a lack of originality.  If you find something that raises concerns,
        return it as a JSON array. Each item should have this format: {{"text": "...", "similarity_score": 0.8, "source": "Possible source or explanation"}}.

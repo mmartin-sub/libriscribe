@@ -41,6 +41,7 @@ class WorldbuildingAgent(Agent):
                 title=project_knowledge_base.title,
                 genre=project_knowledge_base.genre,
                 category=project_knowledge_base.category,
+                language=project_knowledge_base.language,
                 description=project_knowledge_base.description
                 # ... other relevant fields
             )

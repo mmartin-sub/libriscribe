@@ -87,6 +87,7 @@ class ProjectKnowledgeBase(BaseModel):
     genre: str = "Unknown Genre"
     description: str = "No description provided."
     category: str = "Unknown Category"
+    language: str = "English"
     num_characters: Union[int, Tuple[int, int]] = 0  # Keep, used by character generator
     num_characters_str: str = "" #Keep for advanced
     worldbuilding_needed: bool = False #Keep, used by worldbuilding generator

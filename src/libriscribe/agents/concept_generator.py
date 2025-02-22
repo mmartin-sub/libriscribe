@@ -28,23 +28,25 @@ class ConceptGeneratorAgent(Agent):
             # --- Step 1: Initial Concept Generation (Simplified) ---
             if project_knowledge_base.book_length == "Short Story":
                 initial_prompt = f"""Generate a concise book concept for a {project_knowledge_base.genre} {project_knowledge_base.category} short story.
+                    The book should be written in {project_knowledge_base.language}.
 
-                Initial ideas: {project_knowledge_base.description}.
+                    Initial ideas: {project_knowledge_base.description}.
 
-                Return a JSON object within a Markdown code block.  Include:
-                - "title":  A compelling title.
-                - "logline": A one-sentence summary.
-                - "description": A short description (around 100-150 words).
+                    Return a JSON object within a Markdown code block.  Include:
+                    - "title":  A compelling title.
+                    - "logline": A one-sentence summary.
+                    - "description": A short description (around 100-150 words).
 
-                ```json
-                {{
-                    "title": "...",
-                    "logline": "...",
-                    "description": "..."
-                }}
-                ```"""
+                    ```json
+                    {
+                        "title": "...",
+                        "logline": "...",
+                        "description": "..."
+                    }
+                    ```"""
             else:
                 initial_prompt = f"""Generate a book concept for a {project_knowledge_base.genre} {project_knowledge_base.category} ({project_knowledge_base.book_length}).
+                The book should be written in {project_knowledge_base.language}.
 
                 Initial ideas: {project_knowledge_base.description}.
 
@@ -79,7 +81,8 @@ class ConceptGeneratorAgent(Agent):
             ```json
             {json.dumps(initial_concept_json)}
             ```
-
+            The book should be written in {project_knowledge_base.language}.
+           
             Evaluate:
             - **Title:** Is it compelling and relevant?
             - **Logline:** Is it concise and does it capture the core conflict?
@@ -94,6 +97,7 @@ class ConceptGeneratorAgent(Agent):
 
             # --- Step 3: Refine the Concept ---
             refine_prompt = f"""Refine the book concept based on the critique.  Address the weaknesses and improve the concept.
+            The book should be written in {project_knowledge_base.language}.
 
             Original Concept:
             ```json

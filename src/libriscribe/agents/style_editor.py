@@ -6,7 +6,7 @@ from pathlib import Path
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils.file_utils import read_markdown_file, write_markdown_file, read_json_file, extract_json_from_markdown
-#MODIFIED
+
 from libriscribe.knowledge_base import ProjectKnowledgeBase
 from rich.console import Console
 console = Console()
@@ -36,6 +36,7 @@ class StyleEditorAgent(Agent):
 
         Target Tone: {tone}
         Target Audience: {target_audience}
+        Language: {project_knowledge_base.language}
 
         Make specific suggestions for changes, and then provide the REVISED text within a Markdown code block.
 

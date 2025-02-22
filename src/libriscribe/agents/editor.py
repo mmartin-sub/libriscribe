@@ -55,6 +55,7 @@ class EditorAgent(Agent):
                 "chapter_title": chapter_title,
                 "book_title": project_knowledge_base.title,
                 "genre": project_knowledge_base.genre,
+                "language": project_knowledge_base.language,
                 "chapter_content": chapter_content,
                 "review_feedback": review_results.get("review", "")
             }

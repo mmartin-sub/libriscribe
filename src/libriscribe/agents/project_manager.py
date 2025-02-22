@@ -153,7 +153,7 @@ class ProjectManagerAgent:
         self.project_dir = Path(self.settings.projects_dir) / project_name
         project_data_path = self.project_dir / "project_data.json"
         if project_data_path.exists():
-            data = ProjectKnowledgeBase.load_from_file(str(project_data_path)) #MODIFIED
+            data = ProjectKnowledgeBase.load_from_file(str(project_data_path)) 
             if data:
                 self.                self.project_knowledge_base = data
                 #CRITICAL: Set project_dir in project_knowledge_base
@@ -172,7 +172,7 @@ class ProjectManagerAgent:
 
         agent = self.agents[agent_name]
         # Pass project_knowledge_base to agents that need it
-        if agent_name in ["concept_generator", "outliner", "character_generator", "worldbuilding", "chapter_writer", "editor", "style_editor"]: #MODIFIED
+        if agent_name in ["concept_generator", "outliner", "character_generator", "worldbuilding", "chapter_writer", "editor", "style_editor"]: 
             if self.project_knowledge_base:
                 try:
                     agent.execute(project_knowledge_base=self.project_knowledge_base, *args, **kwargs)  # Pass project_knowledge_base
@@ -413,10 +413,21 @@ class ProjectManagerAgent:
         title = project_knowledge_base.title
         author = project_knowledge_base.get('author', 'Unknown Author')  # Assuming you might add author later
         genre = project_knowledge_base.genre
-
+        language = project_knowledge_base.language
         title_page = f"# {title}\n\n"
-        title_page += f"## By {author}\n\n"
-        title_page += f"**Genre:** {genre}\n\n"
+        # Check language for different title page formats
+        if language == "English":
+            title_page += f"## By {author}\n\n"
+            title_page += f"**Genre:** {genre}\n\n"
+        elif language == "Brazilian Portuguese":
+            title_page += f"## Por {author}\n\n"
+            title_page += f"**Gênero:** {genre}\n\n"
+        # Add other language variations as needed
+        else:
+            # Default to English if language not specifically handled
+            title_page += f"## By {author}\n\n"
+            title_page += f"**Genre:** {genre}\n\n"
+            
         return title_page
 
     def markdown_to_pdf(self, markdown_text:str, output_path:str):

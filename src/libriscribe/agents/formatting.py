@@ -11,7 +11,7 @@ from libriscribe.agents.agent_base import Agent
 from libriscribe.utils.file_utils import get_chapter_files, read_markdown_file, read_json_file, write_markdown_file
 # For PDF creation
 from fpdf import FPDF
-#MODIFIED
+
 from libriscribe.knowledge_base import ProjectKnowledgeBase
 from rich.console import Console
 console = Console()
@@ -39,7 +39,7 @@ class FormattingAgent(Agent):
 
             # Get project data (for title page)
             project_data_path = Path(project_dir) / "project_data.json"
-            project_knowledge_base = ProjectKnowledgeBase.load_from_file(str(project_data_path)) #MODIFIED
+            project_knowledge_base = ProjectKnowledgeBase.load_from_file(str(project_data_path)) 
             if not project_knowledge_base:
               print(f"ERROR: Could not load project data from {project_data_path}")
               return
@@ -47,11 +47,11 @@ class FormattingAgent(Agent):
 
             # Format with LLM
             console.print(f"📚 [cyan]Assembling final manuscript...[/cyan]")
-            prompt = prompts.FORMATTING_PROMPT.format(chapters=all_chapters_content)
-            formatted_markdown = self.llm_client.generate_content(prompt, max_tokens=4000) # May need large token limit
+            prompt = prompts.FORMATTING_PROMPT.format(chapters=all_chapters_content,  language=project_knowledge_base.language)
+            formatted_markdown = self.llm_client.generate_content(prompt, max_tokens=120000) # May need large token limit
 
             # Add title page (before LLM formatting, for simplicity)
-            title_page = self.create_title_page(project_knowledge_base) #MODIFIED
+            title_page = self.create_title_page(project_knowledge_base) 
             formatted_markdown = title_page + formatted_markdown
 
 

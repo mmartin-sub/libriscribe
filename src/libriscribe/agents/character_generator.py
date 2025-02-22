@@ -29,6 +29,7 @@ class CharacterGeneratorAgent(Agent):
                 title=project_knowledge_base.title,
                 genre=project_knowledge_base.genre,
                 category=project_knowledge_base.category,
+                language=project_knowledge_base.language,
                 description=project_knowledge_base.description,
                 num_characters=project_knowledge_base.num_characters
                 # ... other relevant fields

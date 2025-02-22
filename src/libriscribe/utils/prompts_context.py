@@ -153,9 +153,9 @@ Appendices: (Supplementary materials, raw data, questionnaires)
 }
 
 # --- Prompts ---
-# Modified outline
 SCENE_OUTLINE_PROMPT = """
-Create a detailed outline for the scenes in a chapter of a {genre} book titled "{title}" which is categorized as {category}.
+Create a detailed outline for the scenes in a chapter of a {genre} book titled "{title}" which is categorized as {category}. 
+The book is written in {language}.
 
 Description: {description}
 
@@ -167,7 +167,7 @@ The outline should include a breakdown of scenes for the chapter, with EACH scen
     * Goal: (The purpose of the scene)
     * Emotional Beat: (The primary emotion conveyed in the scene)
 
-IMPORTANT:  Format the scene outline using Markdown bullet points, as shown below:
+IMPORTANT: Format the scene outline using Markdown bullet points, as shown below:
 
 Scene 1:
     * Summary: [Scene summary here]
@@ -186,10 +186,13 @@ Scene 2:
 [Repeat for each scene, maintaining the exact same bullet point format]
 
 Ensure there are approximately 3-6 scenes, adjusting for the chapter's complexity. Do not create excessively long or short chapters.
+
+IMPORTANT: The content should be written entirely in {language}.
 """
 
 OUTLINE_PROMPT = """
 Create a structured outline for a {genre} book titled "{title}" which is categorized as {category}.
+The book is written in {language}.
 
 Description: {description}
 
@@ -227,10 +230,13 @@ If there's a book length: ({book_length}), adjust the number of chapters accordi
 Note: For short stories, use 1-2 chapters. For novellas, use 5-10 chapters. For novels, use 10+ chapters.
 Return the outline using this EXACT Markdown structure. Do not include any optional or conditional chapters.
 CRITICALLY IMPORTANT: Add specific chapter numbers to each chapter (Chapter 1, Chapter 2, etc.)
+
+IMPORTANT: The content should be written entirely in {language}.
 """
 
 CHARACTER_PROMPT = """
 Create detailed character profiles for a {genre} book titled "{title}" which is categorized as {category}.
+The book is written in {language}.
 
 Book Description: {description}
 
@@ -238,7 +244,7 @@ The book requires the following number of main characters: {num_characters}
 
 For EACH character, include the following in the profile (return as a JSON array of character objects):
 
-Name: (Suggest a suitable name)
+Name: (Suggest a suitable name appropriate for the language and cultural context of the book)
 
 Age:
 
@@ -261,10 +267,14 @@ External Conflicts: (What external challenges do they face?)
 Character Arc: (How do they change throughout the story? Provide a brief description)
 
 Return the character profiles in JSON format. IMPORTANT: Ensure personality_traits is a simple comma-separated string, not an array or list.
+
+IMPORTANT: The content should be written entirely in {language}.
 """
+
 
 WORLDBUILDING_PROMPT = """
 Create detailed worldbuilding information for a {genre} book titled "{title}" which is categorized as {category}.
+The book is written in {language}.
 
 Book Description: {description}
 
@@ -275,10 +285,14 @@ Each field should have at least 1-2 paragraphs of detailed content relevant to t
 
 ENSURE that every field has substantial content. Do not leave any field empty or with placeholder text.
 Return the worldbuilding details in valid JSON format ONLY, no markdown wrapper.
+
+IMPORTANT: The content should be written entirely in {language}.
 """
+
 
 EDITOR_PROMPT = """
 You are an expert editor tasked with refining and improving a chapter of a {genre} book titled "{book_title}".
+The book is written in {language}.
 
 Chapter {chapter_number}: {chapter_title}
 
@@ -324,10 +338,13 @@ Provide the complete, revised chapter with all improvements incorporated. Use Ma
 Wrap the ENTIRE revised chapter in a Markdown code block, like this:
 
 [The full revised chapter content]
+
+IMPORTANT: The content should be written entirely in {language}.
 """
 
+
 RESEARCH_PROMPT = """
-Research the following topic and provide a comprehensive summary of your findings:
+Research the following topic and provide a comprehensive summary of your findings in {language}:
 
 Topic: {query}
 
@@ -362,11 +379,14 @@ Key Findings: A detailed summary of your research, organized into logical sectio
 Conclusion: A concise summary of the main points and their implications.
 
 References: A list of sources used, formatted according to the chosen citation style.
+
+IMPORTANT: The content should be written entirely in {language}.
+
 """
 
 FORMATTING_PROMPT = """
 Combine the provided chapters into a single, well-formatted Markdown document representing the complete book manuscript.
-
+The book is written in {language}.
 Chapters:
 {chapters}
 
@@ -387,10 +407,13 @@ Consistent Formatting: Maintain consistent formatting throughout the document (e
 Table of Contents (Optional): If requested, generate a table of contents with links to each chapter. (Note: This requires a Markdown processor that supports ToC generation). For this basic version, just list the chapter titles.
 
 Output: Return the complete book manuscript in Markdown format.
+
+
 """
 
 SCENE_PROMPT = """
 Write Scene {scene_number} of {total_scenes} for Chapter {chapter_number}: {chapter_title} of the {genre} {category} book "{book_title}".
+The book is written in {language}.
 
 Chapter Summary:
 {chapter_summary}
@@ -412,8 +435,9 @@ Instructions:
 - Use language and style appropriate for the genre.
 
 Important: Focus on showing rather than telling. Create an immersive experience that brings the scene to life.
-"""
 
+IMPORTANT: The content should be written entirely in {language}.
+"""
 
 def clean_worldbuilding_for_category(project_knowledge_base: ProjectKnowledgeBase):
     """

@@ -72,9 +72,16 @@ class LLMClient:
       self.model = model_name
 
     @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
-    def generate_content(self, prompt: str, max_tokens: int = 2000, temperature: float = 0.7) -> str:
-        """Generates text using the selected LLM provider."""
+    def generate_content(self, prompt: str, max_tokens: int = 2000, temperature: float = 0.7, language: str = "English") -> str:
+        """
+        Generates text using the selected LLM provider.
+        Now supports specifying the output language explicitly.
+        """
         try:
+            # Append language instruction to prompt if not already included
+            if "IMPORTANT: The content should be written entirely in" not in prompt and language != "English":
+                prompt += f"\n\nIMPORTANT: Generate the response in {language}."
+                
             if self.llm_provider == "openai":
                 response = self.client.chat.completions.create(
                     model=self.model,
@@ -135,7 +142,6 @@ class LLMClient:
             logger.exception(f"Error during {self.llm_provider} API call: {e}")
             print(f"ERROR: {self.llm_provider} API error: {e}")
             return ""
-
     @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(3))
     def generate_content_with_json_repair(self, original_prompt: str, max_tokens:int = 2000, temperature:float=0.7) -> str:
         """Generates content and attempts to repair JSON errors."""

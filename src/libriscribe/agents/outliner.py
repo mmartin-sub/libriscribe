@@ -150,6 +150,7 @@ class OutlinerAgent(Agent):
             Create a detailed outline for the scenes in Chapter {chapter.chapter_number}: {chapter.title} 
             of a {project_knowledge_base.genre} book titled "{project_knowledge_base.title}" 
             which is categorized as {project_knowledge_base.category}.
+            The book should be written in {project_knowledge_base.language}.
 
             Book Description: {project_knowledge_base.description}
 
