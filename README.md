@@ -11,6 +11,7 @@ Your AI-Powered Book Writing Assistant
 [![Documentation](https://img.shields.io/badge/docs-visit%20now-green.svg)](https://guerra2fernando.github.io/libriscribe/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-yellow.svg?style=flat&logo=buy-me-a-coffee)](https://buymeacoffee.com/guerra2fernando)
 
 </div>
 
@@ -189,5 +190,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 Made with ❤️ by Fernando Guerra and Lenxys
 
 [⭐ Star us on GitHub](https://github.com/guerra2fernando/libriscribe)
+
+If LibriScribe has been helpful for your projects, consider buying me a coffee:
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-yellow.svg?style=flat&logo=buy-me-a-coffee)](https://buymeacoffee.com/guerra2fernando)
 
 </div>

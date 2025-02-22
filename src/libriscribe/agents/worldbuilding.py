@@ -35,7 +35,7 @@ class WorldbuildingAgent(Agent):
                 project_knowledge_base.worldbuilding = Worldbuilding()
             
             aspects = get_worldbuilding_aspects(project_knowledge_base.category) #Get worldbuilding dynamically
-            console.print(f"🏔️ [bold cyan]Creating world details...[/bold cyan]")
+            console.print(f"🏔️ [cyan]Creating world details...[/cyan]")
             prompt = prompts.WORLDBUILDING_PROMPT.format(
                 worldbuilding_aspects=aspects,
                 title=project_knowledge_base.title,
@@ -124,7 +124,7 @@ class WorldbuildingAgent(Agent):
                 project_knowledge_base.worldbuilding = clean_worldbuilding
                 
                 # Log all fields
-                console.print(f"[bold green]🌍 World elements created:[/bold green]")
+                console.print(f"[green]🌍 World elements created:[/green]")
                 for key, value in project_knowledge_base.worldbuilding.model_dump().items():
                     # Only print fields that have content
                     if value and isinstance(value, str) and value.strip():
@@ -137,7 +137,7 @@ class WorldbuildingAgent(Agent):
                 cleaned_data = {k: v for k, v in project_knowledge_base.worldbuilding.model_dump().items() 
                             if k in expected_fields and v}
                 write_json_file(output_path, cleaned_data)
-                console.print(f"\n[bold green]✅ Worldbuilding details generated![/bold green]")
+                console.print(f"\n[green]✅ Worldbuilding details generated![/green]")
 
             except json.JSONDecodeError:
                 print("ERROR: Invalid JSON data received from LLM after repair attempts.")

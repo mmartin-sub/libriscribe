@@ -25,7 +25,8 @@ from libriscribe.utils.llm_client import LLMClient
 # For PDF generation
 from fpdf import FPDF
 import typer  # Import typer
-
+from rich.console import Console
+console = Console()
 
 logger = logging.getLogger(__name__)
 
@@ -71,8 +72,7 @@ class ProjectManagerAgent:
             
         self.save_project_data()
         self.logger.info(f"🚀 Initialized project: {project_data.project_name}")
-        console.print(f"✨ Project [bold green]'{project_name}'[/bold green] initialized successfully!")
-    
+        console.print(f"✨ Project [green]'{project_data.project_name}'[/green] initialized successfully!")    
     def save_project_data(self):
         """Saves project data using the ProjectKnowledgeBase object."""
         if self.project_knowledge_base and self.project_dir:
@@ -304,10 +304,10 @@ class ProjectManagerAgent:
             # Save as Markdown or PDF (original version)
             if original_output_path.endswith(".md"):
                 write_markdown_file(original_output_path, formatted_original)
-                console.print(f"[bold green]📚 Original version formatted and saved![/bold green]")
+                console.print(f"[green]📚 Original version formatted and saved![/green]")
             elif original_output_path.endswith(".pdf"):
                 self.markdown_to_pdf(formatted_original, original_output_path)
-                console.print(f"[bold green]📚 Original version formatted and saved![/bold green]")
+                console.print(f"[green]📚 Original version formatted and saved![/green]")
             else:
                 console.print(f"[red]ERROR: Unsupported output format: {original_output_path}. Must be .md or .pdf[/red]")
                 return
@@ -402,9 +402,12 @@ class ProjectManagerAgent:
         return chapter_path.exists()
 
     def checkpoint(self):
-        """Saves the current project state (project_knowledge_base) to a checkpoint file."""
-        self.save_project_data() # Now it's the same as save
-
+        """Saves the current project state silently."""
+        try:
+            self.save_project_data()  # This should not output anything to console
+        except Exception as e:
+            logger.error(f"Checkpoint failed: {e}")
+            
     def create_title_page(self, project_knowledge_base:ProjectKnowledgeBase) -> str: # now accepts ProjectKnowledgeBase
         """Creates a Markdown title page."""
         title = project_knowledge_base.title

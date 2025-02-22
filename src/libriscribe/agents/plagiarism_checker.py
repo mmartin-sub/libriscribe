@@ -39,7 +39,7 @@ class PlagiarismCheckerAgent(Agent):
 
     def check_plagiarism(self, text_chunk: str) -> List[Dict[str, Any]]:
         """Checks a text chunk, using extract_json_from_markdown."""
-        console.print(f"🔎 [bold cyan]Checking originality of Chapter {chapter_path.split('_')[-1].split('.')[0]}...[/bold cyan]")
+        console.print(f"🔎 [cyan]Checking originality of Chapter {chapter_path.split('_')[-1].split('.')[0]}...[/cyan]")
 
         prompt = f"""
        You are a plagiarism detection expert. Analyze the following text for potential plagiarism.

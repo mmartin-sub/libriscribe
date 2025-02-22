@@ -30,7 +30,7 @@ class FactCheckerAgent(Agent):
             return []
 
         # 1. Identify Claims
-        console.print(f"🔍 [bold cyan]Verifying facts in Chapter {chapter_path.split('_')[-1].split('.')[0]}...[/bold cyan]")
+        console.print(f"🔍 [cyan]Verifying facts in Chapter {chapter_path.split('_')[-1].split('.')[0]}...[/cyan]")
 
         identify_claims_prompt = f"""
         You are an expert fact-checker.  Identify all statements in the following text that make factual claims

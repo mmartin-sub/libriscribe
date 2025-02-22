@@ -61,7 +61,7 @@ class ConceptGeneratorAgent(Agent):
                 }}
                 ```"""
 
-            console.print(f"🧠 [bold cyan]Generating initial concept...[/bold cyan]")
+            console.print(f"🧠 [cyan]Generating initial concept...[/cyan]")
             initial_concept_md = self.llm_client.generate_content_with_json_repair(initial_prompt)
 
             if not initial_concept_md:
@@ -85,7 +85,7 @@ class ConceptGeneratorAgent(Agent):
             - **Logline:** Is it concise and does it capture the core conflict?
             - **Description:** Is it well-written, engaging, and does it provide a clear sense of the story?  Are there any obvious weaknesses or areas for improvement? Be specific and constructive.
             """
-            console.print(f"🔍 [bold cyan]Evaluating concept quality...[/bold cyan]")
+            console.print(f"🔍 [cyan]Evaluating concept quality...[/cyan]")
             critique = self.llm_client.generate_content(critique_prompt)
             if not critique:
                 logger.error("Critique generation failed.")
@@ -112,7 +112,7 @@ class ConceptGeneratorAgent(Agent):
             }}
             ```
             """
-            console.print(f"✨ [bold cyan]Refining concept...[/bold cyan]")
+            console.print(f"✨ [cyan]Refining concept...[/cyan]")
             refined_concept_md = self.llm_client.generate_content_with_json_repair(refine_prompt)
             if not refined_concept_md:
                 logger.error("Refined concept generation failed.")

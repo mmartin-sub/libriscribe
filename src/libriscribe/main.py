@@ -8,26 +8,27 @@ from rich.console import Console
 from rich.prompt import Prompt
 from rich.panel import Panel
 import logging
+import warnings
+from pydantic import PydanticSerializationWarning
 #MODIFIED
 from libriscribe.knowledge_base import ProjectKnowledgeBase, Chapter  # Import the new class
 from libriscribe.settings import Settings
 from rich.progress import track  # Import track
-try:
-    from pick import pick
-except ImportError:
-    console.print("[red]The 'pick' package is required for this application.[/red]")
-    console.print("[yellow]Please install it with: pip install pick[/yellow]")
-    import sys
-    sys.exit(1)
+warnings.filterwarnings("ignore", category=PydanticSerializationWarning)
+
 # Configure logging (same as before)
 logging.basicConfig(
     level=logging.INFO,
-    format="%(message)s",  # Remove timestamp and level info from user-visible logs
+    format="%(message)s",
     handlers=[
-        logging.FileHandler("libriscribe.log"),  # Send detailed logs to file instead
+        logging.FileHandler("libriscribe.log", encoding="utf-8"),  # Add encoding
         logging.StreamHandler()  # Simplified logs to console
     ]
 )
+for handler in logging.root.handlers:
+    if isinstance(handler, logging.StreamHandler):
+        handler.setFormatter(logging.Formatter("%(message)s"))
+        handler.stream.reconfigure(errors='replace')
 
 console = Console()
 app = typer.Typer()
@@ -55,6 +56,7 @@ def select_llm(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
         console.print("[red]❌ No LLM API keys found in .env file. Please add at least one.[/red]")
         raise typer.Exit(code=1)
 
+    console.print("")
     llm_choice = select_from_list("🤖 Select your preferred AI model:", available_llms)
     
     # Convert display name back to API identifier
@@ -73,67 +75,55 @@ def select_llm(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
     return llm_choice
 
 def introduction():
-    """Prints a welcome message (same as before)."""
+    """Prints a welcome message."""
+    
+    console.print("")
+    console.print("")
+    console.print("")   
     console.print(
         Panel(
-            "[bold blue]📚✨ Welcome to Libriscribe! ✨📚[/bold blue]\n\n"
-            "Libriscribe is an AI-powered open-source book creation system made by Fernando Guerra",
+            "Welcome to [bold]Libriscribe[/bold]! ✨\n\n"
+            "An AI-powered, open-source book creation system crafted by Fernando Guerra.\n\n"
+            "🚀  Ready to write your next masterpiece?\n\n"
+            "⭐ If you find Libriscribe helpful, please consider supporting the project by giving it a star on GitHub:\n[link]https://github.com/guerra2fernando/libriscribe[/link]\n"
+            "Your support helps keep this project going!",
             title="[bold blue]Libriscribe[/bold blue]",
             border_style="blue",
+            padding=(1, 2),  # Add some padding for better visual appearance
         )
     )
+    # Print emojis separately to avoid formatting issues (Optional in this case)
+    console.print("")
+    console.print("")
+    # Print emojis separately to avoid formatting issues
+    console.print("Let's create something amazing! \n")
 
 def select_from_list(prompt: str, options: List[str], allow_custom: bool = False) -> str:
-    """Presents options with arrow key navigation and returns selection."""
-    from rich.console import Console
-    from rich.prompt import Prompt
-    from rich.style import Style
-    from rich.text import Text
-    from pick import pick  # Make sure to install this: pip install pick
-    
-    console = Console()
+    """Presents options and returns selection with improved formatting."""
     console.print(f"[bold]{prompt}[/bold]")
     
-    # Add emojis to common option types if they don't already have them
-    option_with_emojis = []
-    for option in options:
-        if "Fiction" in option and "📖" not in option:
-            option = f"📖 {option}"
-        elif "Non-Fiction" in option and "📚" not in option:
-            option = f"📚 {option}"
-        elif "Business" in option and "💼" not in option:
-            option = f"💼 {option}"
-        elif "Research" in option and "🔬" not in option:
-            option = f"🔬 {option}"
-        elif "Fantasy" in option and "🧙" not in option:
-            option = f"🧙 {option}"
-        elif "Science Fiction" in option and "🚀" not in option:
-            option = f"🚀 {option}"
-        elif "Romance" in option and "❤️" not in option:
-            option = f"❤️ {option}"
-        elif "Thriller" in option and "🔪" not in option:
-            option = f"🔪 {option}"
-        elif "Mystery" in option and "🔍" not in option:
-            option = f"🔍 {option}"
-        elif "Horror" in option and "👻" not in option:
-            option = f"👻 {option}"
-        option_with_emojis.append(option)
+    # Display options with numbers
+    for i, option in enumerate(options):
+        console.print(f"[cyan]{i + 1}.[/cyan] {option}")
     
     if allow_custom:
-        option_with_emojis.append("✏️ Custom (enter your own)")
+        console.print(f"[cyan]{len(options) + 1}.[/cyan]Custom (enter your own)")
     
-    # Use pick to create arrow navigation
-    selected_option, index = pick(option_with_emojis, prompt, indicator="→")
-    
-    # Handle custom option
-    if allow_custom and index == len(options):
-        console.print("Enter your custom value:")
-        custom_value = input("> ")
-        return custom_value
-    
-    # Return the original option without emoji if needed
-    original_option = options[index]
-    return original_option
+    # Get user selection with error handling
+    while True:
+        try:
+            choice = typer.prompt("Enter your choice", show_choices=False)
+            choice_idx = int(choice) - 1
+            
+            if 0 <= choice_idx < len(options):
+                return options[choice_idx]  # Return original option without emoji
+            elif allow_custom and choice_idx == len(options):
+                custom_value = typer.prompt("Enter your custom value")
+                return custom_value
+            else:
+                console.print("[red]Invalid choice. Please try again.[/red]")
+        except ValueError:
+            console.print("[red]Please enter a number.[/red]")
 
 
 def save_project_data():
@@ -142,33 +132,71 @@ def save_project_data():
 
 
 def generate_questions_with_llm(category: str, genre: str) -> Dict[str, Any]:
-    """Generates genre-specific questions (same as before, but using LLMClient)."""
+    """Generates genre-specific questions with improved error handling."""
     prompt = f"""
-    Generate a list of 5-7 KEY questions ... (rest of the prompt)
+    Generate a list of 5-7 KEY questions that would help develop a {category} {genre} book.
+    Format your response as a JSON object where keys are question IDs and values are the questions.
+    
+    For example:
+    {{
+        "q1": "What is the central conflict of your story?",
+        "q2": "Who is the main antagonist?",
+        "q3": "What is the world's primary magic system?"
+    }}
+    
+    Return ONLY valid JSON, nothing else.
     """
+    
     llm_client = project_manager.llm_client
     if llm_client is None:
-        console.print("[red] LLM is not selected[/red]")
+        console.print("[red]LLM is not selected[/red]")
         return {}
 
     try:
         response = llm_client.generate_content(prompt, max_tokens=500)
-        questions = json.loads(response)
-        return questions
-    except (Exception, json.JSONDecodeError) as e:
+        
+        # Clean the response - find JSON content
+        response = response.strip()
+        # Look for JSON between curly braces if there's other text
+        if '{' in response and '}' in response:
+            start = response.find('{')
+            end = response.rfind('}') + 1
+            json_str = response[start:end]
+        else:
+            json_str = response
+            
+        try:
+            questions = json.loads(json_str)
+            return questions
+        except json.JSONDecodeError:
+            # If it fails, create a minimal set of questions as fallback
+            console.print("[yellow]Could not parse LLM response. Using default questions.[/yellow]")
+            return {
+                "q1": f"What key themes do you want to explore in your {genre} story?",
+                "q2": "Who is your favorite character and why?",
+                "q3": "What makes your story unique compared to similar works?"
+            }
+    except Exception as e:
         logger.error(f"Error generating questions: {e}")
-        print(f"Error generating questions: {e}")
-        return {}
+        console.print(f"[yellow]Error generating custom questions. Using defaults.[/yellow]")
+        return {
+            "q1": f"What key themes do you want to explore in your {genre} story?",
+            "q2": "Who is your favorite character and why?",
+            "q3": "What makes your story unique compared to similar works?"
+        }
 
 
 # --- Helper functions for Simple Mode ---
 
 def get_project_name_and_title():
+    console.print("")
     project_name = typer.prompt("📁 Enter a project name (this will be the directory name)")
+    console.print("")
     title = typer.prompt("📕 What is the title of your book?")
     return project_name, title
 
 def get_category_and_genre(project_knowledge_base: ProjectKnowledgeBase):
+    console.print("")
     category = select_from_list(
         "📚 What category best describes your book?",
         ["Fiction", "Non-Fiction", "Business", "Research Paper"],
@@ -190,12 +218,14 @@ def get_category_and_genre(project_knowledge_base: ProjectKnowledgeBase):
         genre_options = []  # Should not happen, but for safety
 
     if genre_options:
+        console.print("")
         genre = select_from_list(f"🏷️ What genre/subject best fits your {category} book?", genre_options, allow_custom=True)
         project_knowledge_base.set("genre", genre)
 
 
 
 def get_book_length(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
+    console.print("")
     book_length = select_from_list(
         "📏 How long would you like your book to be?",
         ["Short Story (1-3 chapters)", "Novella (5-8 chapters)", "Novel (15+ chapters)", "Full Book (Non-Fiction)"],
@@ -205,23 +235,28 @@ def get_book_length(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
 
 def get_fiction_details(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
     if project_knowledge_base.category == "Fiction":
+        console.print("")
         num_characters = typer.prompt("👥 How many main characters will your story have?", type=int)
         project_knowledge_base.set("num_characters", num_characters)
+        console.print("")
         worldbuilding_needed = typer.confirm("🌍 Does your story require extensive worldbuilding?")
         project_knowledge_base.set("worldbuilding_needed", worldbuilding_needed)
 
 def get_review_preference(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
+    console.print("")
     review_preference = select_from_list("🔍 How would you like your chapters to be reviewed?", ["Human (you'll review it)", "AI (automatic review)"])
     project_knowledge_base.set("review_preference", review_preference)
 
 def get_description(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
+    console.print("")
     description = typer.prompt("📝 Provide a brief description of your book's concept or plot")
     project_knowledge_base.set("description", description)
 
 def generate_and_review_concept(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
     project_manager.generate_concept()
     project_manager.checkpoint() # Checkpoint
-    console.print(f"\n[bold cyan]✨ Refined Concept:[/bold cyan]")
+    console.print("")
+    console.print(f"\n[cyan]✨ Refined Concept:[/cyan]")
     console.print(f"  [bold]Title:[/bold] {project_knowledge_base.title}")
     console.print(f"  [bold]Logline:[/bold] {project_knowledge_base.logline}")
     console.print(f"  [bold]Description:[/bold]\n{project_knowledge_base.description}")
@@ -230,7 +265,8 @@ def generate_and_review_concept(project_knowledge_base: ProjectKnowledgeBase): #
 def generate_and_edit_outline(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
     project_manager.generate_outline()
     project_manager.checkpoint()  # Checkpoint after outline
-    console.print(f"\n[bold green]📝 Outline generated![/bold green]")
+    console.print("")
+    console.print(f"\n[green]📝 Outline generated![/green]")
 
     if typer.confirm("Do you want to review and edit the outline now?"):
         typer.edit(filename=str(project_manager.project_dir / "outline.md"))
@@ -239,19 +275,23 @@ def generate_and_edit_outline(project_knowledge_base: ProjectKnowledgeBase): #MO
 
 def generate_characters_if_needed(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
      if project_knowledge_base.get("num_characters", 0) > 0:  # Use get with default
+        console.print("")
         if typer.confirm("Do you want to generate character profiles?"):
-            console.print("\n[bold cyan]👥 Generating character profiles...[/bold cyan]")
+            console.print("\n[cyan]👥 Generating character profiles...[/cyan]")
             project_manager.generate_characters()
             project_manager.checkpoint() # Checkpoint
-            console.print(f"\n[bold green]✅ Character profiles generated![/bold green]")
+            console.print("")
+            console.print(f"\n[green]✅ Character profiles generated![/green]")
 
 def generate_worldbuilding_if_needed(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
     if project_knowledge_base.get("worldbuilding_needed", False):  # Use get with default
+        console.print("")
         if typer.confirm("Do you want to generate worldbuilding details?"):
-            console.print("\n[bold cyan]🏔️ Creating worldbuilding details...[/bold cyan]")
+            console.print("\n[cyan]🏔️ Creating worldbuilding details...[/cyan]")
             project_manager.generate_worldbuilding()
             project_manager.checkpoint() # Checkpoint
-            console.print(f"\n[bold green]✅ Worldbuilding details generated![/bold green]")
+            console.print("")
+            console.print(f"\n[green]✅ Worldbuilding details generated![/green]")
 
 def write_and_review_chapters(project_knowledge_base: ProjectKnowledgeBase):
     """Write and review chapters with better progress tracking and error handling."""
@@ -272,7 +312,7 @@ def write_and_review_chapters(project_knowledge_base: ProjectKnowledgeBase):
             )
             project_knowledge_base.add_chapter(chapter)  # Add to knowledge base!
 
-        console.print(f"\n[bold cyan]Writing Chapter {i}: {chapter.title}[/bold cyan]")
+        console.print(f"\n[cyan]Writing Chapter {i}: {chapter.title}[/cyan]")
 
         if project_manager.does_chapter_exist(i):
             if not typer.confirm(f"Chapter {i} already exists. Overwrite?"):
@@ -282,7 +322,8 @@ def write_and_review_chapters(project_knowledge_base: ProjectKnowledgeBase):
         try:
             project_manager.write_and_review_chapter(i)
             project_manager.checkpoint()
-            console.print(f"[bold green]✅ Chapter {i} completed successfully[/bold green]")
+            console.print("")
+            console.print(f"[green]✅ Chapter {i} completed successfully[/green]")
         except Exception as e:
             console.print(f"[red]ERROR writing chapter {i}: {str(e)}[/red]")
             logger.exception(f"Error writing chapter {i}")
@@ -293,12 +334,13 @@ def write_and_review_chapters(project_knowledge_base: ProjectKnowledgeBase):
             if not typer.confirm("\nContinue to next chapter?"):
                 break
 
-    console.print("\n[bold green]Chapter writing process completed![/bold green]")
+    console.print("\n[green]Chapter writing process completed![/green]")
 
 
 
 
 def format_book(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
+    console.print("")
     if typer.confirm("Do you want to format the book now?"):
         output_format = select_from_list("Choose output format:", ["Markdown (.md)", "PDF (.pdf)"])
         if output_format == "Markdown (.md)":
@@ -306,12 +348,13 @@ def format_book(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
         else:
             output_path = str(project_manager.project_dir / "manuscript.pdf")
         project_manager.format_book(output_path)
-        console.print(f"\n[bold green]📘 Book formatted and saved![/bold green]")
+        console.print("")
+        console.print(f"\n[green]📘 Book formatted and saved![/green]")
 
 
 # --- Simple Mode (Refactored) ---
 def simple_mode():
-    print("\n[bold cyan]✨ Starting Simple Mode...[/bold cyan]\n")
+    console.print("\n[cyan]✨ Starting Simple Mode...[/cyan]\n")
 
     project_name, title = get_project_name_and_title()
     project_knowledge_base = ProjectKnowledgeBase(project_name=project_name, title=title)
@@ -352,58 +395,111 @@ def simple_mode():
         print("Exiting.")
         return
 
-    console.print("\n[bold green]🎉 Book creation process complete![/bold green]")
+    console.print("\n[green]🎉 Book creation process complete![/green]")
 
 # --- Helper Functions for Advanced Mode ---
 
-def get_advanced_fiction_details(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
-     num_characters_str = typer.prompt(
-            "👥 How many main characters do you envision? (e.g., 3, 2-4, 5+)", default="2-3"
-        )
-     project_knowledge_base.set("num_characters_str",num_characters_str)
-     project_knowledge_base.set("num_characters", num_characters_str)
+def get_advanced_fiction_details(project_knowledge_base: ProjectKnowledgeBase):
+    """Gets detailed information for fiction projects with proper type conversion."""
+    console.print("")
+    num_characters_str = typer.prompt(
+        "👥 How many main characters do you envision? (e.g., 3, 2-4, 5+)", default="2-3"
+    )
+    project_knowledge_base.set("num_characters_str", num_characters_str)
+    
+    # Convert to appropriate type
+    if "-" in num_characters_str:
+        try:
+            min_val, max_val = map(int, num_characters_str.split("-"))
+            project_knowledge_base.set("num_characters", (min_val, max_val))
+        except ValueError:
+            # Fallback if conversion fails
+            project_knowledge_base.set("num_characters", (2, 3))
+    elif "+" in num_characters_str:
+        try:
+            base_val = int(num_characters_str.replace("+", ""))
+            project_knowledge_base.set("num_characters", base_val)
+        except ValueError:
+            project_knowledge_base.set("num_characters", 3)
+    else:
+        try:
+            project_knowledge_base.set("num_characters", int(num_characters_str))
+        except ValueError:
+            # Fallback if conversion fails
+            project_knowledge_base.set("num_characters", 3)
 
-     worldbuilding_needed = typer.confirm("🌍 Does your story need extensive worldbuilding?")
-     project_knowledge_base.set("worldbuilding_needed", worldbuilding_needed)
+    console.print("")
+    worldbuilding_needed = typer.confirm("🌍 Does your story need extensive worldbuilding?")
+    project_knowledge_base.set("worldbuilding_needed", worldbuilding_needed)
 
-     tone = select_from_list("🎭 What overall tone would you like for your book?", 
-                      ["Serious", "Funny", "Romantic", "Informative", "Persuasive"])
-     project_knowledge_base.set("tone", tone)
+    console.print("")
+    tone = select_from_list("🎭 What overall tone would you like for your book?", 
+                     ["Serious", "Funny", "Romantic", "Informative", "Persuasive"])
+    
+    project_knowledge_base.set("tone", tone)
 
-     target_audience = select_from_list("👥 Who is your target audience?", 
-                              ["Children", "Teens", "Young Adult", "Adults"])
-     project_knowledge_base.set("target_audience", target_audience)
+    console.print("")
+    target_audience = select_from_list("👥 Who is your target audience?", 
+                             ["Children", "Teens", "Young Adult", "Adults"])
+    project_knowledge_base.set("target_audience", target_audience)
 
-     book_length = select_from_list(
-         "📏 How long will your book be?",
-         ["Short Story ", "Novella", "Novel ", "Full Book"],
-         allow_custom=False,
-     )
-     project_knowledge_base.set("book_length",book_length)
+    console.print("")
+    book_length = select_from_list(
+        "📏 How long will your book be?",
+        ["Short Story", "Novella", "Novel", "Full Book"],
+        allow_custom=False,
+    )
+    project_knowledge_base.set("book_length", book_length)
 
-     num_chapters_str = typer.prompt(
+    console.print("")
+    num_chapters_str = typer.prompt(
         "📑 Approximately how many chapters do you want? (e.g., 10, 8-12, 20+)",
-        default="8-12",)
-     project_knowledge_base.set("num_chapters_str", num_chapters_str)
-     project_knowledge_base.set("num_chapters", num_chapters_str)
-     inspired_by = typer.prompt("✨ Are there any authors, books, or series that inspire you? (Optional)")
-     project_knowledge_base.set("inspired_by",inspired_by)
+        default="8-12"
+    )
+    project_knowledge_base.set("num_chapters_str", num_chapters_str)
+    
+    # Convert to appropriate type
+    if "-" in num_chapters_str:
+        try:
+            min_val, max_val = map(int, num_chapters_str.split("-"))
+            project_knowledge_base.set("num_chapters", (min_val, max_val))
+        except ValueError:
+            # Fallback if conversion fails
+            project_knowledge_base.set("num_chapters", (8, 12))
+    elif "+" in num_chapters_str:
+        try:
+            base_val = int(num_chapters_str.replace("+", ""))
+            project_knowledge_base.set("num_chapters", base_val)
+        except ValueError:
+            project_knowledge_base.set("num_chapters", 12)
+    else:
+        try:
+            project_knowledge_base.set("num_chapters", int(num_chapters_str))
+        except ValueError:
+            # Fallback if conversion fails
+            project_knowledge_base.set("num_chapters", 10)
+            
+    inspired_by = typer.prompt("✨ Are there any authors, books, or series that inspire you? (Optional)")
+    project_knowledge_base.set("inspired_by", inspired_by)
 
 def get_advanced_nonfiction_details(project_knowledge_base: ProjectKnowledgeBase): #MODIFIED
     project_knowledge_base.set("num_characters", 0)
     project_knowledge_base.set("num_chapters",0)
     project_knowledge_base.set("worldbuilding_needed",False)
 
+    console.print("")
     tone = select_from_list("🎭 What tone would you like for your non-fiction book?", 
                     ["Serious", "Funny", "Romantic", "Informative", "Persuasive"])
     project_knowledge_base.set("tone", tone)
 
+    console.print("")
     target_audience = select_from_list(
         "👥 Who is your target audience?",
         ["Children", "Teens", "Young Adult", "Adults", "Professional/Expert"],
     )
     project_knowledge_base.set("target_audience", target_audience)
 
+    console.print("")
     book_length = select_from_list(
         "Select the desired book length:",
         ["Article", "Essay", "Full Book"],
@@ -411,6 +507,7 @@ def get_advanced_nonfiction_details(project_knowledge_base: ProjectKnowledgeBase
     )
     project_knowledge_base.set("book_length", book_length)
 
+    console.print("")
     author_experience = typer.prompt("🧠 What is your experience or expertise in this subject?")
     project_knowledge_base.set("author_experience",author_experience)
 
@@ -419,9 +516,11 @@ def get_advanced_business_details(project_knowledge_base: ProjectKnowledgeBase):
     project_knowledge_base.set("num_chapters",0)
     project_knowledge_base.set("worldbuilding_needed",False)
 
+    console.print("")
     tone = select_from_list("Select Tone", ["Informative", "Motivational", "Instructive"])
     project_knowledge_base.set("tone", tone)
 
+    console.print("")
     target_audience = select_from_list(
         "👥 Select Target Audience",
         [
@@ -434,6 +533,7 @@ def get_advanced_business_details(project_knowledge_base: ProjectKnowledgeBase):
     )
     project_knowledge_base.set("target_audience", target_audience)
 
+    console.print("")
     book_length = select_from_list(
         "📏 Select the desired book length:",
         ["Pamphlet", "Guidebook", "Full Book"],
@@ -441,16 +541,21 @@ def get_advanced_business_details(project_knowledge_base: ProjectKnowledgeBase):
     )
     project_knowledge_base.set("book_length", book_length)
 
+    console.print("")
     key_takeaways = typer.prompt("What are the key takeaways you want readers to gain?")
     project_knowledge_base.set("key_takeaways",key_takeaways)
 
+    console.print("")
     case_studies = typer.confirm("Will you include case studies?")
     project_knowledge_base.set("case_studies", case_studies)
 
+    console.print("")
     actionable_advice = typer.confirm("Will you provide actionable advice/exercises?")
     project_knowledge_base.set("actionable_advice",actionable_advice)
 
     if project_knowledge_base.get("genre") == "Marketing":
+        
+        console.print("")
         marketing_focus = select_from_list(
             "✨ What is the primary focus of your marketing book?",
             [
@@ -467,6 +572,7 @@ def get_advanced_business_details(project_knowledge_base: ProjectKnowledgeBase):
         project_knowledge_base.set("marketing_focus",marketing_focus)
 
     elif project_knowledge_base.get("genre") == "Sales":
+        console.print("")
         sales_focus = select_from_list(
             "✨  What is the primary focus of your sales book?",
             [
@@ -486,20 +592,26 @@ def get_advanced_research_details(project_knowledge_base: ProjectKnowledgeBase):
     project_knowledge_base.set("worldbuilding_needed",False)
     project_knowledge_base.set("tone","Formal and Objective")
 
+    console.print("")
     target_audience = select_from_list(
         "👥 Select Target Audience",
         ["Academic Community", "Researchers", "Students", "General Public (if applicable)"],
     )
+    console.print("")
     project_knowledge_base.set("target_audience", target_audience)
 
+    console.print("")
     project_knowledge_base.set("book_length","Academic Article")
 
+    console.print("")
     research_question = typer.prompt("What is your primary research question?")
     project_knowledge_base.set("research_question",research_question)
 
+    console.print("")
     hypothesis = typer.prompt("What is your hypothesis (if applicable)?")
     project_knowledge_base.set("hypothesis", hypothesis)
 
+    console.print("")
     methodology = select_from_list(
         "🔍  Select your research methodology:",
         ["Quantitative", "Qualitative", "Mixed Methods"],
@@ -519,7 +631,7 @@ def get_dynamic_questions(project_knowledge_base: ProjectKnowledgeBase): #MODIFI
 # --- Advanced Mode (Refactored) ---
 
 def advanced_mode():
-    console.print("\n[bold cyan]✨ Starting Advanced Mode...[/bold cyan]\n")
+    console.print("\n[cyan]✨ Starting Advanced Mode...[/cyan]\n")
 
     project_name, title = get_project_name_and_title()
     project_knowledge_base = ProjectKnowledgeBase(project_name=project_name, title=title) #MODIFIED
@@ -562,10 +674,13 @@ def advanced_mode():
 def start():
     """Starts the interactive book creation process."""
     introduction()
-    mode = select_from_list("✨ Choose your creation mode:", ["Simple (guided process)", "Advanced (more options)"])
-    if mode == "Simple":
+    
+    mode_options = ["Simple (guided process)", "Advanced (more options)"]
+    mode = select_from_list("✨ Choose your creation mode:", mode_options)
+    
+    if "Simple" in mode:
         simple_mode()
-    elif mode == "Advanced":
+    elif "Advanced" in mode:
         advanced_mode()
 
 
@@ -671,4 +786,11 @@ def resume(project_name: str = typer.Option(..., prompt="Project name to resume"
 
 
 if __name__ == "__main__":
+    # Display environment info for debugging
+    if "--debug" in sys.argv:
+        console.print("[yellow]Debug Info:[/yellow]")
+        console.print(f"Python: {sys.version}")
+        console.print(f"Terminal: {os.environ.get('TERM', 'Unknown')}")
+        console.print(f"Rich version: {rich.__version__}")
+        # Then continue with normal app execution
     app()

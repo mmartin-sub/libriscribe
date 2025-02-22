@@ -30,7 +30,7 @@ class StyleEditorAgent(Agent):
         tone = getattr(project_knowledge_base, 'tone', 'Informative')
         target_audience = getattr(project_knowledge_base, 'target_audience', 'General')
         
-        console.print(f"🎨 [bold cyan]Polishing writing style for Chapter {chapter_number}...[/bold cyan]")
+        console.print(f"🎨 [cyan]Polishing writing style for Chapter {chapter_number}...[/cyan]")
         prompt = f"""
         You are a style editor. Refine the writing style of the following chapter excerpt...
 
@@ -78,7 +78,7 @@ class StyleEditorAgent(Agent):
             
             if revised_text:
                 write_markdown_file(chapter_path, revised_text)
-                console.print(f"[bold green]✅ Style improvements applied to Chapter {chapter_number}![/bold green]")
+                console.print(f"[green]✅ Style improvements applied to Chapter {chapter_number}![/green]")
             else:
                 print(f"ERROR: Could not extract revised text for {chapter_path}.")
                 self.logger.error(f"Could not extract from StyleEditor response for {chapter_path}.")
