@@ -19,6 +19,10 @@ Your AI-Powered Book Writing Assistant
 
 LibriScribe harnesses the power of AI to revolutionize your book writing journey. Using a sophisticated multi-agent system, where each agent specializes in specific tasks, LibriScribe assists you from initial concept to final manuscript.
 
+<video src="https://github.com/guerra2fernando/libriscribe/raw/refs/heads/main/docs/static/img/libriscribe.mp4" controls width="600">
+  Your browser does not support the video tag.
+</video>
+
 ## ✨ Features
 
 ### Creative Assistance 🎨
