@@ -9,12 +9,12 @@ from rich.prompt import Prompt
 from rich.panel import Panel
 import logging
 import warnings
-from pydantic import PydanticSerializationWarning
+from pydantic import PydanticDeprecationWarning
 
 from libriscribe.knowledge_base import ProjectKnowledgeBase, Chapter  # Import the new class
 from libriscribe.settings import Settings
 from rich.progress import track  # Import track
-warnings.filterwarnings("ignore", category=PydanticSerializationWarning)
+warnings.filterwarnings("ignore", category=PydanticDeprecationWarning)
 
 # Configure logging (same as before)
 logging.basicConfig(
@@ -300,7 +300,15 @@ def write_and_review_chapters(project_knowledge_base: ProjectKnowledgeBase):
         num_chapters = num_chapters[1]
 
     console.print(f"\n[bold]Starting chapter writing process. Total chapters: {num_chapters}[/bold]")
-
+    
+    # Determine if using AI review for automatic processing
+    using_ai_review = project_knowledge_base.get("review_preference", "") == "AI"
+    
+    # If using AI review, ask once if they want to proceed with all chapters
+    if using_ai_review and num_chapters > 1:
+        if not typer.confirm(f"\nAI will automatically write and review all {num_chapters} chapters. Proceed?"):
+            return
+    
     for i in range(1, num_chapters + 1):
         chapter = project_knowledge_base.get_chapter(i)
         if chapter is None:
@@ -315,7 +323,9 @@ def write_and_review_chapters(project_knowledge_base: ProjectKnowledgeBase):
         console.print(f"\n[cyan]Writing Chapter {i}: {chapter.title}[/cyan]")
 
         if project_manager.does_chapter_exist(i):
-            if not typer.confirm(f"Chapter {i} already exists. Overwrite?"):
+            # If using AI review, automatically overwrite existing chapters
+            # Otherwise, ask for confirmation
+            if not using_ai_review and not typer.confirm(f"Chapter {i} already exists. Overwrite?"):
                 console.print(f"[yellow]Skipping chapter {i}...[/yellow]")
                 continue
 
@@ -327,17 +337,15 @@ def write_and_review_chapters(project_knowledge_base: ProjectKnowledgeBase):
         except Exception as e:
             console.print(f"[red]ERROR writing chapter {i}: {str(e)}[/red]")
             logger.exception(f"Error writing chapter {i}")
-            if not typer.confirm("Continue with next chapter?"):
+            if not using_ai_review and not typer.confirm("Continue with next chapter?"):
                 break
 
-        if i < num_chapters:
+        # Only ask to continue if NOT using AI review and there are more chapters
+        if i < num_chapters and not using_ai_review:
             if not typer.confirm("\nContinue to next chapter?"):
                 break
 
     console.print("\n[green]Chapter writing process completed![/green]")
-
-
-
 
 def format_book(project_knowledge_base: ProjectKnowledgeBase): 
     console.print("")
@@ -385,11 +393,24 @@ def simple_mode():
             num_chapters = num_chapters[1]
 
         print(f"\nPreparing to write {num_chapters} chapters...")
-        for chapter_num in range(1, num_chapters + 1):
-            if not typer.confirm(f"\n📝 Ready to write Chapter {chapter_num}?"):
-                break
-            project_manager.write_and_review_chapter(chapter_num)
-            project_manager.checkpoint()
+
+        # Determine if using AI review for automatic processing
+        using_ai_review = project_knowledge_base.get("review_preference", "") == "AI"
+
+        # If using AI review, ask once if they want to proceed with all chapters
+        if using_ai_review and num_chapters > 1:
+            if typer.confirm(f"AI will automatically write and review all {num_chapters} chapters. Proceed?"):
+                # Write all chapters automatically
+                for chapter_num in range(1, num_chapters + 1):
+                    project_manager.write_and_review_chapter(chapter_num)
+                    project_manager.checkpoint()
+        else:
+            # User interaction for each chapter
+            for chapter_num in range(1, num_chapters + 1):
+                if not typer.confirm(f"\n📝 Ready to write Chapter {chapter_num}?"):
+                    break
+                project_manager.write_and_review_chapter(chapter_num)
+                project_manager.checkpoint()
 
         # Only format after chapters are written
         if typer.confirm("\nDo you want to format the book now?"):

@@ -229,6 +229,7 @@ class ProjectManagerAgent:
         self.review_content(chapter_number)  # Review for content issues
 
         if self.project_knowledge_base and self.project_knowledge_base.review_preference == "AI":
+            # AI review - automatically edit without confirmation
             self.edit_chapter(chapter_number)  # AI editing
             self.edit_style(chapter_number)  # AI style editing
         elif self.project_knowledge_base and self.project_knowledge_base.review_preference == "Human":
@@ -239,7 +240,7 @@ class ProjectManagerAgent:
                 print("\nChanges saved.")
             # Even for human review, we might want style editing
             if typer.confirm("Do you want AI to refine the writing style?"):
-                 self.edit_style(chapter_number)
+                self.edit_style(chapter_number)
 
 
     def edit_chapter(self, chapter_number: int):
