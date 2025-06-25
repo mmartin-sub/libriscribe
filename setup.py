@@ -16,6 +16,7 @@ setup(
         "markdown",
         "fpdf",
         "tenacity",
+        "anthropic",
     ],
     entry_points={
         "console_scripts": [

@@ -1,4 +1,4 @@
-#!/home/shuther/Documents/Projects/libriscribe/.venv/bin/python
+#!/home/shuther/Documents/Projects/libriscribe/.venv/bin/python3.12
 # -*- coding: utf-8 -*-
 import re
 import sys

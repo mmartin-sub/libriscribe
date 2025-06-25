@@ -33,7 +33,10 @@ class LLMClient:
         if self.llm_provider == "openai":
             if not self.settings.openai_api_key:
                 raise ValueError("OpenAI API key is not set.")
-            return OpenAI(api_key=self.settings.openai_api_key)
+            return OpenAI(
+                api_key=self.settings.openai_api_key,
+                base_url=getattr(self.settings, "openai_base_url", "https://api.openai.com/v1")
+            )
         elif self.llm_provider == "claude":
             if not self.settings.claude_api_key:
                 raise ValueError("Claude API key is not set.")
@@ -57,15 +60,15 @@ class LLMClient:
     def _get_default_model(self):
         """Gets the default model name for the selected provider."""
         if self.llm_provider == "openai":
-            return "gpt-4o-mini"
+            return getattr(self.settings, "openai_default_model", "gpt-4o-mini")
         elif self.llm_provider == "claude":
-            return "claude-3-opus-20240229" # Or another appropriate Claude 3 model
+            return getattr(self.settings, "claude_default_model", "claude-3-opus-20240229")
         elif self.llm_provider == "google_ai_studio":
-            return "gemini-1.5-pro-002"
+            return getattr(self.settings, "google_ai_studio_default_model", "gemini-2.5-flash-lite-preview-06-17")
         elif self.llm_provider == "deepseek":
-             return "deepseek-coder-6.7b-instruct"
+            return getattr(self.settings, "deepseek_default_model", "deepseek-coder-6.7b-instruct")
         elif self.llm_provider == "mistral":
-            return "mistral-medium-latest"
+            return getattr(self.settings, "mistral_default_model", "mistral-medium-latest")
         else:
             return "unknown"  # Should not happen, but good for safety
     def set_model(self, model_name: str):
@@ -81,7 +84,7 @@ class LLMClient:
             # Append language instruction to prompt if not already included
             if "IMPORTANT: The content should be written entirely in" not in prompt and language != "English":
                 prompt += f"\n\nIMPORTANT: Generate the response in {language}."
-                
+
             if self.llm_provider == "openai":
                 response = self.client.chat.completions.create(
                     model=self.model,
@@ -157,6 +160,6 @@ class LLMClient:
                     repaired_json = extract_json_from_markdown(repaired_response)
                     if repaired_json is not None:
                         # CRITICAL CHANGE:  Return the JSON *string*, not wrapped in Markdown.
-                        return repaired_response 
+                        return repaired_response
         logger.error("JSON repair failed.")
         return "" # Return empty

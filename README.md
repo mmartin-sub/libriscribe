@@ -45,9 +45,12 @@ LibriScribe harnesses the power of AI to revolutionize your book writing journey
 ### 1. Installation
 
 ```bash
-git clone https://github.com/guerra2fernando/libriscribe.git
+git clone ...
 cd libriscribe
+python3.12 -m venv .venv
+source .venv/bin/activate
 pip install -e .
+pip install -r requirements.txt
 ```
 
 ### 2. Configuration
