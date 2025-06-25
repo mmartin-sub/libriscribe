@@ -9,7 +9,10 @@ from rich.prompt import Prompt
 from rich.panel import Panel
 import logging
 import warnings
+import datetime
 import sys
+import os
+import rich
 
 from pydantic import PydanticDeprecationWarning
 
@@ -18,12 +21,25 @@ from libriscribe.settings import Settings
 from rich.progress import track  # Import track
 warnings.filterwarnings("ignore", category=PydanticDeprecationWarning)
 
+
+def main_callback(debug: bool = typer.Option(False, "--debug", help="Enable debug mode")):
+    if debug:
+        console.print("[yellow]Debug Info:[/yellow]")
+        console.print(f"Python: {sys.version}")
+        console.print(f"Terminal: {os.environ.get('TERM', 'Unknown')}")
+        console.print(f"Rich version: {rich.__version__}")
+
+
+# Define the log file name as a variable
+LOG_FILE_NAME = "libriscribe.log"
+
 # Configure logging (same as before)
 logging.basicConfig(
     level=logging.INFO,
     format="%(message)s",
     handlers=[
-        logging.FileHandler("libriscribe.log", encoding="utf-8"),  # Add encoding
+        # Set the log file to append mode ('a')
+        logging.FileHandler(LOG_FILE_NAME, mode='a', encoding="utf-8"),  # Add encoding
         logging.StreamHandler()  # Simplified logs to console
     ]
 )
@@ -33,10 +49,16 @@ for handler in logging.root.handlers:
         handler.stream.reconfigure(errors='replace')
 
 console = Console()
+# app = typer.Typer(callback=main_callback)
 app = typer.Typer()
 #project_manager = ProjectManagerAgent()  # Initialize ProjectManager
 project_manager = ProjectManagerAgent(llm_client=None)
 logger = logging.getLogger(__name__)
+
+# Log the current date, time, and program arguments
+current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+program_arguments = " ".join(sys.argv)
+logger.info(f"--- Log started on {current_time} with arguments: {program_arguments} ---")
 
 def select_llm(project_knowledge_base: ProjectKnowledgeBase):
     """Lets the user select an LLM provider."""
@@ -732,26 +754,83 @@ def start():
         advanced_mode()
 
 
-# Removed the create command
+# put back the create command
+@app.command()
+def create(
+    project_name: str = typer.Option(..., prompt="Project name"),
+    title: str = typer.Option(..., prompt="Book title"),
+    genre: str = typer.Option(..., prompt="Genre"),
+    language: str = typer.Option(..., prompt="Language"),
+    description: str = typer.Option(..., prompt="Brief description"),
+    category: str = typer.Option(
+        ..., prompt="Category (fiction, non-fiction, business, research paper)"
+    ),
+    num_characters: int = typer.Option(0, prompt="Number of main characters (if fiction)"),
+    worldbuilding_needed: bool = typer.Option(
+        False, prompt="Extensive worldbuilding needed? (if fiction)"
+    ),
+):
+    """Creates a new book project (non-interactive version)."""
+    project_knowledge_base = ProjectKnowledgeBase( #MODIFIED
+        project_name=project_name,
+        title=title,
+        genre=genre,
+        language=language,
+        description=description,
+        category=category,
+        num_characters=num_characters,
+        worldbuilding_needed=worldbuilding_needed,
+        review_preference="AI",  # Default to AI review
+        book_length="Novel" if category == "fiction" else "Full Book",  # Default book length
+    )
+    project_manager.initialize_project_with_data(project_knowledge_base) #MODIFIED
+
+# Not sure if it is the proper way to do it
+@app.command()
+def concept(project_name: str = typer.Option(..., prompt="Project name")):
+    """Generates a book concept."""
+    # see code of resume(), maybe this is not how it is expected to work
+    project_manager.load_project_data(project_name)
+    print(f"Project '{project_name}' loaded. Concept...")
+    llm_choice = project_manager.project_knowledge_base.llm_provider
+    project_manager.initialize_llm_client(llm_choice)
+    project_manager.generate_concept()
 
 @app.command()
-def outline():
+def outline(project_name: str = typer.Option(..., prompt="Project name")):
     """Generates a book outline."""
+    project_manager.load_project_data(project_name)
+    print(f"Project '{project_name}' loaded. Outline...")
+    llm_choice = project_manager.project_knowledge_base.llm_provider
+    project_manager.initialize_llm_client(llm_choice)
     project_manager.generate_outline()
 
 @app.command()
-def characters():
+def characters(project_name: str = typer.Option(..., prompt="Project name")):
     """Generates character profiles."""
+    project_manager.load_project_data(project_name)
+    print(f"Project '{project_name}' loaded. characters...")
+    llm_choice = project_manager.project_knowledge_base.llm_provider
+    project_manager.initialize_llm_client(llm_choice)
     project_manager.generate_characters()
 
 @app.command()
-def worldbuilding():
+def worldbuilding(project_name: str = typer.Option(..., prompt="Project name")):
     """Generates worldbuilding details."""
+    project_manager.load_project_data(project_name)
+    print(f"Project '{project_name}' loaded. World Building...")
+    llm_choice = project_manager.project_knowledge_base.llm_provider
+    project_manager.initialize_llm_client(llm_choice)
     project_manager.generate_worldbuilding()
 
 @app.command()
-def write(chapter_number: int = typer.Option(..., prompt="Chapter number")):
+def write(project_name: str = typer.Option(..., prompt="Project name"), chapter_number: int = typer.Option(..., prompt="Chapter number")):
     """Writes a specific chapter, with review process."""
+    project_manager.load_project_data(project_name)
+    print(f"Project '{project_name}' loaded. World Building...")
+    llm_choice = project_manager.project_knowledge_base.llm_provider
+    project_manager.initialize_llm_client(llm_choice)
+
     logger.info(f"📝 Agent {project_manager.agents['chapter_writer'].name} writing chapter {chapter_number}...") # type: ignore
     project_manager.write_and_review_chapter(chapter_number)
     logger.info(f"✅ Chapter {chapter_number} complete.")
@@ -759,8 +838,13 @@ def write(chapter_number: int = typer.Option(..., prompt="Chapter number")):
 
 
 @app.command()
-def edit(chapter_number: int = typer.Option(..., prompt="Chapter number to edit")):
+def edit(project_name: str = typer.Option(..., prompt="Project name"), chapter_number: int = typer.Option(..., prompt="Chapter number to edit")):
     """Edits and refines a specific chapter"""
+    project_manager.load_project_data(project_name)
+    print(f"Project '{project_name}' loaded. Edit Chapter...")
+    llm_choice = project_manager.project_knowledge_base.llm_provider
+    project_manager.initialize_llm_client(llm_choice)
+
     project_manager.edit_chapter(chapter_number)
 
 
@@ -794,6 +878,9 @@ def resume(project_name: str = typer.Option(..., prompt="Project name to resume"
         if not project_manager.project_knowledge_base:
             print("ERROR resuming project")
             return
+
+        llm_choice = project_manager.project_knowledge_base.llm_provider
+        project_manager.initialize_llm_client(llm_choice)
 
         if project_manager.project_dir and (project_manager.project_dir / "outline.md").exists():
             # Find the last written chapter
@@ -832,13 +919,5 @@ def resume(project_name: str = typer.Option(..., prompt="Project name to resume"
         print(f"Error loading project data: {e}")
 
 
-
 if __name__ == "__main__":
-    # Display environment info for debugging
-    if "--debug" in sys.argv:
-        console.print("[yellow]Debug Info:[/yellow]")
-        console.print(f"Python: {sys.version}")
-        console.print(f"Terminal: {os.environ.get('TERM', 'Unknown')}")
-        console.print(f"Rich version: {rich.__version__}")
-        # Then continue with normal app execution
     app()

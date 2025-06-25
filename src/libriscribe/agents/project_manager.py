@@ -65,21 +65,21 @@ class ProjectManagerAgent:
         self.project_dir.mkdir(parents=True, exist_ok=True)
         self.project_knowledge_base = project_data
         self.project_knowledge_base.project_dir = self.project_dir
-        
+
         # Ensure worldbuilding is None if not needed
         if not self.project_knowledge_base.worldbuilding_needed:
             self.project_knowledge_base.worldbuilding = None
-            
+
         self.save_project_data()
         self.logger.info(f"🚀 Initialized project: {project_data.project_name}")
-        console.print(f"✨ Project [green]'{project_data.project_name}'[/green] initialized successfully!")    
+        console.print(f"✨ Project [green]'{project_data.project_name}'[/green] initialized successfully!")
     def save_project_data(self):
         """Saves project data using the ProjectKnowledgeBase object."""
         if self.project_knowledge_base and self.project_dir:
             try:
                 # Debug logs before save
                 logger.info("Saving project data...")
-                
+
                 # Clean up worldbuilding fields before saving
                 if hasattr(self.project_knowledge_base, 'clean_worldbuilding_for_category'):
                     # If you added the helper function to the class
@@ -101,7 +101,7 @@ class ProjectManagerAgent:
                         elif category == "non-fiction":
                             fields_to_keep = [
                                 "setting_context", "key_figures", "major_events", "underlying_causes",
-                                "consequences", "relevant_data", "different_perspectives", 
+                                "consequences", "relevant_data", "different_perspectives",
                                 "key_concepts"
                             ]
                         elif category == "business":
@@ -119,7 +119,7 @@ class ProjectManagerAgent:
                             ]
                         else:
                             fields_to_keep = []
-                        
+
                         # Create clean worldbuilding
                         if fields_to_keep:
                             clean_worldbuilding = Worldbuilding()
@@ -128,13 +128,13 @@ class ProjectManagerAgent:
                                     value = getattr(self.project_knowledge_base.worldbuilding, field)
                                     if value and isinstance(value, str) and value.strip():
                                         setattr(clean_worldbuilding, field, value)
-                            
+
                             # Replace with clean version
                             self.project_knowledge_base.worldbuilding = clean_worldbuilding
-                
+
                 file_path = str(self.project_dir / "project_data.json")
                 self.project_knowledge_base.save_to_file(file_path)
-                
+
                 # Verify save
                 if Path(file_path).exists():
                     # Read back and verify
@@ -146,16 +146,16 @@ class ProjectManagerAgent:
                 print(f"ERROR: Failed to save project data. See log.")
         else:
             logger.warning("Attempted to save project data before initialization.")
-            
-        
+
+
     def load_project_data(self, project_name: str):
         """Loads project data."""
         self.project_dir = Path(self.settings.projects_dir) / project_name
         project_data_path = self.project_dir / "project_data.json"
         if project_data_path.exists():
-            data = ProjectKnowledgeBase.load_from_file(str(project_data_path)) 
+            data = ProjectKnowledgeBase.load_from_file(str(project_data_path))
             if data:
-                self.                self.project_knowledge_base = data
+                self.project_knowledge_base = data
                 #CRITICAL: Set project_dir in project_knowledge_base
                 self.project_knowledge_base.project_dir = self.project_dir
             else:
@@ -172,7 +172,7 @@ class ProjectManagerAgent:
 
         agent = self.agents[agent_name]
         # Pass project_knowledge_base to agents that need it
-        if agent_name in ["concept_generator", "outliner", "character_generator", "worldbuilding", "chapter_writer", "editor", "style_editor"]: 
+        if agent_name in ["concept_generator", "outliner", "character_generator", "worldbuilding", "chapter_writer", "editor", "style_editor"]:
             if self.project_knowledge_base:
                 try:
                     agent.execute(project_knowledge_base=self.project_knowledge_base, *args, **kwargs)  # Pass project_knowledge_base
@@ -266,13 +266,13 @@ class ProjectManagerAgent:
             total_chapters = self.project_knowledge_base.num_chapters
             if isinstance(total_chapters, tuple):
                 total_chapters = total_chapters[1]  # Get max if it's a range
-            
+
             console.print(f"[bold]Formatting book with {total_chapters} chapters...[/bold]")
-            
+
             # --- Original Version ---
             original_content = ""
             missing_chapters = []
-            
+
             # Iterate through expected chapters
             for chapter_num in range(1, total_chapters + 1):
                 chapter_path = self.project_dir / f"chapter_{chapter_num}.md"
@@ -283,25 +283,25 @@ class ProjectManagerAgent:
                 else:
                     missing_chapters.append(chapter_num)
                     console.print(f"[yellow]! Original Chapter {chapter_num} not found[/yellow]")
-            
+
             if missing_chapters:
                 console.print(f"[yellow]Warning: Missing original chapters: {missing_chapters}[/yellow]")
                 if not original_content:
                     console.print("[red]ERROR: No original chapters found to format.[/red]")
                     return
-            
+
             # Format with LLM to ensure proper structure and flow
             console.print(f"{self.agents['formatting'].name} is: Formatting Original Chapters...")
-            prompt = prompts.FORMATTING_PROMPT.format(chapters=original_content)
+            prompt = prompts.FORMATTING_PROMPT.format(language=self.project_knowledge_base.language, chapters=original_content)
             formatted_original = self.llm_client.generate_content(prompt, max_tokens=4000)
-            
+
             # Add title page
             title_page = self.create_title_page(self.project_knowledge_base)
             formatted_original = title_page + formatted_original
-            
+
             # Determine output path for original version
             original_output_path = output_path.replace(".md", "_original.md").replace(".pdf", "_original.pdf")
-            
+
             # Save as Markdown or PDF (original version)
             if original_output_path.endswith(".md"):
                 write_markdown_file(original_output_path, formatted_original)
@@ -317,22 +317,22 @@ class ProjectManagerAgent:
             revised_content = ""
             missing_revised_chapters = []
             has_revised_chapters = False
-            
+
             # Check if we have any revised chapters
             for chapter_num in range(1, total_chapters + 1):
                 if (self.project_dir / f"chapter_{chapter_num}_revised.md").exists():
                     has_revised_chapters = True
                     break
-            
+
             if not has_revised_chapters:
                 console.print("[yellow]No revised chapters found. Skipping revised version formatting.[/yellow]")
                 return
-                
+
             # Process revised chapters
             for chapter_num in range(1, total_chapters + 1):
                 revised_path = self.project_dir / f"chapter_{chapter_num}_revised.md"
                 original_path = self.project_dir / f"chapter_{chapter_num}.md"
-                
+
                 if revised_path.exists():
                     chapter_content = read_markdown_file(str(revised_path))
                     revised_content += chapter_content + "\n\n"
@@ -346,16 +346,16 @@ class ProjectManagerAgent:
                 else:
                     missing_revised_chapters.append(chapter_num)
                     console.print(f"[yellow]! Chapter {chapter_num} not found (neither original nor revised)[/yellow]")
-            
+
             if missing_revised_chapters:
                 console.print(f"[yellow]Info: {len(missing_revised_chapters)} chapters don't have revised versions[/yellow]")
-            
+
             # Format with LLM
             console.print(f"{self.agents['formatting'].name} is: Formatting Revised Chapters...")
-            prompt_revised = prompts.FORMATTING_PROMPT.format(chapters=revised_content)
+            prompt_revised = prompts.FORMATTING_PROMPT.format(language=self.project_knowledge_base.language, chapters=revised_content)
             formatted_revised = self.llm_client.generate_content(prompt_revised, max_tokens=4000)
             formatted_revised = title_page + formatted_revised
-            
+
             # Save as Markdown or PDF (revised)
             if output_path.endswith(".md"):
                 write_markdown_file(output_path, formatted_revised)
@@ -365,7 +365,7 @@ class ProjectManagerAgent:
                 console.print(f"[green]Revised version formatted and saved to: {output_path}[/green]")
             else:
                 console.print(f"[red]ERROR: Unsupported output format: {output_path}. Must be .md or .pdf[/red]")
-                
+
         except Exception as e:
             self.logger.exception(f"Error formatting book: {e}")
             console.print(f"[red]ERROR: Failed to format the book: {str(e)}[/red]")
@@ -408,7 +408,7 @@ class ProjectManagerAgent:
             self.save_project_data()  # This should not output anything to console
         except Exception as e:
             logger.error(f"Checkpoint failed: {e}")
-            
+
     def create_title_page(self, project_knowledge_base:ProjectKnowledgeBase) -> str: # now accepts ProjectKnowledgeBase
         """Creates a Markdown title page."""
         title = project_knowledge_base.title
@@ -428,7 +428,7 @@ class ProjectManagerAgent:
             # Default to English if language not specifically handled
             title_page += f"## By {author}\n\n"
             title_page += f"**Genre:** {genre}\n\n"
-            
+
         return title_page
 
     def markdown_to_pdf(self, markdown_text:str, output_path:str):

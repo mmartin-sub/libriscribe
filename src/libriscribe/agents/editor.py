@@ -67,12 +67,12 @@ class EditorAgent(Agent):
             if "```" in edited_response:
                 start = edited_response.find("```") + 3
                 end = edited_response.rfind("```")
-                
+
                 # Skip the language identifier if present (e.g., ```markdown)
                 next_newline = edited_response.find("\n", start)
                 if next_newline < end and next_newline != -1:
                     start = next_newline + 1
-                
+
                 revised_chapter = edited_response[start:end].strip()
             else:
                 # If no code blocks, try to extract the content after a leading explanation
@@ -82,13 +82,13 @@ class EditorAgent(Agent):
                     if line.startswith("#") or line.startswith("Chapter"):
                         content_start = i
                         break
-                
+
                 if content_start > 0:
                     revised_chapter = "\n".join(lines[content_start:])
                 else:
                     revised_chapter = edited_response
-                    
-                    
+
+
             if revised_chapter:
                  #--- FIX: Save as chapter_{chapter_number}_revised.md ---
                 revised_chapter_path = str(Path(project_knowledge_base.project_dir) / f"chapter_{chapter_number}_revised.md")
@@ -119,3 +119,20 @@ class EditorAgent(Agent):
             if line.startswith("#"):
                 return line.replace("#", "").strip()
         return "Untitled Chapter"
+    def extract_scene_titles(self, chapter_content: str) -> list[str]:
+        """
+        Extracts scene titles from chapter content.
+        Looks for lines starting with '**' and containing a colon, e.g.:
+        **Scène 1 : Title**
+        **Scene 2: Title**
+        **Szene 3: Titel**
+        """
+        scene_titles = []
+        lines = chapter_content.split("\n")
+        for line in lines:
+            line = line.strip()
+            if line.startswith("**") and ":" in line and line.endswith("**"):
+                # Remove the surrounding '**'
+                title = line[2:-2].strip()
+                scene_titles.append(title)
+        return scene_titles

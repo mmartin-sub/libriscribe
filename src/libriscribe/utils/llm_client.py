@@ -24,7 +24,10 @@ class LLMClient:
 
     def __init__(self, llm_provider: str):
         self.settings = Settings()
-        self.llm_provider = llm_provider
+        # Use default_llm from settings if llm_provider is None or empty
+        self.llm_provider = llm_provider or getattr(self.settings, "default_llm", None)
+        if not self.llm_provider:
+            raise ValueError("No LLM provider specified and no default_llm set in settings.")
         self.client = self._get_client()  # Initialize the correct client
         self.model = self._get_default_model()
 

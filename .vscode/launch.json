@@ -1,0 +1,25 @@
+{
+   // Use IntelliSense to learn about possible attributes.
+   // Hover to view descriptions of existing attributes.
+   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+   "version": "0.2.0",
+       "inputs": [
+        {
+            "id": "programArgs",
+            "type": "promptString",
+            "description": "Enter command-line arguments (e.g., --param value --flag):",
+            "default": "" // Optional: You can provide a default value here
+        }
+    ],
+   "configurations": [
+      {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}", // Or specify the full path to your main script
+            "console": "integratedTerminal",
+            "justMyCode": false, // Important: Set to false to step into library code
+            "args": ["${input:programArgs}"]
+        }
+   ]
+}

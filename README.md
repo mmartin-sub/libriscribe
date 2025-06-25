@@ -79,6 +79,15 @@ MISTRAL_API_KEY=your_api_key_here
 libriscribe start
 ```
 
+```bash
+python src/libriscribe/main.py
+concept --project-name my_book
+worldbuilding  --project-name my_book
+write --project-name my_book --chapter-number 1
+edit --project-name my_book --chapter-number 1
+Resume --project-name my_book
+```
+
 Choose between:
 - 🎯 **Simple Mode:** Quick, streamlined book creation
 - 🎛️ **Advanced Mode:** Fine-grained control over each step

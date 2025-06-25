@@ -2,6 +2,7 @@ node_modules/
 .venv/
 .env
 venv/
+.history/
 __pycache__/
 src/libriscribe.egg-info/
 src/libriscribe/__pycache__/
