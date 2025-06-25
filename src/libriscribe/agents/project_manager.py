@@ -22,6 +22,7 @@ from libriscribe.utils.file_utils import write_json_file, read_json_file, write_
 from libriscribe.utils import prompts_context as prompts
 from libriscribe.knowledge_base import ProjectKnowledgeBase, Worldbuilding
 from libriscribe.utils.llm_client import LLMClient
+from libriscribe.utils.markdown_utils import generate_yaml_metadata
 # For PDF generation
 from fpdf import FPDF
 import typer  # Import typer
@@ -297,7 +298,8 @@ class ProjectManagerAgent:
 
             # Add title page
             title_page = self.create_title_page(self.project_knowledge_base)
-            formatted_original = title_page + formatted_original
+            yaml_metadata = generate_yaml_metadata(self.project_knowledge_base)
+            formatted_original = yaml_metadata + title_page + formatted_original
 
             # Determine output path for original version
             original_output_path = output_path.replace(".md", "_original.md").replace(".pdf", "_original.pdf")
