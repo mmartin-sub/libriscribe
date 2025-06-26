@@ -76,12 +76,15 @@ MISTRAL_API_KEY=your_api_key_here
 ### 3. Launch LibriScribe
 
 ```bash
+source .venv/bin/activate
 libriscribe start
 ```
 
 ```bash
+source .venv/bin/activate
 python src/libriscribe/main.py
 concept --project-name my_book
+characters --project-name my_book
 worldbuilding  --project-name my_book
 write --project-name my_book --chapter-number 1
 edit --project-name my_book --chapter-number 1

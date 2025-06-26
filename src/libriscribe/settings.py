@@ -22,4 +22,6 @@ class Settings(BaseSettings):
     deepseek_default_model: str = "deepseek-coder-6.7b-instruct"
     mistral_default_model: str = "mistral-medium-latest"
 
+    llm_timeout: int = 120  # Default timeout in seconds
+
     model_config = SettingsConfigDict(env_file=".env", extra='ignore') # type: ignore

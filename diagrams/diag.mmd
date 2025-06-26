@@ -1,0 +1,25 @@
+graph TD
+
+    1993["User<br>External Actor"]
+    1999["Documentation Website<br>Docusaurus / React"]
+    subgraph 1991["External Systems"]
+        2000["AI APIs<br>OpenAI, Anthropic, etc."]
+        2001["Web Content<br>Websites, Search APIs, etc."]
+    end
+    subgraph 1992["Libriscribe CLI<br>Python"]
+        1994["CLI Entrypoint<br>Typer"]
+        1995["AI Agent Orchestrator<br>Python"]
+        1996["Project Knowledge Base<br>Pydantic Models"]
+        1997["LLM Client<br>Python"]
+        1998["File I/O Utilities<br>Python"]
+        %% Edges at this level (grouped by source)
+        1994["CLI Entrypoint<br>Typer"] -->|delegates to| 1995["AI Agent Orchestrator<br>Python"]
+        1995["AI Agent Orchestrator<br>Python"] -->|updates/reads| 1996["Project Knowledge Base<br>Pydantic Models"]
+        1995["AI Agent Orchestrator<br>Python"] -->|uses| 1997["LLM Client<br>Python"]
+        1995["AI Agent Orchestrator<br>Python"] -->|persists project via| 1998["File I/O Utilities<br>Python"]
+    end
+    %% Edges at this level (grouped by source)
+    1993["User<br>External Actor"] -->|runs commands| 1994["CLI Entrypoint<br>Typer"]
+    1993["User<br>External Actor"] -->|browses| 1999["Documentation Website<br>Docusaurus / React"]
+    1995["AI Agent Orchestrator<br>Python"] -->|researches via| 2001["Web Content<br>Websites, Search APIs, etc."]
+    1997["LLM Client<br>Python"] -->|calls| 2000["AI APIs<br>OpenAI, Anthropic, etc."]

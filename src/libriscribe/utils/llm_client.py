@@ -78,22 +78,39 @@ class LLMClient:
       self.model = model_name
 
     @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
-    def generate_content(self, prompt: str, max_tokens: int = 2000, temperature: float = 0.7, language: str = "English") -> str:
+    def generate_content(
+        self,
+        prompt: str,
+        max_tokens: int = 2000,
+        temperature: float = 0.7,
+        language: str = "English",
+        timeout: int = None,  # <-- Add timeout parameter
+    ) -> str:
         """
         Generates text using the selected LLM provider.
         Now supports specifying the output language explicitly.
         """
         try:
+            # Use timeout from settings if not provided
+            if timeout is None:
+                timeout = getattr(self.settings, "llm_timeout", 60)
+
             # Append language instruction to prompt if not already included
             if "IMPORTANT: The content should be written entirely in" not in prompt and language != "English":
                 prompt += f"\n\nIMPORTANT: Generate the response in {language}."
 
             if self.llm_provider == "openai":
+                # Debug: Print base URL and timeout before making the request
+                print(f"[DEBUG] OpenAI base_url: {getattr(self.client, 'base_url', 'unknown')}")
+                print(f"[DEBUG] OpenAI timeout: {timeout}")
+                logger.debug(f"OpenAI base_url: {getattr(self.client, 'base_url', 'unknown')}")
+                logger.debug(f"OpenAI timeout: {timeout}")
                 response = self.client.chat.completions.create(
                     model=self.model,
                     messages=[{"role": "user", "content": prompt}],
                     max_tokens=max_tokens,
                     temperature=temperature,
+                    timeout=timeout,  # <-- Pass timeout here
                 )
                 return response.choices[0].message.content.strip()
 
@@ -122,8 +139,13 @@ class LLMClient:
                     "max_tokens": max_tokens,
                     "temperature": temperature
                 }
-                response = requests.post("https://api.deepseek.com/v1/chat/completions", headers=headers, json=data, timeout=120) # Timeout
-                response.raise_for_status() # Raise for HTTP errors
+                response = requests.post(
+                    "https://api.deepseek.com/v1/chat/completions",
+                    headers=headers,
+                    json=data,
+                    timeout=timeout  # <-- Pass timeout here
+                )
+                response.raise_for_status()
                 return response.json()["choices"][0]["message"]["content"].strip()
             elif self.llm_provider == "mistral":
                 headers = {
@@ -137,7 +159,12 @@ class LLMClient:
                     "temperature": temperature
                 }
 
-                response = requests.post("https://api.mistral.ai/v1/chat/completions", headers=headers, json=data, timeout=120)
+                response = requests.post(
+                    "https://api.mistral.ai/v1/chat/completions",
+                    headers=headers,
+                    json=data,
+                    timeout=timeout  # <-- Pass timeout here
+                )
                 response.raise_for_status()
                 return response.json()['choices'][0]['message']['content'].strip()
 
@@ -146,8 +173,12 @@ class LLMClient:
 
         except Exception as e:
             logger.exception(f"Error during {self.llm_provider} API call: {e}")
-            print(f"ERROR: {self.llm_provider} API error: {e}")
-            return ""
+            print(f"ERROR: {self.llm_provider} API error: {e}\n"
+                f"Base URL: {self.client.base_urlbase_url}\n"
+                f"Model: {self.model}\n"
+                f"Prompt: {prompt[:500]}{'...' if len(prompt) > 500 else ''}"
+            )
+            raise
     @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(3))
     def generate_content_with_json_repair(self, original_prompt: str, max_tokens:int = 2000, temperature:float=0.7) -> str:
         """Generates content and attempts to repair JSON errors."""

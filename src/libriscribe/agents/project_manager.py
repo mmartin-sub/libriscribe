@@ -3,6 +3,8 @@
 import logging
 from typing import Any, Dict, Optional
 from pathlib import Path
+import os
+from datetime import datetime
 
 from libriscribe.agents.concept_generator import ConceptGeneratorAgent
 from libriscribe.agents.outliner import OutlinerAgent
@@ -307,6 +309,7 @@ class ProjectManagerAgent:
             # Save as Markdown or PDF (original version)
             if original_output_path.endswith(".md"):
                 write_markdown_file(original_output_path, formatted_original)
+                self.log_manuscript_stats(original_output_path)
                 console.print(f"[green]📚 Original version formatted and saved![/green]")
             elif original_output_path.endswith(".pdf"):
                 self.markdown_to_pdf(formatted_original, original_output_path)
@@ -356,7 +359,7 @@ class ProjectManagerAgent:
             console.print(f"{self.agents['formatting'].name} is: Formatting Revised Chapters...")
             prompt_revised = prompts.FORMATTING_PROMPT.format(language=self.project_knowledge_base.language, chapters=revised_content)
             formatted_revised = self.llm_client.generate_content(prompt_revised, max_tokens=4000)
-            formatted_revised = title_page + formatted_revised
+            formatted_revised = yaml_metadata + title_page + formatted_revised
 
             # Save as Markdown or PDF (revised)
             if output_path.endswith(".md"):
@@ -425,6 +428,9 @@ class ProjectManagerAgent:
         elif language == "Brazilian Portuguese":
             title_page += f"## Por {author}\n\n"
             title_page += f"**Gênero:** {genre}\n\n"
+        elif language == "French":
+            title_page += f"## Par {author}\n\n"
+            title_page += f"**Genre:** {genre}\n\n"
         # Add other language variations as needed
         else:
             # Default to English if language not specifically handled
@@ -452,4 +458,8 @@ class ProjectManagerAgent:
               pdf.set_font("Arial", size=12)  # Reset font
           else: # Regular text
             pdf.multi_cell(0, 10, line)
+
+      # Log manuscript statistics
+      self.log_manuscript_stats(output_path)
+
       pdf.output(output_path)

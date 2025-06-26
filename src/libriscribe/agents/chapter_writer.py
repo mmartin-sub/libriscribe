@@ -51,7 +51,7 @@ class ChapterWriterAgent(Agent):
 
             console.print(f"\n[cyan]📝 Writing Chapter {chapter_number}: {chapter.title}[/cyan]")
 
-            
+
             # Make sure there's at least one scene
             if not chapter.scenes:
                 console.print(f"[yellow]No scenes found for Chapter {chapter_number}. Creating a default scene.[/yellow]")
@@ -64,18 +64,18 @@ class ChapterWriterAgent(Agent):
                     emotional_beat="Tension"
                 )
                 chapter.scenes.append(default_scene)
-            
+
             # Make sure scenes are ordered by scene number
             ordered_scenes = sorted(chapter.scenes, key=lambda s: s.scene_number)
             # Process each scene individually
             scene_contents = []
-            
+
             for scene in ordered_scenes:
                 console.print(f"🎬 Creating Scene/Section {scene.scene_number} of {len(ordered_scenes)}...")
 
                 # Generate a scene title if none exists
                 scene_title = f"Scene {scene.scene_number}: {scene.summary[:30]}..." if len(scene.summary) > 30 else f"Scene {scene.scene_number}: {scene.summary}"
-                
+
                 # Create a prompt for this specific scene
                 scene_prompt = prompts.SCENE_PROMPT.format(
                     chapter_number=chapter_number,
@@ -93,34 +93,44 @@ class ChapterWriterAgent(Agent):
                     emotional_beat=scene.emotional_beat if scene.emotional_beat else "None specified",
                     total_scenes=len(ordered_scenes)
                 )
-                
-                scene_prompt += f"\n\nIMPORTANT: Begin the scene with the title: **{scene_title}**"
 
-                
+                scene_prompt += f"\n\nIMPORTANT: Begin the scene with the title: ### **{scene_title}** (as a Markdown heading, bolded)"
+
                 # Generate the scene content
                 scene_content = self.llm_client.generate_content(scene_prompt, max_tokens=2000)
                 if not scene_content:
                     console.print(f"[yellow]Warning: Failed to generate content for Scene {scene.scene_number}. Using placeholder.[/yellow]")
                     scene_content = f"[Scene {scene.scene_number} content unavailable]"
-                
-                # Ensure the scene title is included
-                if not scene_content.startswith(f"**{scene_title}**") and not scene_content.startswith(f"# {scene_title}"):
-                    scene_content = f"**{scene_title}**\n\n{scene_content}"
-                
+
+                # Ensure the scene title is included as a comment only
+                formatted_scene_title = f"### **{scene_title}**"
+                scene_title_comment = f"<!-- \n{formatted_scene_title} -->"
+
+                # Remove any visible scene title at the start
+                if scene_content.startswith(formatted_scene_title):
+                    scene_content = scene_content[len(formatted_scene_title):].lstrip()
+                elif scene_content.startswith(f"**{scene_title}**"):
+                    scene_content = scene_content[len(f"**{scene_title}**"):].lstrip()
+                elif scene_content.startswith(f"### {scene_title}"):
+                    scene_content = scene_content[len(f"### {scene_title}") :].lstrip()
+
+                # Always prepend the comment version
+                scene_content = f"{scene_title_comment}\n\n{scene_content}"
+
                 scene_contents.append(scene_content)
-            
-            
+
+
             # Combine scenes into a complete chapter
             chapter_content = f"## Chapter {chapter_number}: {chapter.title}\n\n"
             chapter_content += "\n\n".join(scene_contents)
-            
+
             # Save the chapter
             if output_path is None:
                 output_path = str(Path(project_knowledge_base.project_dir) / f"chapter_{chapter_number}.md")
             write_markdown_file(output_path, chapter_content)
-            
+
             console.print(f"[green]✅ Chapter {chapter_number} completed with {len(ordered_scenes)} scenes![/green]")
-            
+
         except Exception as e:
             self.logger.exception(f"Error writing chapter {chapter_number}: {e}")
             console.print(f"[red]ERROR: Failed to write chapter {chapter_number}. See log for details.[/red]")

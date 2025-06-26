@@ -40,11 +40,13 @@ class CharacterGeneratorAgent(Agent):
 
             if not character_json_str:
                 print("ERROR: Character generation failed. See Log")
+                logger.error(f"Character generation failed. character_json_str: {character_json_str}")
                 return
             try:
                 characters = extract_json_from_markdown(character_json_str)
                 if not characters or not isinstance(characters, list):
                     print("ERROR: Failed to parse character data")
+                    logger.error(f"Failed to parse character data. character_json_str: {character_json_str}")
                     return
 
                 # Process and store characters in knowledge base
@@ -98,7 +100,7 @@ class CharacterGeneratorAgent(Agent):
 
                         # --- MODIFIED PERSONALITY TRAITS HANDLING ---
                         personality_traits = flattened_char_data.get("personality_traits", "")
-                        
+
                         # Convert to string format instead of array
                         if isinstance(personality_traits, list):
                             # Join list into a comma-separated string
@@ -106,11 +108,11 @@ class CharacterGeneratorAgent(Agent):
                         elif isinstance(personality_traits, str):
                             # Keep it as a string, just ensure it's properly formatted
                             personality_traits = personality_traits.strip()
-                        
+
                         # Only use default if we have an empty string after processing
                         if not personality_traits:
                             personality_traits = "Resourceful, Cautious, Determined"  # Default traits as string
-                        
+
                         # Create character using the flattened data
                         character = Character(
                             name=flattened_char_data.get("name", ""),

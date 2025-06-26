@@ -286,15 +286,16 @@ def generate_and_review_concept(project_knowledge_base: ProjectKnowledgeBase):
     console.print(f"  [bold]Description:[/bold]\n{project_knowledge_base.description}")
     return typer.confirm("Do you want to proceed with generating an outline based on this concept?")
 
-def generate_and_edit_outline(project_knowledge_base: ProjectKnowledgeBase):
+def generate_and_edit_outline(project_knowledge_base: ProjectKnowledgeBase, skip_edit: bool = False):
     project_manager.generate_outline()
     project_manager.checkpoint()  # Checkpoint after outline
     console.print("")
     console.print(f"\n[green]📝 Outline generated![/green]")
 
-    if typer.confirm("Do you want to review and edit the outline now?"):
-        typer.edit(filename=str(project_manager.project_dir / "outline.md"))
-        print("\nChanges saved.")
+    if not skip_edit:
+        if typer.confirm("Do you want to review and edit the outline now?"):
+            typer.edit(filename=str(project_manager.project_dir / "outline.md"))
+            print("\nChanges saved.")
 
 
 def generate_characters_if_needed(project_knowledge_base: ProjectKnowledgeBase):
@@ -308,7 +309,7 @@ def generate_characters_if_needed(project_knowledge_base: ProjectKnowledgeBase):
             console.print(f"\n[green]✅ Character profiles generated![/green]")
 
 def generate_worldbuilding_if_needed(project_knowledge_base: ProjectKnowledgeBase):
-    if project_knowledge_base.get("worldbuilding_needed", False):  # Use get with default
+    if project_knowledge_base.get("worldbuilding_needed", False) :  # Use get with default
         console.print("")
         if typer.confirm("Do you want to generate worldbuilding details?"):
             console.print("\n[cyan]🏔️ Creating worldbuilding details...[/cyan]")
@@ -871,10 +872,6 @@ def resume(project_name: str = typer.Option(..., prompt="Project name to resume"
         project_manager.load_project_data(project_name)
         print(f"Project '{project_name}' loaded. Resuming...")
 
-        # Determine where to resume from.  This logic is simplified for now
-        # and assumes you'll mostly resume chapter writing. A more robust
-        # solution would inspect more files.
-
         if not project_manager.project_knowledge_base:
             print("ERROR resuming project")
             return
@@ -882,36 +879,49 @@ def resume(project_name: str = typer.Option(..., prompt="Project name to resume"
         llm_choice = project_manager.project_knowledge_base.llm_provider
         project_manager.initialize_llm_client(llm_choice)
 
+        generate_and_edit_outline(project_manager.project_knowledge_base, skip_edit=True)
+        generate_characters_if_needed(project_manager.project_knowledge_base)
+        generate_worldbuilding_if_needed(project_manager.project_knowledge_base)
+        project_manager.checkpoint()
+
+        # If outline exists, resume chapter writing
         if project_manager.project_dir and (project_manager.project_dir / "outline.md").exists():
-            # Find the last written chapter
             last_chapter = 0
-            num_chapters = project_manager.project_knowledge_base.get("num_chapters",1)
+            num_chapters = project_manager.project_knowledge_base.get("num_chapters", 1)
             if isinstance(num_chapters, tuple):
                 num_chapters = num_chapters[1]
 
-            for i in range(1, num_chapters + 1):  # Iterate in order
+            for i in range(1, num_chapters + 1):
                 if (project_manager.project_dir / f"chapter_{i}.md").exists():
                     last_chapter = i
                 else:
-                    break  # Stop at the first missing chapter
+                    break
 
             print(f"Last written chapter: {last_chapter}")
 
-            # Check the project data and files to determine next steps
             for i in range(last_chapter + 1, num_chapters + 1):
-                 project_manager.write_and_review_chapter(i)
+                project_manager.write_and_review_chapter(i)
             if typer.confirm("Do you want to format now the book?"):
-                format()
+                format_book(project_manager.project_knowledge_base)
 
-        elif project_manager.project_knowledge_base:  # Project data exists, but no outline
-            # Resume from outline generation (this is a simplification)
-            print("Resuming from outline generation...")
-            project_manager.generate_outline()
-            # ... (rest of the logic, similar to simple/advanced mode)
+        # If outline does not exist but project data does, resume from outline generation
+        elif project_manager.project_knowledge_base:
+
+            # After outline, proceed to chapter writing
+            num_chapters = project_manager.project_knowledge_base.get("num_chapters", 1)
+            if isinstance(num_chapters, tuple):
+                num_chapters = num_chapters[1]
+
+            for i in range(1, num_chapters + 1):
+                if not (project_manager.project_dir / f"chapter_{i}.md").exists():
+                    project_manager.write_and_review_chapter(i)
+                    project_manager.checkpoint()
+
+            if typer.confirm("Do you want to format now the book?"):
+                format_book(project_manager.project_knowledge_base)
 
         else:
             print("No checkpoint found to resume from.")
-
 
     except FileNotFoundError:
         print(f"Project '{project_name}' not found.")
