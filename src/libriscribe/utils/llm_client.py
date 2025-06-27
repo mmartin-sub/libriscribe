@@ -101,8 +101,8 @@ class LLMClient:
 
             if self.llm_provider == "openai":
                 # Debug: Print base URL and timeout before making the request
-                print(f"[DEBUG] OpenAI base_url: {getattr(self.client, 'base_url', 'unknown')}")
-                print(f"[DEBUG] OpenAI timeout: {timeout}")
+                # print(f"[DEBUG] OpenAI base_url: {getattr(self.client, 'base_url', 'unknown')}")
+                # print(f"[DEBUG] OpenAI timeout: {timeout}")
                 logger.debug(f"OpenAI base_url: {getattr(self.client, 'base_url', 'unknown')}")
                 logger.debug(f"OpenAI timeout: {timeout}")
                 response = self.client.chat.completions.create(
@@ -171,14 +171,30 @@ class LLMClient:
             else:
                 return "" #  Should not happen, provider checked in init
 
-        except Exception as e:
-            logger.exception(f"Error during {self.llm_provider} API call: {e}")
-            print(f"ERROR: {self.llm_provider} API error: {e}\n"
-                f"Base URL: {self.client.base_urlbase_url}\n"
+        except openai.APITimeoutError:
+            logger.error(
+                f"OpenAI API timed out.\n"
+                f"Base URL: {getattr(self.client, 'base_url', 'unknown')}\n"
+                f"Model: {self.model}\n"
+                f"Prompt: {prompt[:500]}{'...' if len(prompt) > 500 else ''}"
+            )
+            print(
+                f"ERROR: OpenAI API timed out.\n"
+                f"Base URL: {getattr(self.client, 'base_url', 'unknown')}\n"
                 f"Model: {self.model}\n"
                 f"Prompt: {prompt[:500]}{'...' if len(prompt) > 500 else ''}"
             )
             raise
+            #return ""  # No traceback for timeout, but maybe it should be raise #tockeck
+        except Exception as e:
+            logger.exception(f"Error during {self.llm_provider} API call: {e}")
+            print(
+                f"ERROR: {self.llm_provider} API error: {e}\n"
+                f"Base URL: {getattr(self.client, 'base_url', 'unknown')}\n"
+                f"Model: {self.model}\n"
+                f"Prompt: {prompt[:500]}{'...' if len(prompt) > 500 else ''}"
+            )
+            raise # so the retry mechanism works
     @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(3))
     def generate_content_with_json_repair(self, original_prompt: str, max_tokens:int = 2000, temperature:float=0.7) -> str:
         """Generates content and attempts to repair JSON errors."""

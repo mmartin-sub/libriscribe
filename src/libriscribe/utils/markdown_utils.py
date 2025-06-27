@@ -1,100 +1,88 @@
 import os
 from datetime import datetime
 import yaml
+import langcodes
+
+class LiteralStr(str): pass
+
+def literal_str_representer(dumper, data):
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
+
+yaml.add_representer(LiteralStr, literal_str_representer)
+
+def ensure_literal_block(val):
+    """Convert multiline strings to LiteralStr for YAML block style."""
+    if isinstance(val, str) and '\n' in val:
+        return LiteralStr(val)
+    if isinstance(val, list):
+        return [ensure_literal_block(v) for v in val]
+    return val
+
+def normalize_language(lang_value):
+    """Normalize language names to BCP 47 codes using langcodes."""
+    if not lang_value:
+        return lang_value
+    try:
+        # langcodes standardizes names and codes
+        return langcodes.find(lang_value).to_tag()
+    except Exception:
+        return lang_value  # fallback to original if not recognized
 
 def generate_yaml_metadata(project_knowledge_base):
-    """Generate a YAML metadata block from the project knowledge base, using defaults if available."""
-    # --- Load defaults from default.yaml if present ---
+    import copy
+    # Load defaults from default.yaml
     defaults = {}
-    default_yaml_path = None
     if hasattr(project_knowledge_base, "project_dir") and project_knowledge_base.project_dir:
         default_yaml_path = os.path.join(project_knowledge_base.project_dir, "default.yaml")
         if os.path.isfile(default_yaml_path):
             with open(default_yaml_path, "r", encoding="utf-8") as f:
                 defaults = yaml.safe_load(f) or {}
 
-    # --- Required fields with project values taking precedence over defaults ---
-    def get_field(key, fallback=None):
-        return getattr(project_knowledge_base, key, None) or project_knowledge_base.get(key, None) or defaults.get(key, fallback)
+    # Start with all keys from default.yaml
+    metadata = copy.deepcopy(defaults)
 
-    title = get_field("title", "Untitled")
-    author = get_field("author", "Unknown Author")
-    language = get_field("language")
-    abstract = get_field("description", "")
-    genre = get_field("genre", "")
-    date = get_field("date") or defaults.get("date") or datetime.now().strftime("%Y-%m-%d")
-
-    # --- Optional: cover image ---
-    cover_image = None
-    if hasattr(project_knowledge_base, "project_dir") and project_knowledge_base.project_dir:
-        for ext in ["jpg", "jpeg", "png"]:
-            candidate = os.path.join(project_knowledge_base.project_dir, f"cover.{ext}")
-            if os.path.isfile(candidate):
-                cover_image = f"cover.{ext}"
-                break
-    if not cover_image:
-        cover_image = defaults.get("cover-image")
-
-    # --- Generate keywords (merge with defaults if present) ---
-    stopwords = {"the", "a", "an", "of", "and", "in", "on", "for", "to", "de", "la", "le", "et", "du", "des"}
-    keywords = set(defaults.get("keywords", []))
-    for word in (str(title) + " " + str(genre)).lower().replace("'", " ").replace(":", " ").split():
-        if word not in stopwords and len(word) > 2:
-            keywords.add(word)
-    if isinstance(author, str):
-        keywords.add(author.lower())
-    keywords = sorted(keywords)
-
-    # --- Eisvogel/Pandoc-specific fields ---
-    subtitle = get_field("subtitle")
-    publisher = get_field("publisher")
-    isbn = get_field("isbn")
-    rights = get_field("rights")
-    toc = defaults.get("toc", True)
-    toc_title = defaults.get("toc-title", "Table des Matières")
-    toc_own_page = defaults.get("toc-own-page", True)
-    lof = defaults.get("lof", False)
-    lot = defaults.get("lot", False)
-    colorlinks = defaults.get("colorlinks", True)
-    linkcolor = defaults.get("linkcolor", "blue")
-    mainfont = defaults.get("mainfont", "Linux Libertine O")
-    sansfont = defaults.get("sansfont", "Linux Biolinum O")
-    monofont = defaults.get("monofont", "Fira Mono")
-    fontsize = defaults.get("fontsize", "12pt")
-    geometry = defaults.get("geometry", "margin=2.5cm")
-    header_includes = defaults.get("header-includes", [
-        "\\usepackage{microtype}",
-        "\\usepackage{csquotes}"
-    ])
-
-    # --- YAML construction ---
-    metadata = {
-        "title": title,
-        "subtitle": subtitle,
-        "author": author,
-        "date": date,
-        "lang": language,
-        "abstract": abstract,
-        "genre": genre,
-        "cover-image": cover_image,
-        "keywords": keywords,
-        "publisher": publisher,
-        "isbn": isbn,
-        "rights": rights,
-        "toc": toc,
-        "toc-title": toc_title,
-        "toc-own-page": toc_own_page,
-        "lof": lof,
-        "lot": lot,
-        "colorlinks": colorlinks,
-        "linkcolor": linkcolor,
-        "mainfont": mainfont,
-        "sansfont": sansfont,
-        "monofont": monofont,
-        "fontsize": fontsize,
-        "geometry": geometry,
-        "header-includes": header_includes,
+    # List of keys to override (project_data.json → YAML mapping)
+    override_map = {
+        "title": "title",
+        "subtitle": "subtitle",
+        "author": "author",
+        "language": "lang",
+        "description": "abstract",
+        "genre": "genre",
+        "date": "date",
+        "cover-image": "cover-image",
+        "keywords": "keywords",
+        "publisher": "publisher",
+        "isbn": "isbn",
+        "rights": "rights",
     }
-    # Remove None or empty values
+
+    # Helper to get value from project_knowledge_base (attribute or dict)
+    def get_field(key):
+        return getattr(project_knowledge_base, key, None) or project_knowledge_base.get(key, None)
+
+    # Only replace if present in project data
+    for src_key, yaml_key in override_map.items():
+        value = get_field(src_key)
+        if value is not None:
+            if yaml_key == "keywords":
+                # If keywords is a string, split by comma
+                if isinstance(value, str):
+                    value = [w.strip() for w in value.split(",")]
+                metadata[yaml_key] = value
+            elif yaml_key == "lang":
+                metadata[yaml_key] = normalize_language(value)
+            else:
+                metadata[yaml_key] = value
+
+    # Remove empty values
     metadata = {k: v for k, v in metadata.items() if v not in [None, "", []]}
-    yaml_block = "---\n" + yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True)
+
+    # Ensure block style for multiline header-includes
+    if "header-includes" in metadata:
+        metadata["header-includes"] = [
+            ensure_literal_block(item) for item in metadata["header-includes"]
+        ]
+
+    yaml_block = "---\n" + yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True) + "---\n"
+    return yaml_block

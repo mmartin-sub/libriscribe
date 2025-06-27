@@ -372,17 +372,32 @@ def write_and_review_chapters(project_knowledge_base: ProjectKnowledgeBase):
 
     console.print("\n[green]Chapter writing process completed![/green]")
 
-def format_book(project_knowledge_base: ProjectKnowledgeBase):
+def format_book(project_knowledge_base: ProjectKnowledgeBase, output_format: str = None):
+    """
+    Formats the book as Markdown or PDF.
+    If output_format is not provided, checks Settings, then prompts the user.
+    """
     console.print("")
-    if typer.confirm("Do you want to format the book now?"):
-        output_format = select_from_list("Choose output format:", ["Markdown (.md)", "PDF (.pdf)"])
-        if output_format == "Markdown (.md)":
-            output_path = str(project_manager.project_dir / "manuscript.md")
-        else:
-            output_path = str(project_manager.project_dir / "manuscript.pdf")
-        project_manager.format_book(output_path)
-        console.print("")
-        console.print(f"\n[green]📘 Book formatted and saved![/green]")
+    settings = Settings()
+    # Use provided, or settings, or prompt
+    if output_format is None:
+        output_format = getattr(settings, "default_export_format", None)
+    if output_format is None:
+        format_choice = select_from_list("Choose output format:", ["Markdown (.md)", "PDF (.pdf)"])
+        output_format = "md" if "Markdown" in format_choice else "pdf"
+    else:
+        output_format = output_format.lower()
+        if output_format not in ("md", "pdf"):
+            console.print("[red]Invalid output format. Using Markdown (.md) as default.[/red]")
+            output_format = "md"
+
+    if output_format == "md":
+        output_path = str(project_manager.project_dir / "manuscript.md")
+    else:
+        output_path = str(project_manager.project_dir / "manuscript.pdf")
+    project_manager.format_book(output_path)
+    console.print("")
+    console.print(f"\n[green]📘 Book formatted and saved to: {output_path}[/green]")
 
 
 # --- Simple Mode (Refactored) ---
@@ -901,8 +916,7 @@ def resume(project_name: str = typer.Option(..., prompt="Project name to resume"
 
             for i in range(last_chapter + 1, num_chapters + 1):
                 project_manager.write_and_review_chapter(i)
-            if typer.confirm("Do you want to format now the book?"):
-                format_book(project_manager.project_knowledge_base)
+            format_book(project_manager.project_knowledge_base, "md")
 
         # If outline does not exist but project data does, resume from outline generation
         elif project_manager.project_knowledge_base:
@@ -917,8 +931,7 @@ def resume(project_name: str = typer.Option(..., prompt="Project name to resume"
                     project_manager.write_and_review_chapter(i)
                     project_manager.checkpoint()
 
-            if typer.confirm("Do you want to format now the book?"):
-                format_book(project_manager.project_knowledge_base)
+            format_book(project_manager.project_knowledge_base, "md")
 
         else:
             print("No checkpoint found to resume from.")

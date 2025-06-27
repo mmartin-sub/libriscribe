@@ -1,0 +1,3 @@
+[tool.ruff]
+ignore = ["F401", "F541"]
+# ignore = ["F401", "E501"])

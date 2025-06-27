@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional
 from pathlib import Path
 import os
 from datetime import datetime
+import openai  # Add this import at the top if not already present
 
 from libriscribe.agents.concept_generator import ConceptGeneratorAgent
 from libriscribe.agents.outliner import OutlinerAgent
@@ -182,6 +183,9 @@ class ProjectManagerAgent:
                 except Exception as e:
                     logger.exception(f"Error running agent {agent_name}: {e}")
                     print(f"ERROR: Agent {agent_name} failed. See log for details.")
+                    # Only raise if it's an APITimeoutError
+                    if isinstance(e, openai.APITimeoutError):
+                        raise
             else:
                 print(f"ERROR: Project data not initialized before running {agent_name}.")
         else:  # Other agents
@@ -190,6 +194,8 @@ class ProjectManagerAgent:
             except Exception as e:
                 logger.exception(f"Error running agent {agent_name}: {e}")
                 print(f"ERROR: Agent {agent_name} failed. See log for details.")
+                if isinstance(e, openai.APITimeoutError):
+                    raise
 
 
     # --- Command Handlers (using ProjectKnowledgeBase) ---
@@ -443,7 +449,9 @@ class ProjectManagerAgent:
       """Converts the formatted markdown to PDF"""
       pdf = FPDF()
       pdf.add_page()
-      pdf.set_font("Arial", size=12)
+      # Arial is not good for UTF-8 characters, so we use DejaVuSans
+      pdf.add_font('DejaVu', '', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', uni=True)
+      pdf.set_font('DejaVu', '', 12)
 
       # Basic Markdown parsing and PDF generation
       lines = markdown_text.split("\n")
@@ -463,3 +471,14 @@ class ProjectManagerAgent:
       self.log_manuscript_stats(output_path)
 
       pdf.output(output_path)
+
+    def log_manuscript_stats(self, manuscript_path):
+        """Logs basic statistics about the manuscript file."""
+        try:
+            with open(manuscript_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            num_words = len(content.split())
+            num_chars = len(content)
+            print(f"Manuscript stats: {num_words} words, {num_chars} characters.")
+        except Exception as e:
+            print(f"Could not log manuscript stats: {e}")

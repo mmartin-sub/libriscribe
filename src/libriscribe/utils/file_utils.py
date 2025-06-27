@@ -57,33 +57,15 @@ def write_json_file(file_path: str, data: Union[Dict[str, Any], BaseModel, Proje
         logger.exception(f"Error writing to JSON file {file_path}: {e}")
         print(f"ERROR: Failed to write to {file_path}. See log.")
 
-# The read_markdown and write_markdown will not change, so they remain the same
-def read_markdown_file(file_path: str) -> str:
-    """Reads a Markdown file and returns its content as a string."""
-    try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            return f.read()
-    except FileNotFoundError:
-        logger.error(f"File not found: {file_path}")
-        print(f"ERROR: File not found: {file_path}")
-        return "" # Return empty string.
-    except Exception as e:
-        logger.exception(f"Error reading Markdown file {file_path}: {e}")
-        print(f"ERROR: Could not read {file_path}")
-        return ""
+def write_markdown_file(path: str, content: str):
+    """Writes content to a markdown file using UTF-8 encoding."""
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
 
-def write_markdown_file(file_path: str, content: str) -> None:
-    """Writes a string to a Markdown file."""
-    try:
-        # Ensure the directory exists
-        Path(file_path).parent.mkdir(parents=True, exist_ok=True)
-
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.write(content)
-
-    except Exception as e:
-        logger.exception(f"Error writing to Markdown file {file_path}: {e}")
-        print(f"ERROR: Failed to write to {file_path}. See log.")
+def read_markdown_file(path: str) -> str:
+    """Reads content from a markdown file using UTF-8 encoding."""
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
 
 def get_chapter_files(project_dir: str) -> list[str]:
     """Gets a sorted list of chapter files in the project directory."""

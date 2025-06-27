@@ -15,3 +15,4 @@ tenacity
 rich
 pick
 pyyaml
+langcodes

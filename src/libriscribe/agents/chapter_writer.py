@@ -23,6 +23,25 @@ class ChapterWriterAgent(Agent):
         super().__init__("ChapterWriterAgent", llm_client)
 
 
+    def format_scene(scene_title: str, scene_content: str) -> str:
+        """
+        Formats a scene by removing any visible scene title and adding it as a Markdown comment.
+        """
+        formatted_scene_title = f"### **{scene_title}**"
+        # Remove visible scene title if present (robust to whitespace)
+        content = scene_content.lstrip()
+        for variant in [
+            formatted_scene_title,
+            f"**{scene_title}**",
+            f"### {scene_title}",
+            f"# {scene_title}",
+            scene_title
+        ]:
+            if content.startswith(variant):
+                content = content[len(variant):].lstrip()
+        # Always prepend the comment version
+        scene_title_comment = f"<!-- {formatted_scene_title} -->"
+        return f"{scene_title_comment}\n\n{content}"
     def execute(self, project_knowledge_base: ProjectKnowledgeBase, chapter_number: int, output_path: Optional[str] = None) -> None:
         """Writes a chapter scene by scene."""
         try:
@@ -99,24 +118,11 @@ class ChapterWriterAgent(Agent):
                 # Generate the scene content
                 scene_content = self.llm_client.generate_content(scene_prompt, max_tokens=2000)
                 if not scene_content:
-                    console.print(f"[yellow]Warning: Failed to generate content for Scene {scene.scene_number}. Using placeholder.[/yellow]")
-                    scene_content = f"[Scene {scene.scene_number} content unavailable]"
+                    error_msg = f"Failed to generate content for Scene {scene.scene_number}."
+                    console.print(f"[red]{error_msg}[/red]")
+                    raise RuntimeError(error_msg)
 
-                # Ensure the scene title is included as a comment only
-                formatted_scene_title = f"### **{scene_title}**"
-                scene_title_comment = f"<!-- \n{formatted_scene_title} -->"
-
-                # Remove any visible scene title at the start
-                if scene_content.startswith(formatted_scene_title):
-                    scene_content = scene_content[len(formatted_scene_title):].lstrip()
-                elif scene_content.startswith(f"**{scene_title}**"):
-                    scene_content = scene_content[len(f"**{scene_title}**"):].lstrip()
-                elif scene_content.startswith(f"### {scene_title}"):
-                    scene_content = scene_content[len(f"### {scene_title}") :].lstrip()
-
-                # Always prepend the comment version
-                scene_content = f"{scene_title_comment}\n\n{scene_content}"
-
+                scene_content = self.format_scene(scene_title, scene_content)
                 scene_contents.append(scene_content)
 
 

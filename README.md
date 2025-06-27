@@ -51,6 +51,7 @@ python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -e .
 pip install -r requirements.txt
+sudo apt install fonts-firacode fonts-ebgaramond
 ```
 
 ### 2. Configuration
