@@ -1,0 +1,73 @@
+# Template for the headers added to .md file to generate better pdf
+title: "Titre par défaut"              # Main title of the book (used in PDF title page and headers)
+subtitle: "Sous-titre par défaut"      # Subtitle (shown under the title)
+author: "Auteur inconnu"               # Author name(s), shown on title page and in PDF metadata
+lang: fr-FR                            # Language (affects hyphenation, etc.)
+abstract: "Résumé par défaut du livre." # Short summary, used in PDF metadata and sometimes in front matter
+genre: "Essai"                         # Book genre (for your reference or custom metadata)
+publisher: "Auto-édition"              # Publisher name (shown in PDF header/footer if set, replaces 'My Company')
+isbn: ""                               # ISBN number (optional, for cataloging)
+rights: "© 2025 Substantifik. All Rights Reserved." # Copyright or license info
+
+toc: true                              # Include a Table of Contents
+toc-title: "Table des Matières"        # Title for the TOC
+titlepage: true
+toc-own-page: true                     # Place TOC on its own page
+
+lof: false                             # List of Figures (set true if you have figures/images)
+lot: false                             # List of Tables (set true if you have tables)
+
+colorlinks: true                       # Use colored links in PDF (recommended for digital)
+linkcolor: "blue"                      # Color for links (e.g., blue, red, etc.)
+
+header-left: "A Book for You"
+footer-right: "\\thepage / \\pageref{LastPage}"
+
+mainfont: "TeX Gyre Pagella"          # Main text font (Eisvogel default) or EB Garamond or Charis SIL or Noto Serif; Linux Libertine O (not full unicode), TeX Gyre Pagella, Libertinus Serif
+sansfont: "Linux Biolinum O"           # Sans-serif font (Eisvogel default) or Source Sans Pro, TeX Gyre Heros,
+monofont: "Fira Code"                  # Monospace font (no ubuntu package for Fira Mono)
+fontsize: "12pt"                       # Base font size
+geometry: "margin=2.5cm"               # Page margins
+
+# --- LaTeX header-includes ---
+# These lines are injected into the LaTeX preamble.
+# Impact: Control chapter/page breaks, typography, and other advanced formatting.
+header-includes:
+  - "\\newcommand{\\sectionbreak}{\\clearpage}"  # Start each chapter on a new page
+  - "\\usepackage{etoolbox}"           # Needed for the next block
+  - |                                  # Ensures chapters start on right-hand (recto) pages (adds blank if needed)
+    \\preto\\chapter{%
+      \\cleardoublepage%
+      \\ifodd\\value{page}\\else\\hbox{}\\newpage\\fi%
+    }
+  - "\\usepackage{microtype}"          # Better typography
+  - "\\usepackage{csquotes}"           # Proper quotation marks
+  - "\\usepackage{lastpage}"
+
+  - "\\usepackage{babel}"
+  - "\\usepackage{csquotes}"
+
+# fix for pagecolor
+  - "\\usepackage{xcolor}"
+  - "\\usepackage{pagecolor}"
+  - "\\pagecolor{white}"
+
+# for babel
+  - "\\usepackage[fr]{babel}"
+  - "\\babelfont{sf}{Linux Biolinum O}"
+  - "\\babelfont{tt}{Fira Code}"
+
+# with font fallback for emojis (clash with babel)
+#  - "\\usepackage{fontspec}" # clash with babel
+#  - "\\newfontfamily\\emoji{Noto Color Emoji}[Renderer=Harfbuzz,Scale=MatchUppercase]"
+#  - "\\DeclareTextFontCommand{\\textemoji}{\emoji}"
+
+# --- Keywords for PDF metadata and searchability ---
+keywords:
+  - hero
+  - fantasy
+  - imaginaire
+
+# --- Other useful options you can add ---
+# cover-image: cover.jpg               # Path to a cover image (shown on title page if present)
+# date: "2025-06-26"                   # Publication date (shown on title page and in metadata)

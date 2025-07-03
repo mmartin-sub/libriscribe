@@ -33,7 +33,7 @@ def generate_yaml_metadata(project_knowledge_base):
     # Load defaults from default.yaml
     defaults = {}
     if hasattr(project_knowledge_base, "project_dir") and project_knowledge_base.project_dir:
-        default_yaml_path = os.path.join(project_knowledge_base.project_dir, "default.yaml")
+        default_yaml_path = os.path.join(project_knowledge_base.project_dir, "../../conf", "default-book.yaml")
         if os.path.isfile(default_yaml_path):
             with open(default_yaml_path, "r", encoding="utf-8") as f:
                 defaults = yaml.safe_load(f) or {}
@@ -66,12 +66,13 @@ def generate_yaml_metadata(project_knowledge_base):
         value = get_field(src_key)
         if value is not None:
             if yaml_key == "keywords":
-                # If keywords is a string, split by comma
                 if isinstance(value, str):
                     value = [w.strip() for w in value.split(",")]
                 metadata[yaml_key] = value
             elif yaml_key == "lang":
                 metadata[yaml_key] = normalize_language(value)
+            elif yaml_key == "abstract":
+                metadata[yaml_key] = ensure_literal_block(value)
             else:
                 metadata[yaml_key] = value
 

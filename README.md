@@ -51,7 +51,8 @@ python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -e .
 pip install -r requirements.txt
-sudo apt install fonts-firacode fonts-ebgaramond
+sudo apt install fonts-firacode fonts-ebgaramond fonts-noto fonts-texgyre fonts-noto-color-emoji texlive-luatex texlive-lang-french
+luaotfload-tool -f -u
 ```
 
 ### 2. Configuration
