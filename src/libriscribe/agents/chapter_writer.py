@@ -10,6 +10,7 @@ from libriscribe.knowledge_base import ProjectKnowledgeBase, Chapter, Scene
 from libriscribe.utils.llm_client import LLMClient
 
 import json
+import re
 from rich.console import Console
 
 console = Console()
@@ -27,21 +28,20 @@ class ChapterWriterAgent(Agent):
         """
         Formats a scene by removing any visible scene title and adding it as a Markdown comment.
         """
-        formatted_scene_title = f"### **{scene_title}**"
-        # Remove visible scene title if present (robust to whitespace)
+        # Remove any Markdown heading that starts with the scene title (robust to variants)
         content = scene_content.lstrip()
-        for variant in [
-            formatted_scene_title,
-            f"**{scene_title}**",
-            f"### {scene_title}",
-            f"# {scene_title}",
-            scene_title
-        ]:
-            if content.startswith(variant):
-                content = content[len(variant):].lstrip()
-        # Always prepend the comment version
-        scene_title_comment = f"<!-- {formatted_scene_title} -->"
+        # Regex: match headings like ### **Scene 1: ...**, ### Scene 1: ..., **Scene 1: ...**, Scene 1: ...
+        pattern = re.compile(
+            r"^(#{{1,6}}\s*)?(\*\*)?{}.*?(\*\*)?\s*\n*-*\n*".format(re.escape(scene_title)),
+            re.IGNORECASE | re.DOTALL
+        )
+        content, n = pattern.subn('', content, count=1)
+        if n == 0:
+            self.logger.debug(f"No scene title heading matched for removal in scene: '{scene_title}'")
+        # Always prepend the comment version (with full scene title)
+        scene_title_comment = f"<!-- ### **{scene_title}** -->"
         return f"{scene_title_comment}\n\n{content}"
+
     def execute(self, project_knowledge_base: ProjectKnowledgeBase, chapter_number: int, output_path: Optional[str] = None) -> None:
         """Writes a chapter scene by scene."""
         try:
@@ -92,8 +92,10 @@ class ChapterWriterAgent(Agent):
             for scene in ordered_scenes:
                 console.print(f"🎬 Creating Scene/Section {scene.scene_number} of {len(ordered_scenes)}...")
 
-                # Generate a scene title if none exists
-                scene_title = f"Scene {scene.scene_number}: {scene.summary[:30]}..." if len(scene.summary) > 30 else f"Scene {scene.scene_number}: {scene.summary}"
+                # Use full summary for scene title
+                scene_title = f"Scene {scene.scene_number}: {scene.summary}"
+
+                self.logger.debug(f"Prompting LLM for scene {scene.scene_number} with title: {scene_title}")
 
                 # Create a prompt for this specific scene
                 scene_prompt = prompts.SCENE_PROMPT.format(
@@ -102,7 +104,7 @@ class ChapterWriterAgent(Agent):
                     book_title=project_knowledge_base.title,
                     genre=project_knowledge_base.genre,
                     category=project_knowledge_base.category,
-                    language=project_knowledge_base.language,  # Add language parameter
+                    language=project_knowledge_base.language,
                     chapter_summary=chapter.summary,
                     scene_number=scene.scene_number,
                     scene_summary=scene.summary,
@@ -113,10 +115,14 @@ class ChapterWriterAgent(Agent):
                     total_scenes=len(ordered_scenes)
                 )
 
-                scene_prompt += f"\n\nIMPORTANT: Begin the scene with the title: ### **{scene_title}** (as a Markdown heading, bolded)"
+                # Add the new instruction from prompts.py
+                scene_prompt += "\n\n" + prompts.SCENE_TITLE_INSTRUCTION.format(
+                    scene_number=scene.scene_number,
+                    scene_summary=scene.summary
+                )
 
-                # Generate the scene content
-                scene_content = self.llm_client.generate_content(scene_prompt, max_tokens=2000)
+                scene_content = self.llm_client.generate_content(scene_prompt) #, max_tokens=2000
+                self.logger.debug(f"LLM output for scene {scene.scene_number} (first 100 chars): {scene_content[:100]!r}")
                 if not scene_content:
                     error_msg = f"Failed to generate content for Scene {scene.scene_number}."
                     console.print(f"[red]{error_msg}[/red]")
@@ -127,7 +133,7 @@ class ChapterWriterAgent(Agent):
 
 
             # Combine scenes into a complete chapter
-            chapter_content = f"## Chapter {chapter_number}: {chapter.title}\n\n"
+            chapter_content = f"# Chapter {chapter_number}: {chapter.title}\n\n"
             chapter_content += "\n\n".join(scene_contents)
 
             # Save the chapter

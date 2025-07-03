@@ -48,7 +48,7 @@ class FormattingAgent(Agent):
             # Format with LLM
             console.print(f"📚 [cyan]Assembling final manuscript...[/cyan]")
             prompt = prompts.FORMATTING_PROMPT.format(chapters=all_chapters_content,  language=project_knowledge_base.language)
-            formatted_markdown = self.llm_client.generate_content(prompt, max_tokens=120000) # May need large token limit
+            formatted_markdown = self.llm_client.generate_content(prompt) # May need large token limit , max_tokens=120000
 
             # Add title page (before LLM formatting, for simplicity)
             title_page = self.create_title_page(project_knowledge_base)

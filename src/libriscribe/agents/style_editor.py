@@ -51,7 +51,7 @@ class StyleEditorAgent(Agent):
         ---
         """  # Added Markdown code block
         try:
-            response = self.llm_client.generate_content(prompt, max_tokens=3000)
+            response = self.llm_client.generate_content(prompt) # , max_tokens=3000
 
             # Extract the revised content from the response
             if "```" in response:

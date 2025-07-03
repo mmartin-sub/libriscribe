@@ -1,4 +1,4 @@
-# src/libriscribe/agents/plagiarism_checker.py 
+# src/libriscribe/agents/plagiarism_checker.py
 
 import asyncio
 import logging
@@ -44,7 +44,7 @@ class PlagiarismCheckerAgent(Agent):
         prompt = f"""
        You are a plagiarism detection expert. Analyze the following text for potential plagiarism.
        The text is written in {project_knowledge_base.language}.
-       
+
        Do NOT compare it to the entire internet. Instead, focus on identifying common phrases, sentence structures,
        or ideas that might indicate a lack of originality.  If you find something that raises concerns,
        return it as a JSON array. Each item should have this format: {{"text": "...", "similarity_score": 0.8, "source": "Possible source or explanation"}}.
@@ -56,7 +56,7 @@ class PlagiarismCheckerAgent(Agent):
        ---
        """
         try:
-            response_json_str = self.llm_client.generate_content(prompt, max_tokens=500)
+            response_json_str = self.llm_client.generate_content(prompt) # , max_tokens=500
             results = extract_json_from_markdown(response_json_str)
             if results is None:
                 return []  # Return empty list on parsing failure

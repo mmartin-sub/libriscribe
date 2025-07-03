@@ -88,7 +88,25 @@ def generate_yaml_metadata(project_knowledge_base, write_to_file=True):
             ensure_literal_block(item) for item in metadata["header-includes"]
         ]
 
-    yaml_block = "---\n" + yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True) + "---\n"
+    try:
+        yaml_block = "---\n" + yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True) + "---\n"
+    except Exception as e:
+        # Save the problematic metadata for debugging
+        error_path = os.path.join(
+            getattr(project_knowledge_base, 'project_dir', os.getcwd()),
+            "config-error.yaml"
+        )
+        with open(error_path, "w", encoding="utf-8") as f:
+            # Use repr() to ensure all objects are stringified
+            import pprint
+            f.write("# YAML serialization error. Raw metadata below:\n")
+            pprint.pprint(metadata, stream=f, width=120)
+        # Print types of all metadata fields for debugging
+        print("[DEBUG] Metadata field types (on YAML serialization error):")
+        for k, v in metadata.items():
+            print(f"  {k}: {type(v)}")
+        print(f"[red]❌ Error serializing YAML metadata. Saved problematic data to: {error_path}[/red]")
+        raise e
 
     # Add log message
     print(f"[LOG] YAML metadata updated")

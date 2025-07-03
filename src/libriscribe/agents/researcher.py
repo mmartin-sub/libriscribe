@@ -10,10 +10,12 @@ from libriscribe.utils import prompts_context as prompts
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils.file_utils import write_markdown_file
 from rich.console import Console
-console = Console()
-# Third-party imports for web scraping (requests and BeautifulSoup)
 import requests
 from bs4 import BeautifulSoup
+
+console = Console()
+# Third-party imports for web scraping (requests and BeautifulSoup)
+
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +32,7 @@ class ResearcherAgent(Agent):
             # Use LLM to generate initial research summary
             console.print(f"🔎 [cyan]Researching: {query}...[/cyan]")
             prompt = prompts.RESEARCH_PROMPT.format(query=query, language=project_knowledge_base.language)
-            llm_summary = self.llm_client.generate_content(prompt, max_tokens=1000)
+            llm_summary = self.llm_client.generate_content(prompt) # , max_tokens=1000
 
 
             # Basic web scraping (example with Google Search - adapt as needed)

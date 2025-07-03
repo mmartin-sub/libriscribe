@@ -439,6 +439,11 @@ Important: Focus on showing rather than telling. Create an immersive experience 
 IMPORTANT: The content should be written entirely in {language}.
 """
 
+SCENE_TITLE_INSTRUCTION = (
+    "IMPORTANT: Begin the scene with the title: ## Scene {scene_number}: {scene_summary} "
+    "(as a Markdown heading, not bold, not triple #, no extra formatting)"
+)
+
 def clean_worldbuilding_for_category(project_knowledge_base: ProjectKnowledgeBase):
     """
     Clean the worldbuilding object to only keep fields relevant to the project category.

@@ -80,7 +80,7 @@ class ContentReviewerAgent(Agent):
         ---
         """
         try:
-            review_results = self.llm_client.generate_content(prompt, max_tokens=1500)
+            review_results = self.llm_client.generate_content(prompt) # , max_tokens=1500
             return {"review": review_results}
         except Exception as e:
             self.logger.exception(f"Error reviewing chapter {chapter_path}: {e}")

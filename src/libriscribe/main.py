@@ -37,7 +37,7 @@ LOG_FILE_NAME = "libriscribe.log"
 
 # Configure logging (same as before)
 logging.basicConfig(
-    level=logging.DEBUG, #.INFO
+    level=logging.INFO, #.INFO, DEBUG
     format="%(message)s",
     handlers=[
         # Set the log file to append mode ('a')
@@ -179,7 +179,7 @@ def generate_questions_with_llm(category: str, genre: str) -> Dict[str, Any]:
         return {}
 
     try:
-        response = llm_client.generate_content(prompt, max_tokens=500)
+        response = llm_client.generate_content(prompt) # max_tokens=500
 
         # Clean the response - find JSON content
         response = response.strip()

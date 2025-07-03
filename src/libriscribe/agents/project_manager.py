@@ -305,7 +305,7 @@ class ProjectManagerAgent:
             # Format with LLM to ensure proper structure and flow
             console.print(f"{self.agents['formatting'].name} is: Formatting Original Chapters...")
             prompt = prompts.FORMATTING_PROMPT.format(language=self.project_knowledge_base.language, chapters=original_content)
-            formatted_original = self.llm_client.generate_content(prompt, max_tokens=4000)
+            formatted_original = self.llm_client.generate_content(prompt) # , max_tokens=4000
 
             # Add title page
             title_page = self.agents["formatting"].create_title_page(self.project_knowledge_base)
@@ -367,7 +367,7 @@ class ProjectManagerAgent:
             # Format with LLM
             console.print(f"{self.agents['formatting'].name} is: Formatting Revised Chapters...")
             prompt_revised = prompts.FORMATTING_PROMPT.format(language=self.project_knowledge_base.language, chapters=revised_content)
-            formatted_revised = self.llm_client.generate_content(prompt_revised, max_tokens=8000)
+            formatted_revised = self.llm_client.generate_content(prompt_revised) #, max_tokens=8000
             formatted_revised = yaml_metadata + title_page + formatted_revised
 
             # Save as Markdown or PDF (revised)
@@ -383,6 +383,7 @@ class ProjectManagerAgent:
         except Exception as e:
             self.logger.exception(f"Error formatting book: {e}")
             console.print(f"[red]ERROR: Failed to format the book: {str(e)}[/red]")
+            raise e
 
     def research(self, query: str):
         """Performs web research."""

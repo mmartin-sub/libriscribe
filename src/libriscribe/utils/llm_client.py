@@ -22,7 +22,7 @@ llm_logger = logging.getLogger("libriscribe.llm")
 llm_log_handler = logging.FileHandler("libriscribe_llm.log", mode="a", encoding="utf-8")
 llm_log_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
 llm_logger.addHandler(llm_log_handler)
-llm_logger.setLevel(logging.DEBUG)
+llm_logger.setLevel(logging.INFO)
 
 
 class LLMClient:
@@ -87,7 +87,7 @@ class LLMClient:
     def generate_content(
         self,
         prompt: str,
-        max_tokens: int = 2000,
+        max_tokens: int = 2000, # Deprecated
         temperature: float = 0.7,
         language: str = "English",
         timeout: int = None,  # <-- Add timeout parameter
@@ -113,7 +113,7 @@ class LLMClient:
                 response = self.client.chat.completions.create(
                     model=self.model,
                     messages=[{"role": "user", "content": prompt}],
-                    max_tokens=max_tokens,
+                #    max_tokens=max_tokens,
                     temperature=temperature,
                     timeout=timeout,
                 )
@@ -125,7 +125,7 @@ class LLMClient:
             elif self.llm_provider == "claude":
                 response = self.client.messages.create(
                     model=self.model,
-                    max_tokens=max_tokens,
+                #    max_tokens=max_tokens,
                     temperature=temperature,
                     messages=[{"role": "user", "content": prompt}]
                 )
@@ -217,9 +217,9 @@ class LLMClient:
             )
             raise
     @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(3))
-    def generate_content_with_json_repair(self, original_prompt: str, max_tokens:int = 2000, temperature:float=0.7) -> str:
+    def generate_content_with_json_repair(self, original_prompt: str, temperature:float=0.7) -> str: # max_tokens:int = 2000,
         """Generates content and attempts to repair JSON errors."""
-        response_text = self.generate_content(original_prompt, max_tokens, temperature)
+        response_text = self.generate_content(prompt=original_prompt, temperature=temperature) # max_tokens,
         if response_text:
             json_data = extract_json_from_markdown(response_text)
             if json_data is not None:
@@ -228,7 +228,7 @@ class LLMClient:
 
                 # If JSON extraction failed, attempt to repair the JSON
                 repair_prompt = f"You are a helpful AI that only returns valid JSON. Fix the following broken JSON:\n\n```json\n{response_text}\n```"
-                repaired_response = self.generate_content(repair_prompt, max_tokens=max_tokens, temperature=0.2) # Low temp for corrections
+                repaired_response = self.generate_content(prompt=repair_prompt,  temperature=0.2) # Low temp for corrections, max_tokens=max_tokens,
                 if repaired_response:
                     repaired_json = extract_json_from_markdown(repaired_response)
                     if repaired_json is not None:

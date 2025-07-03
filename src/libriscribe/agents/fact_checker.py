@@ -1,4 +1,4 @@
-# src/libriscribe/agents/fact_checker.py 
+# src/libriscribe/agents/fact_checker.py
 import asyncio
 import logging
 from typing import Any, Dict, List
@@ -78,7 +78,7 @@ class FactCheckerAgent(Agent):
         """
 
         try:
-            result_json_str = self.llm_client.generate_content(prompt, max_tokens=500)
+            result_json_str = self.llm_client.generate_content(prompt) # , max_tokens=500
             result = extract_json_from_markdown(result_json_str)
             if result is None:
                 return {"claim":claim, "result": "Error", "explanation": "Failed to parse LLM Response", "sources": []}

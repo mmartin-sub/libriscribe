@@ -41,7 +41,7 @@ class OutlinerAgent(Agent):
                 initial_prompt += f"\n\nIMPORTANT: Generate at most {max_chapters} chapters."
 
             console.print(f"📝 [cyan]Creating chapter outline...[/cyan]")
-            initial_outline = self.llm_client.generate_content(initial_prompt, max_tokens=3000, temperature=0.5)
+            initial_outline = self.llm_client.generate_content(initial_prompt, temperature=0.5) #max_tokens=3000
             if not initial_outline:
                 logger.error("Initial outline generation failed.")
                 return
@@ -187,7 +187,7 @@ class OutlinerAgent(Agent):
             """
 
             console.print(f"  Generating Scene Outline for Chapter {chapter.chapter_number}...")
-            scene_outline_md = self.llm_client.generate_content(scene_prompt, max_tokens=2000, temperature=0.5)
+            scene_outline_md = self.llm_client.generate_content(scene_prompt, temperature=0.5) # max_tokens=2000,
             if not scene_outline_md:
                 logger.error(f"Scene outline generation failed for Chapter {chapter.chapter_number}.")
                 return

@@ -10,5 +10,7 @@ src/libriscribe/utils/__pycache__/
 src/libriscribe/agents/__pycache__/
 projects/
 libriscribe.log
+libriscribe_llm.log
+*.log
 .trunk/
 .trunk/logs/
