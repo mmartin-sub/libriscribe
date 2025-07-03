@@ -26,6 +26,9 @@ from libriscribe.utils import prompts_context as prompts
 from libriscribe.knowledge_base import ProjectKnowledgeBase, Worldbuilding
 from libriscribe.utils.llm_client import LLMClient
 from libriscribe.utils.markdown_utils import generate_yaml_metadata
+
+from libriscribe.settings import REVISED_SUFFIX
+
 # For PDF generation
 from fpdf import FPDF
 import typer  # Import typer
@@ -142,7 +145,7 @@ class ProjectManagerAgent:
                 # Verify save
                 if Path(file_path).exists():
                     # Read back and verify
-                    loaded_data = ProjectKnowledgeBase.load_from_file(file_path)
+                    loaded_data = ProjectKnowledgeBase.load_from_file(file_path)  # noqa: F841
                 else:
                     logger.error(f"File not created: {file_path}")
             except Exception as e:
@@ -305,8 +308,8 @@ class ProjectManagerAgent:
             formatted_original = self.llm_client.generate_content(prompt, max_tokens=4000)
 
             # Add title page
-            title_page = self.create_title_page(self.project_knowledge_base)
-            yaml_metadata = generate_yaml_metadata(self.project_knowledge_base)
+            title_page = self.agents["formatting"].create_title_page(self.project_knowledge_base)
+            yaml_metadata = generate_yaml_metadata(self.project_knowledge_base, write_to_file=True)
             formatted_original = yaml_metadata + title_page + formatted_original
 
             # Determine output path for original version
@@ -331,7 +334,7 @@ class ProjectManagerAgent:
 
             # Check if we have any revised chapters
             for chapter_num in range(1, total_chapters + 1):
-                if (self.project_dir / f"chapter_{chapter_num}_revised.md").exists():
+                if (self.project_dir / f"chapter_{chapter_num}_{REVISED_SUFFIX}.md").exists():
                     has_revised_chapters = True
                     break
 
@@ -341,7 +344,7 @@ class ProjectManagerAgent:
 
             # Process revised chapters
             for chapter_num in range(1, total_chapters + 1):
-                revised_path = self.project_dir / f"chapter_{chapter_num}_revised.md"
+                revised_path = self.project_dir / f"chapter_{chapter_num}_{REVISED_SUFFIX}.md"
                 original_path = self.project_dir / f"chapter_{chapter_num}.md"
 
                 if revised_path.exists():
@@ -364,16 +367,16 @@ class ProjectManagerAgent:
             # Format with LLM
             console.print(f"{self.agents['formatting'].name} is: Formatting Revised Chapters...")
             prompt_revised = prompts.FORMATTING_PROMPT.format(language=self.project_knowledge_base.language, chapters=revised_content)
-            formatted_revised = self.llm_client.generate_content(prompt_revised, max_tokens=4000)
+            formatted_revised = self.llm_client.generate_content(prompt_revised, max_tokens=8000)
             formatted_revised = yaml_metadata + title_page + formatted_revised
 
             # Save as Markdown or PDF (revised)
             if output_path.endswith(".md"):
                 write_markdown_file(output_path, formatted_revised)
-                console.print(f"[green]Revised version formatted and saved to: {output_path}[/green]")
+                console.print(f"[green]Revised version formatted and saved to md: {output_path}[/green]")
             elif output_path.endswith(".pdf"):
                 self.markdown_to_pdf(formatted_revised, output_path)
-                console.print(f"[green]Revised version formatted and saved to: {output_path}[/green]")
+                console.print(f"[green]Revised version formatted and saved to pdf: {output_path}[/green]")
             else:
                 console.print(f"[red]ERROR: Unsupported output format: {output_path}. Must be .md or .pdf[/red]")
 
@@ -386,7 +389,7 @@ class ProjectManagerAgent:
         self.run_agent("researcher", query, str(self.project_dir / "research_results.md"))# type: ignore
 
     def edit_style(self, chapter_number: int):
-        """Refines writing style."""
+        """Ruefines writing style."""
         self.run_agent("style_editor", chapter_number=chapter_number)
         self.save_project_data()
 
@@ -406,7 +409,13 @@ class ProjectManagerAgent:
         """Reviews chapter content."""
         chapter_path = str(self.project_dir / f"chapter_{chapter_number}.md")# type: ignore
         results = self.agents["content_reviewer"].execute(chapter_path) # type: ignore
-        print(f"Content review results for chapter {chapter_number}:\n{results.get('review', 'No review available.')}")
+        review_content = results.get('review', None)
+        if not review_content or review_content == 'No review available.':
+            raise RuntimeError(f"No review available for chapter {chapter_number}.")
+        review_path = str(self.project_dir / f"chapter_{chapter_number}_review.md")
+        from libriscribe.utils.file_utils import write_markdown_file
+        write_markdown_file(review_path, review_content)
+        print(f"Content review for chapter {chapter_number} saved to {review_path}")
 
     def does_chapter_exist(self, chapter_number: int) -> bool:
         """Checks if a chapter file exists."""
@@ -419,31 +428,6 @@ class ProjectManagerAgent:
             self.save_project_data()  # This should not output anything to console
         except Exception as e:
             logger.error(f"Checkpoint failed: {e}")
-
-    def create_title_page(self, project_knowledge_base:ProjectKnowledgeBase) -> str: # now accepts ProjectKnowledgeBase
-        """Creates a Markdown title page."""
-        title = project_knowledge_base.title
-        author = project_knowledge_base.get('author', 'Unknown Author')  # Assuming you might add author later
-        genre = project_knowledge_base.genre
-        language = project_knowledge_base.language
-        title_page = f"# {title}\n\n"
-        # Check language for different title page formats
-        if language == "English":
-            title_page += f"## By {author}\n\n"
-            title_page += f"**Genre:** {genre}\n\n"
-        elif language == "Brazilian Portuguese":
-            title_page += f"## Por {author}\n\n"
-            title_page += f"**Gênero:** {genre}\n\n"
-        elif language == "French":
-            title_page += f"## Par {author}\n\n"
-            title_page += f"**Genre:** {genre}\n\n"
-        # Add other language variations as needed
-        else:
-            # Default to English if language not specifically handled
-            title_page += f"## By {author}\n\n"
-            title_page += f"**Genre:** {genre}\n\n"
-
-        return title_page
 
     def markdown_to_pdf(self, markdown_text:str, output_path:str):
       """Converts the formatted markdown to PDF"""

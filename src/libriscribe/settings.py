@@ -6,6 +6,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Manuscript file constants
+MANUSCRIPT_FILENAME: str = "manuscript"
+MANUSCRIPT_MD_FILENAME: str = MANUSCRIPT_FILENAME + ".md"
+MANUSCRIPT_PDF_FILENAME: str = MANUSCRIPT_FILENAME + ".pdf"
+
+REVISED_SUFFIX: str = "revised"  # <--- Add this line
+SCENES_JSON:str = "scenes.json"
 class Settings(BaseSettings):
     openai_api_key: str = ""  # Optional, can be empty
     google_ai_studio_api_key: str = ""

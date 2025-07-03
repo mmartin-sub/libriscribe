@@ -18,6 +18,12 @@ logger = logging.getLogger(__name__)
 httpx_logger = logging.getLogger("httpx")
 httpx_logger.setLevel(logging.WARNING)  # Or ERROR, to suppress even warnings
 
+llm_logger = logging.getLogger("libriscribe.llm")
+llm_log_handler = logging.FileHandler("libriscribe_llm.log", mode="a", encoding="utf-8")
+llm_log_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+llm_logger.addHandler(llm_log_handler)
+llm_logger.setLevel(logging.DEBUG)
+
 
 class LLMClient:
     """Unified LLM client for multiple providers."""
@@ -99,10 +105,9 @@ class LLMClient:
             if "IMPORTANT: The content should be written entirely in" not in prompt and language != "English":
                 prompt += f"\n\nIMPORTANT: Generate the response in {language}."
 
+            llm_logger.debug(f"PROMPT (provider={self.llm_provider}, model={self.model}):\n{prompt}")
+
             if self.llm_provider == "openai":
-                # Debug: Print base URL and timeout before making the request
-                # print(f"[DEBUG] OpenAI base_url: {getattr(self.client, 'base_url', 'unknown')}")
-                # print(f"[DEBUG] OpenAI timeout: {timeout}")
                 logger.debug(f"OpenAI base_url: {getattr(self.client, 'base_url', 'unknown')}")
                 logger.debug(f"OpenAI timeout: {timeout}")
                 response = self.client.chat.completions.create(
@@ -110,9 +115,12 @@ class LLMClient:
                     messages=[{"role": "user", "content": prompt}],
                     max_tokens=max_tokens,
                     temperature=temperature,
-                    timeout=timeout,  # <-- Pass timeout here
+                    timeout=timeout,
                 )
-                return response.choices[0].message.content.strip()
+                result = response.choices[0].message.content.strip()
+                logger.debug(f"LLMClient response (OpenAI):\n{result}")
+                llm_logger.debug(f"RESPONSE (provider={self.llm_provider}, model={self.model}):\n{result}")
+                return result
 
             elif self.llm_provider == "claude":
                 response = self.client.messages.create(
@@ -121,12 +129,18 @@ class LLMClient:
                     temperature=temperature,
                     messages=[{"role": "user", "content": prompt}]
                 )
-                return response.content[0].text.strip()
+                result = response.content[0].text.strip()
+                logger.debug(f"LLMClient response (Claude):\n{result}")
+                llm_logger.debug(f"RESPONSE (provider={self.llm_provider}, model={self.model}):\n{result}")
+                return result
 
             elif self.llm_provider == "google_ai_studio":
                 model = self.client.GenerativeModel(model_name=self.model)
-                response = model.generate_content(prompt) # No need for messages list with genai
-                return response.text.strip()
+                response = model.generate_content(prompt)
+                result = response.text.strip()
+                logger.debug(f"LLMClient response (Google AI Studio):\n{result}")
+                llm_logger.debug(f"RESPONSE (provider={self.llm_provider}, model={self.model}):\n{result}")
+                return result
 
             elif self.llm_provider == "deepseek":
                 headers = {
@@ -143,10 +157,14 @@ class LLMClient:
                     "https://api.deepseek.com/v1/chat/completions",
                     headers=headers,
                     json=data,
-                    timeout=timeout  # <-- Pass timeout here
+                    timeout=timeout
                 )
                 response.raise_for_status()
-                return response.json()["choices"][0]["message"]["content"].strip()
+                result = response.json()["choices"][0]["message"]["content"].strip()
+                logger.debug(f"LLMClient response (DeepSeek):\n{result}")
+                llm_logger.debug(f"RESPONSE (provider={self.llm_provider}, model={self.model}):\n{result}")
+                return result
+
             elif self.llm_provider == "mistral":
                 headers = {
                     "Content-Type": "application/json",
@@ -163,13 +181,17 @@ class LLMClient:
                     "https://api.mistral.ai/v1/chat/completions",
                     headers=headers,
                     json=data,
-                    timeout=timeout  # <-- Pass timeout here
+                    timeout=timeout
                 )
                 response.raise_for_status()
-                return response.json()['choices'][0]['message']['content'].strip()
+                result = response.json()['choices'][0]['message']['content'].strip()
+                logger.debug(f"LLMClient response (Mistral):\n{result}")
+                llm_logger.debug(f"RESPONSE (provider={self.llm_provider}, model={self.model}):\n{result}")
+                return result
 
             else:
-                return "" #  Should not happen, provider checked in init
+                logger.error(f"Unknown LLM provider: {self.llm_provider}")
+                return ""
 
         except openai.APITimeoutError:
             logger.error(
@@ -185,7 +207,6 @@ class LLMClient:
                 f"Prompt: {prompt[:500]}{'...' if len(prompt) > 500 else ''}"
             )
             raise
-            #return ""  # No traceback for timeout, but maybe it should be raise #tockeck
         except Exception as e:
             logger.exception(f"Error during {self.llm_provider} API call: {e}")
             print(
@@ -194,7 +215,7 @@ class LLMClient:
                 f"Model: {self.model}\n"
                 f"Prompt: {prompt[:500]}{'...' if len(prompt) > 500 else ''}"
             )
-            raise # so the retry mechanism works
+            raise
     @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(3))
     def generate_content_with_json_repair(self, original_prompt: str, max_tokens:int = 2000, temperature:float=0.7) -> str:
         """Generates content and attempts to repair JSON errors."""
@@ -204,8 +225,10 @@ class LLMClient:
             if json_data is not None:
                 return response_text # Return the original markdown
             else:
-                repair_prompt = f"You are a helpful AI that only returns valid JSON.  Fix the following broken JSON:\n\n```json\n{response_text}\n```"
-                repaired_response = self.generate_content(repair_prompt, max_tokens=max_tokens, temperature=0.2) #Low temp for corrections
+
+                # If JSON extraction failed, attempt to repair the JSON
+                repair_prompt = f"You are a helpful AI that only returns valid JSON. Fix the following broken JSON:\n\n```json\n{response_text}\n```"
+                repaired_response = self.generate_content(repair_prompt, max_tokens=max_tokens, temperature=0.2) # Low temp for corrections
                 if repaired_response:
                     repaired_json = extract_json_from_markdown(repaired_response)
                     if repaired_json is not None:

@@ -3,7 +3,8 @@ from datetime import datetime
 import yaml
 import langcodes
 
-class LiteralStr(str): pass
+class LiteralStr(str):
+    pass
 
 def literal_str_representer(dumper, data):
     return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
@@ -28,15 +29,16 @@ def normalize_language(lang_value):
     except Exception:
         return lang_value  # fallback to original if not recognized
 
-def generate_yaml_metadata(project_knowledge_base):
+def generate_yaml_metadata(project_knowledge_base, write_to_file=True):
     import copy
     # Load defaults from default.yaml
     defaults = {}
-    if hasattr(project_knowledge_base, "project_dir") and project_knowledge_base.project_dir:
-        default_yaml_path = os.path.join(project_knowledge_base.project_dir, "../../conf", "default-book.yaml")
-        if os.path.isfile(default_yaml_path):
-            with open(default_yaml_path, "r", encoding="utf-8") as f:
-                defaults = yaml.safe_load(f) or {}
+    # Find project root (three levels up from this file)
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    default_yaml_path = os.path.join(project_root, "conf", "default-book.yaml")
+    if os.path.isfile(default_yaml_path):
+        with open(default_yaml_path, "r", encoding="utf-8") as f:
+            defaults = yaml.safe_load(f) or {}
 
     # Start with all keys from default.yaml
     metadata = copy.deepcopy(defaults)
@@ -47,14 +49,16 @@ def generate_yaml_metadata(project_knowledge_base):
         "subtitle": "subtitle",
         "author": "author",
         "language": "lang",
-        "description": "abstract",
-        "genre": "genre",
+        "abstract": "abstract",         # If you want to override the résumé
+        "description": "description",   # For PDF comment metadata
         "date": "date",
-        "cover-image": "cover-image",
         "keywords": "keywords",
         "publisher": "publisher",
         "isbn": "isbn",
         "rights": "rights",
+        "subject": "subject",           # Add if you want to override
+        "category": "category",         # Add if you want to override
+        "outline": "outline",
     }
 
     # Helper to get value from project_knowledge_base (attribute or dict)
@@ -71,10 +75,9 @@ def generate_yaml_metadata(project_knowledge_base):
                 metadata[yaml_key] = value
             elif yaml_key == "lang":
                 metadata[yaml_key] = normalize_language(value)
-            elif yaml_key == "abstract":
-                metadata[yaml_key] = ensure_literal_block(value)
             else:
-                metadata[yaml_key] = value
+                # Apply ensure_literal_block to all other string values
+                metadata[yaml_key] = ensure_literal_block(value)
 
     # Remove empty values
     metadata = {k: v for k, v in metadata.items() if v not in [None, "", []]}
@@ -86,4 +89,20 @@ def generate_yaml_metadata(project_knowledge_base):
         ]
 
     yaml_block = "---\n" + yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True) + "---\n"
+
+    # Add log message
+    print(f"[LOG] YAML metadata updated")
+
+    # Optionally write to config-metadata.yaml
+    if write_to_file:
+        # Save config-metadata.yaml in the same directory as chapter_*.md files
+        config_dir = getattr(project_knowledge_base, 'project_dir', None)
+        if config_dir is not None:
+            config_path = os.path.join(str(config_dir), "config-metadata.yaml")
+        else:
+            config_path = os.path.join(project_root, "config-metadata.yaml")
+        with open(config_path, "w", encoding="utf-8") as f:
+            yaml.safe_dump(metadata, f, sort_keys=False, allow_unicode=True)
+        print(f"[green]📝 Metadata YAML generated at: {config_path}[/green]")
+
     return yaml_block

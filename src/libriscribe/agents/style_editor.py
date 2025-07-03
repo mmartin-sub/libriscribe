@@ -21,6 +21,7 @@ class StyleEditorAgent(Agent):
     def execute(self, project_knowledge_base: ProjectKnowledgeBase, chapter_number: int) -> None:
         """Refines style based on project settings."""
         chapter_path = str(Path(project_knowledge_base.project_dir) / f"chapter_{chapter_number}.md")
+        self.log_start(chapter_number, chapter_path)
         chapter_content = read_markdown_file(chapter_path)
         if not chapter_content:
             print(f"ERROR: Chapter file is empty or not found: {chapter_path}")
@@ -83,6 +84,7 @@ class StyleEditorAgent(Agent):
             else:
                 print(f"ERROR: Could not extract revised text for {chapter_path}.")
                 self.logger.error(f"Could not extract from StyleEditor response for {chapter_path}.")
+                raise ValueError(f"Could not extract revised text for {chapter_path}.")
 
         except Exception as e:
             self.logger.exception(f"Error during style editing for {chapter_path}: {e}")

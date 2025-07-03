@@ -90,7 +90,7 @@ characters --project-name my_book
 worldbuilding  --project-name my_book
 write --project-name my_book --chapter-number 1
 edit --project-name my_book --chapter-number 1
-Resume --project-name my_book
+resume --project-name my_book
 ```
 
 Choose between:

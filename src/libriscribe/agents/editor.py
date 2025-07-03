@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+import re
 
 from libriscribe.agents.agent_base import Agent
 from libriscribe.utils import prompts_context as prompts
@@ -9,8 +10,10 @@ from libriscribe.utils.file_utils import read_markdown_file, write_markdown_file
 from libriscribe.knowledge_base import ProjectKnowledgeBase
 from libriscribe.utils.llm_client import LLMClient
 from libriscribe.agents.content_reviewer import ContentReviewerAgent
+from libriscribe.settings import REVISED_SUFFIX
 # Add this import
 from rich.console import Console
+from libriscribe.settings import Settings  # Add this import
 console = Console()
 
 
@@ -90,8 +93,33 @@ class EditorAgent(Agent):
 
 
             if revised_chapter:
-                 #--- FIX: Save as chapter_{chapter_number}_revised.md ---
-                revised_chapter_path = str(Path(project_knowledge_base.project_dir) / f"chapter_{chapter_number}_revised.md")
+                lines = revised_chapter.splitlines()
+                # Ensure first non-empty line is a single '#'
+                for i, line in enumerate(lines):
+                    if line.strip().startswith("#"):
+                        lines[i] = "# " + line.lstrip("#").strip()
+                        break
+
+                # Ensure all scene titles are '##'
+                for i, line in enumerate(lines):
+                    if "Scene" in line and line.strip().startswith("#"):
+                        scene_title = line.lstrip("#").strip()
+                        lines[i] = f"\n<!--\n## {scene_title}\n-->\n"
+                    elif line.startswith("## "):
+                        scene_title = line[3:].strip()
+                        lines[i] = f"\n<!--\n## {scene_title}\n-->\n"
+
+                # Optionally, insert section names as HTML comments
+                # Example: if you have a way to detect section starts, insert <!-- Section: Name -->
+                # This requires more context about your section structure
+
+                revised_chapter = "\n".join(lines)
+
+                #--- FIX: Save as chapter_{chapter_number}_{REVISED_SUFFIX}.md ---
+                revised_chapter_path = str(
+                    Path(project_knowledge_base.project_dir) /
+                    f"chapter_{chapter_number}_{REVISED_SUFFIX}.md"
+                )
                 write_markdown_file(revised_chapter_path, revised_chapter)
                 console.print(f"[green]✅ Edited chapter saved![/green]")
             else:
@@ -109,7 +137,7 @@ class EditorAgent(Agent):
         """Extracts chapter number."""
         try:
             return int(chapter_path.split("_")[1].split(".")[0])
-        except:
+        except Exception:
             return -1
 
     def extract_chapter_title(self, chapter_content: str) -> str:
@@ -122,17 +150,25 @@ class EditorAgent(Agent):
     def extract_scene_titles(self, chapter_content: str) -> list[str]:
         """
         Extracts scene titles from chapter content.
-        Looks for lines starting with '**' and containing a colon, e.g.:
-        **Scène 1 : Title**
-        **Scene 2: Title**
-        **Szene 3: Titel**
+        Handles:
+        - Lines starting with '##' and containing a colon.
+        - Lines with '**...**' containing a colon.
+        - Scene titles inside HTML comments.
         """
         scene_titles = []
-        lines = chapter_content.split("\n")
+        # Regex for scene titles in various formats
+        scene_title_patterns = [
+            r'^\s*##\s*(.+?:.+)$',  # Markdown heading
+            r'^\s*\*\*(.+?:.+)\*\*\s*$',  # Bolded
+            r'<!--\s*\*\*(.+?:.+)\*\*\s*-->',  # Bolded inside HTML comment
+            r'<!--\s*##\s*(.+?:.+)\s*-->',  # Heading inside HTML comment
+        ]
+        lines = chapter_content.splitlines()
         for line in lines:
-            line = line.strip()
-            if line.startswith("**") and ":" in line and line.endswith("**"):
-                # Remove the surrounding '**'
-                title = line[2:-2].strip()
-                scene_titles.append(title)
+            for pattern in scene_title_patterns:
+                match = re.match(pattern, line.strip())
+                if match:
+                    title = match.group(1).strip()
+                    scene_titles.append(title)
+                    break  # Only match one pattern per line
         return scene_titles

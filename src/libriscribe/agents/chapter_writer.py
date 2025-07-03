@@ -23,7 +23,7 @@ class ChapterWriterAgent(Agent):
         super().__init__("ChapterWriterAgent", llm_client)
 
 
-    def format_scene(scene_title: str, scene_content: str) -> str:
+    def format_scene(self, scene_title: str, scene_content: str) -> str:
         """
         Formats a scene by removing any visible scene title and adding it as a Markdown comment.
         """

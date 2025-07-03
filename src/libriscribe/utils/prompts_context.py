@@ -1,7 +1,7 @@
 # src/libriscribe/utils/prompts_context.py
 
 from typing import Any, Dict, Optional, List, Union, Tuple
-from libriscribe.knowledge_base import ProjectKnowledgeBase
+from libriscribe.knowledge_base import ProjectKnowledgeBase, Worldbuilding
 
 def get_worldbuilding_aspects(category: str) -> str:
     """Dynamically returns worldbuilding aspects based on the project category."""
@@ -154,7 +154,7 @@ Appendices: (Supplementary materials, raw data, questionnaires)
 
 # --- Prompts ---
 SCENE_OUTLINE_PROMPT = """
-Create a detailed outline for the scenes in a chapter of a {genre} book titled "{title}" which is categorized as {category}. 
+Create a detailed outline for the scenes in a chapter of a {genre} book titled "{title}" which is categorized as {category}.
 The book is written in {language}.
 
 Description: {description}
@@ -447,10 +447,10 @@ def clean_worldbuilding_for_category(project_knowledge_base: ProjectKnowledgeBas
     if not project_knowledge_base.worldbuilding_needed or not project_knowledge_base.worldbuilding:
         project_knowledge_base.worldbuilding = None
         return
-        
+
     category = project_knowledge_base.category.lower()
     worldbuilding = project_knowledge_base.worldbuilding
-    
+
     # Get relevant fields for this category
     if category == "fiction":
         relevant_fields = [
@@ -462,7 +462,7 @@ def clean_worldbuilding_for_category(project_knowledge_base: ProjectKnowledgeBas
     elif category == "non-fiction":
         relevant_fields = [
             "setting_context", "key_figures", "major_events", "underlying_causes",
-            "consequences", "relevant_data", "different_perspectives", 
+            "consequences", "relevant_data", "different_perspectives",
             "key_concepts"
         ]
     elif category == "business":
@@ -481,16 +481,16 @@ def clean_worldbuilding_for_category(project_knowledge_base: ProjectKnowledgeBas
     else:
         # If category not recognized, keep all fields
         return
-    
+
     # Create clean Worldbuilding object with only relevant fields
     clean_worldbuilding = Worldbuilding()
-    
+
     # Copy only the relevant fields that have content
     for field in relevant_fields:
         if hasattr(worldbuilding, field):
             value = getattr(worldbuilding, field)
             if value and isinstance(value, str) and value.strip():
                 setattr(clean_worldbuilding, field, value)
-    
+
     # Replace with clean version
     project_knowledge_base.worldbuilding = clean_worldbuilding

@@ -32,22 +32,22 @@ class ContentReviewerAgent(Agent):
             print(f"ERROR: Chapter file is empty or not found: {chapter_path}")
             return {}
         console.print(f"🔍 [cyan]Reviewing Chapter {chapter_path.split('_')[-1].split('.')[0]}...[/cyan]")
-        
+
         # Get the project_knowledge_base from the ProjectManagerAgent
         # We need to get the language from the project knowledge base
         # Since we're passed only the chapter_path, we need to infer the project
-        
+
         # Extract project directory from chapter path to find project data
         from pathlib import Path
         from libriscribe.knowledge_base import ProjectKnowledgeBase
-        
+
         chapter_file = Path(chapter_path)
         project_dir = chapter_file.parent
         project_data_path = project_dir / "project_data.json"
-        
+
         # Default language in case we can't load the project data
         language = "English"
-        
+
         # Try to load the project knowledge base to get the language
         if project_data_path.exists():
             try:
@@ -57,12 +57,12 @@ class ContentReviewerAgent(Agent):
             except Exception as e:
                 self.logger.warning(f"Could not load project data for language detection: {e}")
                 # Continue with default language
-        
+
         prompt = f"""
         You are a meticulous content reviewer. Review the following chapter for:
 
         Language: {language}
-        
+
         1.  **Internal Consistency:** Are character actions, dialogue, and motivations consistent with their established personalities and the overall plot?
         2.  **Clarity:** Are there any confusing passages, ambiguous descriptions, or unclear plot points?
         3.  **Plot Holes:** Are there any logical inconsistencies or unresolved questions within the chapter's narrative?

@@ -1,73 +1,202 @@
-# Template for the headers added to .md file to generate better pdf
-title: "Titre par défaut"              # Main title of the book (used in PDF title page and headers)
-subtitle: "Sous-titre par défaut"      # Subtitle (shown under the title)
-author: "Auteur inconnu"               # Author name(s), shown on title page and in PDF metadata
-lang: fr-FR                            # Language (affects hyphenation, etc.)
-abstract: "Résumé par défaut du livre." # Short summary, used in PDF metadata and sometimes in front matter
-genre: "Essai"                         # Book genre (for your reference or custom metadata)
-publisher: "Auto-édition"              # Publisher name (shown in PDF header/footer if set, replaces 'My Company')
-isbn: ""                               # ISBN number (optional, for cataloging)
-rights: "© 2025 Substantifik. All Rights Reserved." # Copyright or license info
+# Document Metadata
+# Essential information about the book for title pages, PDF properties, and indexing.
+title: "Titre par défaut"              # Main title of the book (used in PDF title page and headers).
+subtitle: "Sous-titre par défaut"      # Subtitle (shown under the title).
+author:                                # Author name(s). Use a list for multiple authors.
+  - "Auteur inconnu"
+date: "July 3, 2025"                   # Publication date. Can be a string or LaTeX command like \today.
 
-toc: true                              # Include a Table of Contents
-toc-title: "Table des Matières"        # Title for the TOC
-titlepage: true
-toc-own-page: true                     # Place TOC on its own page
-
-lof: false                             # List of Figures (set true if you have figures/images)
-lot: false                             # List of Tables (set true if you have tables)
-
-colorlinks: true                       # Use colored links in PDF (recommended for digital)
-linkcolor: "blue"                      # Color for links (e.g., blue, red, etc.)
-
-header-left: "A Book for You"
-footer-right: "\\thepage / \\pageref{LastPage}"
-
-mainfont: "TeX Gyre Pagella"          # Main text font (Eisvogel default) or EB Garamond or Charis SIL or Noto Serif; Linux Libertine O (not full unicode), TeX Gyre Pagella, Libertinus Serif
-sansfont: "Linux Biolinum O"           # Sans-serif font (Eisvogel default) or Source Sans Pro, TeX Gyre Heros,
-monofont: "Fira Code"                  # Monospace font (no ubuntu package for Fira Mono)
-fontsize: "12pt"                       # Base font size
-geometry: "margin=2.5cm"               # Page margins
-
-# --- LaTeX header-includes ---
-# These lines are injected into the LaTeX preamble.
-# Impact: Control chapter/page breaks, typography, and other advanced formatting.
-header-includes:
-  - "\\newcommand{\\sectionbreak}{\\clearpage}"  # Start each chapter on a new page
-  - "\\usepackage{etoolbox}"           # Needed for the next block
-  - |                                  # Ensures chapters start on right-hand (recto) pages (adds blank if needed)
-    \\preto\\chapter{%
-      \\cleardoublepage%
-      \\ifodd\\value{page}\\else\\hbox{}\\newpage\\fi%
-    }
-  - "\\usepackage{microtype}"          # Better typography
-  - "\\usepackage{csquotes}"           # Proper quotation marks
-  - "\\usepackage{lastpage}"
-
-  - "\\usepackage{babel}"
-  - "\\usepackage{csquotes}"
-
-# fix for pagecolor
-  - "\\usepackage{xcolor}"
-  - "\\usepackage{pagecolor}"
-  - "\\pagecolor{white}"
-
-# for babel
-  - "\\usepackage[fr]{babel}"
-  - "\\babelfont{sf}{Linux Biolinum O}"
-  - "\\babelfont{tt}{Fira Code}"
-
-# with font fallback for emojis (clash with babel)
-#  - "\\usepackage{fontspec}" # clash with babel
-#  - "\\newfontfamily\\emoji{Noto Color Emoji}[Renderer=Harfbuzz,Scale=MatchUppercase]"
-#  - "\\DeclareTextFontCommand{\\textemoji}{\emoji}"
-
-# --- Keywords for PDF metadata and searchability ---
-keywords:
+# This field is intended for a concise summary of your book's content, often displayed as an "abstract" section within the document itself, particularly in academic or technical publications.
+# Pandoc uses the abstract variable to populate an abstract environment in LaTeX output (if the template supports it) or to generate an abstract section in HTML, EPUB, and DOCX formats.
+# It can contain Markdown formatting, which Pandoc will convert to the appropriate output format (e.g., HTML paragraphs for web output).
+abstract: |
+  Résumé par défaut du livre. Ce document est configuré pour une publication professionnelle,
+  prenant en charge le contenu multilingue, les caractères Unicode et les emojis,
+  ainsi que la conformité PDF/A pour l'archivage. # Short summary, used in PDF metadata. Use '|' for multi-line strings.
+keywords:                              # List of relevant keywords for indexing and PDF metadata.
   - hero
   - fantasy
   - imaginaire
+  - multilingual
+  - emoji
+  - PDF/A
+  - Pandoc
+  - LaTeX
+subject: "PSubject of the book" # Document subject for PDF metadata. [2]
 
-# --- Other useful options you can add ---
-# cover-image: cover.jpg               # Path to a cover image (shown on title page if present)
-# date: "2025-06-26"                   # Publication date (shown on title page and in metadata)
+# Purpose: This field is generally used for a longer, more detailed description of the document, primarily for metadata purposes in various file formats.
+#  Pandoc includes the description in the metadata of ODT, DOCX, and PPTX files. Some applications might display this as "Comments" metadata in the PDF properties.  It is not typically rendered directly within the visible content of the LaTeX PDF document itself, unlike abstract.
+description: |
+  Personalized book
+# Longer description for PDF metadata. [2]
+
+# "Fiction", "Non-Fiction", "Science", "History", "Technical Documentation", "Academic Research", etc.
+category: "Fiction"                    # Document category for PDF metadata. [2]
+publisher: "Auto-édition"              # Publisher name (used in PDF metadata).
+isbn: ""                               # ISBN number (optional, for cataloging).
+rights: "© 2025 Substantifik. All Rights Reserved." # Copyright or license info.
+
+# Language Configuration
+# 'lang' identifies the primary language using IETF BCP 47 tags (e.g., en-US, fr-CA).
+# This is critical for hyphenation and correct language-specific typesetting with polyglossia.
+lang: fr-FR                            # Primary language of the document. Set to French (France). [2]
+dir: ltr                               # Base script direction: 'ltr' for left-to-right (default).
+                                       # Important for bidirectional languages like Arabic or Hebrew. [2]
+
+# LaTeX Engine and Document Class
+# 'pdf-engine' specifies the LaTeX processor. LuaLaTeX is crucial for advanced features.
+pdf-engine: lualatex                   # Essential for robust Unicode, multilingual, and color emoji support. [3, 4]
+documentclass: scrbook                 # Recommended document class from KOMA-Script for professional book typesetting. [1]
+                                       # Offers superior typography and extensive layout flexibility. [1, 5]
+fontsize: 12pt                         # Base font size for the document. Common options: 10pt, 11pt, 12pt. [6, 7]
+
+# Core Book Dimensions for Easy Adjustment (US Trade 6x9 inches with bleed)
+# Modify these values to change the book's physical size.
+# For US Trade 6x9 (152x229mm):
+book-width-core: 6in                   # Core book width (e.g., 6 inches). [1]
+book-height-core: 9in                  # Core book height (e.g., 9 inches). [1]
+bleed-amount: 0.125in                  # Standard bleed for print (e.g., 0.125 inches on each edge). [1]
+
+smart: true # Converts straight quotes (", ') to curly quotes (“, ”, ‘, ’), three hyphens (---) to em-dashes (—), two hyphens (--) to en-dashes (–), and three dots (...) to ellipses (…). This significantly improves the typography of your document.
+
+# TO CHANGE TO A4 (210x297mm) with 3.175mm bleed:
+# book-width-core: 210mm
+# book-height-core: 297mm
+# bleed-amount: 3.175mm
+
+# Font Configuration (Requires LuaLaTeX and fontspec)
+# Using Noto fonts for broad Unicode coverage and visual harmony across scripts is highly recommended. [8, 9, 10]
+# Ensure these fonts are installed on your system.
+mainfont: "Noto Serif"                 # Primary serif font for body text. [8, 10]
+
+#mainfontoptions:
+#  - Ligatures=TeX # Enable standard TeX ligatures
+#  - SmallCaps=On # Enable small caps feature
+#  - RawFeature=+onum # Enable old-style numerals (if supported by font)
+
+sansfont: "Noto Sans"                  # Sans-serif font for headings, captions, etc. [8, 10]
+monofont: "Noto Sans Mono"             # Monospace font for code blocks and fixed-width text. [8, 10]
+mathfont: "Latin Modern Math"          # Dedicated font for mathematical expressions. [11]
+
+# Table of Contents and Book Structure
+toc: true                              # Generates a Table of Contents. [12]
+toc-title: "Table des Matières"        # Title for the TOC. [13]
+toc-depth: 3                           # Includes up to subsections (Chapter, Section, Subsection) in the TOC. [13]
+toc-own-page: true                     # Ensures the Table of Contents starts on a new page. [12]
+titlepage: true                        # Turns on the title page. [12]
+book: true                             # Tells Pandoc to use book-specific typesetting features in the LaTeX template. [12]
+first-chapter: 1                       # Specifies the starting number for the first chapter. Useful for multi-volume books. [12]
+
+lof: true                              # List of Figures (set true if you have figures/images).
+lot: true                              # List of Tables (set true if you have tables).
+
+colorlinks: true                       # Use colored links in PDF (recommended for digital).
+linkcolor: "blue"                      # Color for links (e.g., blue, red, etc.). [13]
+
+header-left: "A Book for You"          # Text on the left side of the header. [12]
+footer-right: "\\thepage / \\pageref{LastPage}" # Text on the right side of the footer (often page number). [12]
+
+# Cover Image (for title page in PDF)
+cover-image-path: images/my_book_cover.jpg # Path to your cover image.
+
+# --- LaTeX header-includes ---
+# This section allows injecting raw LaTeX code directly into the document's preamble.
+# It's used for loading specific packages, defining custom commands, and fine-tuning font fallbacks.
+# Note: Pandoc's $header-includes$ might not be at the very end of the preamble.
+# If code depends on later declarations, wrap it in \AtEndPreamble from etoolbox. [14]
+header-includes: |
+  \usepackage{calc} % Required for arithmetic operations in LaTeX dimensions (e.g., adding bleed).
+  % Define dimensions including bleed for print-ready output based on YAML variables.
+  \newcommand{\calculatedPaperWidth}{\dimexpr\book-width-core+\bleed-amount*2\relax}
+  \newcommand{\calculatedPaperHeight}{\dimexpr\book-height-core+\bleed-amount*2\relax}
+
+  \usepackage[
+    paperwidth=\calculatedPaperWidth,
+    paperheight=\calculatedPaperHeight,
+    top=0.75in,
+    bottom=0.75in,
+    inner=0.75in,
+    outer=0.5in,
+    includehead,
+    includefoot
+  ]{geometry} % [1]
+
+  \usepackage{fontspec} % Required for 'mainfont', 'sansfont', 'monofont', 'mathfont' variables to work with LuaLaTeX. [8, 15]
+  \usepackage{polyglossia} % For advanced multilingual support, preferred over 'babel' with LuaLaTeX. [16, 17]
+  \usepackage{emoji} % For robust color emoji support. [18]
+
+  % Set the default language for polyglossia (IETF BCP 47 tag).
+  \setdefaultlanguage[variant=us]{english} % Setting English as default for internal LaTeX commands. [17, 19]
+  \setmainlanguage[variant=fr]{french} % Explicitly set French as the main document language. [17, 19]
+  % Declare other languages used in the book. This enables correct hyphenation and typography.
+  \setotherlanguages{german,japanese,arabic,hebrew} % Add any other languages you plan to use. [17, 19]
+
+  % Define custom fonts for specific languages if they require different typefaces (e.g., CJK fonts).
+  % These fonts must be installed on your system or provided in a 'fonts' directory.
+  % Noto CJK fonts are recommended for East Asian scripts. [9]
+  \babelfont[japanese]{rm}{Noto Serif CJK JP} % Serif font for Japanese text. [19]
+  \babelfont[japanese]{sf}{Noto Sans CJK JP} % Sans-serif font for Japanese text. [19]
+  \babelfont[arabic]{rm}{Noto Naskh Arabic} % Naskh style Arabic font. [19, 20]
+  \babelfont[hebrew]{rm}{Noto Serif Hebrew} % Serif font for Hebrew text. [19, 20]
+
+  % Configure robust emoji font fallback using LuaTeX's luaotfload.add_fallback.
+  % This is crucial for ensuring all emojis render correctly, even if not present in main fonts. [21, 22]
+  \directlua{luaotfload.add_fallback ("emojifallback", {
+    "Noto Color Emoji:mode=harf;",   % Primary color emoji font (Google). [21]
+    "Segoe UI Emoji:mode=harf;",     % Backup color emoji font (Microsoft, Windows 11 default). [21]
+  })}
+  % Apply the fallback mechanism to your main document fonts.
+  \setmainfont{Noto Serif}
+  \setsansfont{Noto Sans}
+  \setmonofont{Noto Sans Mono}
+
+  % PDF/A-3u Compliance (Requires LuaLaTeX and pdfx package)
+  % 'a-3u' ensures PDF/A-3b compliance with additional Unicode text mapping. [23, 24]
+  \usepackage[a-3u,mathxmp]{pdfx} % Generates PDF/A-3u compliant PDF. 'mathxmp' for math metadata. [23, 24]
+  \usepackage[pdfa]{hyperref} % Ensures hyperlinks are PDF/A compliant, crucial for archival. [23]
+
+  % Microtypography for professional output.
+  % 'microtype' package provides subtle adjustments for improved text appearance (e.g., protrusion, expansion). [1]
+  \usepackage[final]{microtype}
+
+  % Proper quotation marks.
+  \usepackage{csquotes}
+
+  % For page numbering like "Page X / LastPage".
+  \usepackage{lastpage}
+
+  % Chapter/Page Break Control
+  % \clearpage ensures content starts on a new page.
+  % \cleardoublepage ensures content starts on a new right-hand page (recto), adding a blank page if needed.
+  \newcommand{\sectionbreak}{\clearpage}  % Start each section on a new page (if desired, otherwise remove).
+  \usepackage{etoolbox} % Needed for \preto.
+  \preto\chapter{%
+    \cleardoublepage%
+    \ifodd\value{page}\else\hbox{}\\newpage\\fi%
+  } % Ensures chapters start on right-hand (recto) pages (adds blank if needed).
+
+  % Fix for pagecolor (keep with caution for print-ready PDFs)
+  % While functional, setting a non-white page color might complicate PDF/A compliance for print.
+  % For print, it's generally best to let the printer handle paper color.
+  \usepackage{xcolor}
+  \usepackage{pagecolor}
+  \pagecolor{white}
+
+  \usepackage{eso-pic} % For adding content to the background of pages
+  \usepackage{graphicx} % For including graphics
+
+  % Command to place the cover image on the title page
+  % This will place the image as a background, scaled to fit the page.
+  \AddToShipoutPictureBG*{%
+    \AtPageLowerLeft{%
+      \includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio]{cover-image-path}%
+    }%
+  }
+  % Note: 'cover-image-path' here is a Pandoc variable.
+  % Pandoc will replace it with the value from your YAML.
+  % Ensure the path is correct relative to where Pandoc is executed,
+  % or use --resource-path in your Pandoc command.
+  % If you want the image to be *only* on the title page,
+  % you might need more advanced LaTeX logic (e.g., using \ifthispageodd
+  % or specific title page hooks provided by scrbook or a custom template).
+  % For a simple full-page background on the first page, this works.

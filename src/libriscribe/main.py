@@ -18,6 +18,8 @@ from pydantic import PydanticDeprecationWarning
 
 from libriscribe.knowledge_base import ProjectKnowledgeBase, Chapter  # Import the new class
 from libriscribe.settings import Settings
+from libriscribe.settings import MANUSCRIPT_MD_FILENAME
+from libriscribe.settings import MANUSCRIPT_PDF_FILENAME
 from rich.progress import track  # Import track
 warnings.filterwarnings("ignore", category=PydanticDeprecationWarning)
 
@@ -35,7 +37,7 @@ LOG_FILE_NAME = "libriscribe.log"
 
 # Configure logging (same as before)
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG, #.INFO
     format="%(message)s",
     handlers=[
         # Set the log file to append mode ('a')
@@ -392,7 +394,7 @@ def format_book(project_knowledge_base: ProjectKnowledgeBase, output_format: str
             output_format = "md"
 
     if output_format == "md":
-        output_path = str(project_manager.project_dir / "manuscript.md")
+        output_path = str(project_manager.project_dir / MANUSCRIPT_MD_FILENAME)
     else:
         output_path = str(project_manager.project_dir / "manuscript.pdf")
     project_manager.format_book(output_path)
@@ -869,7 +871,7 @@ def format():
     """Formats the entire book into a single Markdown or PDF file."""
     output_format = select_from_list("Choose output format:", ["Markdown (.md)", "PDF (.pdf)"])
     if output_format == "Markdown (.md)":
-        output_path = str(project_manager.project_dir / "manuscript.md")
+        output_path = str(project_manager.project_dir / MANUSCRIPT_MD_FILENAME)
     else:
         output_path = str(project_manager.project_dir / "manuscript.pdf")
     project_manager.format_book(output_path)  # Pass output_path here
@@ -894,47 +896,53 @@ def resume(project_name: str = typer.Option(..., prompt="Project name to resume"
         llm_choice = project_manager.project_knowledge_base.llm_provider
         project_manager.initialize_llm_client(llm_choice)
 
-        generate_and_edit_outline(project_manager.project_knowledge_base, skip_edit=True)
-        generate_characters_if_needed(project_manager.project_knowledge_base)
-        generate_worldbuilding_if_needed(project_manager.project_knowledge_base)
-        project_manager.checkpoint()
-
-        # If outline exists, resume chapter writing
-        if project_manager.project_dir and (project_manager.project_dir / "outline.md").exists():
-            last_chapter = 0
-            num_chapters = project_manager.project_knowledge_base.get("num_chapters", 1)
-            if isinstance(num_chapters, tuple):
-                num_chapters = num_chapters[1]
-
-            for i in range(1, num_chapters + 1):
-                if (project_manager.project_dir / f"chapter_{i}.md").exists():
-                    last_chapter = i
-                else:
-                    break
-
-            print(f"Last written chapter: {last_chapter}")
-
-            for i in range(last_chapter + 1, num_chapters + 1):
-                project_manager.write_and_review_chapter(i)
-            format_book(project_manager.project_knowledge_base, "md")
-
-        # If outline does not exist but project data does, resume from outline generation
-        elif project_manager.project_knowledge_base:
-
-            # After outline, proceed to chapter writing
-            num_chapters = project_manager.project_knowledge_base.get("num_chapters", 1)
-            if isinstance(num_chapters, tuple):
-                num_chapters = num_chapters[1]
-
-            for i in range(1, num_chapters + 1):
-                if not (project_manager.project_dir / f"chapter_{i}.md").exists():
-                    project_manager.write_and_review_chapter(i)
-                    project_manager.checkpoint()
-
-            format_book(project_manager.project_knowledge_base, "md")
-
+        # 1. Outline
+        outline_path = project_manager.project_dir / "outline.md"
+        if not outline_path.exists():
+            generate_and_edit_outline(project_manager.project_knowledge_base, skip_edit=True)
+            project_manager.checkpoint()
         else:
-            print("No checkpoint found to resume from.")
+            print("Outline already exists. Skipping outline generation.")
+
+        # 2. Characters
+        characters_path = project_manager.project_dir / "characters.md"
+        if project_manager.project_knowledge_base.get("num_characters", 0) > 0 and not characters_path.exists():
+            generate_characters_if_needed(project_manager.project_knowledge_base)
+            project_manager.checkpoint()
+        else:
+            print("Characters already generated or not needed. Skipping.")
+
+        # 3. Worldbuilding
+        worldbuilding_path = project_manager.project_dir / "worldbuilding.md"
+        if project_manager.project_knowledge_base.get("worldbuilding_needed", False) and not worldbuilding_path.exists():
+            generate_worldbuilding_if_needed(project_manager.project_knowledge_base)
+            project_manager.checkpoint()
+        else:
+            print("Worldbuilding already generated or not needed. Skipping.")
+
+        # 4. Chapters
+        num_chapters = project_manager.project_knowledge_base.get("num_chapters", 1)
+        if isinstance(num_chapters, tuple):
+            num_chapters = num_chapters[1]
+
+        last_chapter = 0
+        for i in range(1, num_chapters + 1):
+            chapter_path = project_manager.project_dir / f"chapter_{i}.md"
+            if chapter_path.exists():
+                last_chapter = i
+
+        print(f"Last written chapter: {last_chapter}/{num_chapters}")
+
+        for i in range(last_chapter + 1, num_chapters + 1):
+            project_manager.write_and_review_chapter(i)
+            project_manager.checkpoint()
+
+        # 5. Format book if all chapters exist and manuscript doesn't
+        manuscript_path = project_manager.project_dir / MANUSCRIPT_MD_FILENAME
+        if all((project_manager.project_dir / f"chapter_{i}.md").exists() for i in range(1, num_chapters + 1)) and not manuscript_path.exists():
+            format_book(project_manager.project_knowledge_base, "md")
+        else:
+            print("Book already formatted or chapters missing. Skipping formatting.")
 
     except FileNotFoundError:
         print(f"Project '{project_name}' not found.")

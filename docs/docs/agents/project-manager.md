@@ -80,3 +80,58 @@ The Project Manager seamlessly integrates with all other LibriScribe agents:
 - Ensures proper sequencing of operations
 - Manages file dependencies
 - Coordinates multi-agent operations
+
+# Project Data Reference
+
+The `project_data.json` file stores all project metadata and configuration. Below are the main fields and their possible values:
+
+| Field              | Type      | Description                                      | Example / Options                                  |
+|--------------------|-----------|--------------------------------------------------|----------------------------------------------------|
+| `project_name`     | string    | Name of the project                              | `"my_novel_project"`                               |
+| `title`            | string    | Book title                                       | `"The Dragon's Shadow"`                            |
+| `genre`            | string    | Book genre                                       | `"Fantasy"`, `"Science Fiction"`, `"Mystery"`, etc.|
+| `category`         | string    | Book category                                    | `"Fiction"`, `"Non-Fiction"`, `"Business"`, etc.   |
+| `language`         | string    | Language of the book                             | `"English"`, `"Spanish"`, etc.                     |
+| `book_length`      | string    | Book length/type                                 | `"Short Story"`, `"Novella"`, `"Novel"`            |
+| `num_chapters`     | int/range | Number of chapters (int or range, e.g. 5-8)      | `8`, `"5-8"`, `"20+"`                              |
+| `num_characters`   | int/range | Number of main characters                        | `3`, `"2-4"`                                       |
+| `logline`          | string    | One-sentence summary of the book                  | `"A daemon finds a dragon egg in Neo-London..."`   |
+| `tone`             | string    | Tone of the book                                 | `"Informative"`, `"Dark"`, `"Humorous"`, etc.      |
+| `target_audience`  | string    | Intended audience                                | `"General"`, `"Young Adult"`, `"Children"`, etc.   |
+| `llm_provider`     | string    | LLM provider used                                | `"openai"`, `"anthropic"`, etc.                    |
+| `worldbuilding_needed` | bool  | Whether worldbuilding is required                | `true`, `false`                                    |
+| ...                | ...       | ...                                              | ...                                                |
+
+**Note:** Some fields accept either a single value or a range (e.g., `"5-8"` for chapters).
+
+---
+
+### 2. Update `ProjectKnowledgeBase` Model with Field Choices and Docstrings
+
+Add comments or Pydantic `Field` descriptions to clarify the options for each field:
+
+````python
+# filepath: [knowledge_base.py](http://_vscodecontentref_/6)
+# ...existing code...
+
+class ProjectKnowledgeBase(BaseModel):
+    project_name: str
+    title: str = Field("Untitled", description="Book title")
+    genre: str = Field("Unknown Genre", description="Book genre (e.g., 'Fantasy', 'Science Fiction', 'Mystery')")
+    description: str = Field("No description provided.", description="Book description")
+    category: str = Field("Unknown Category", description="Book category (e.g., 'Fiction', 'Non-Fiction', 'Business')")
+    language: str = Field("English", description="Book language (e.g., 'English', 'Spanish')")
+    num_characters: Union[int, Tuple[int, int]] = Field(0, description="Number of main characters (int or range, e.g., 2-4)")
+    num_characters_str: str = Field("", description="String version of num_characters for advanced use")
+    worldbuilding_needed: bool = Field(False, description="Whether worldbuilding is required")
+    review_preference: str = Field("AI", description="Preferred review method ('AI', 'Human', etc.)")
+    book_length: str = Field("", description="Book length/type ('Short Story', 'Novella', 'Novel')")
+    logline: str = Field("No logline available", description="One-sentence summary of the book")
+    tone: str = Field("Informative", description="Book tone ('Informative', 'Dark', 'Humorous', etc.)")
+    target_audience: str = Field("General", description="Intended audience ('General', 'Young Adult', etc.)")
+    num_chapters: Union[int, Tuple[int, int]] = Field(1, description="Number of chapters (int or range, e.g., 5-8)")
+    num_chapters_str: str = Field("", description="String version of num_chapters for advanced use")
+    llm_provider: str = Field("openai", description="LLM provider ('openai', 'anthropic', etc.)")
+    dynamic_questions: Dict[str, str] = Field(default_factory=dict, description="Advanced: dynamic questions for the project")
+
+````

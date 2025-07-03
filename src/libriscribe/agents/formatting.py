@@ -39,7 +39,7 @@ class FormattingAgent(Agent):
 
             # Get project data (for title page)
             project_data_path = Path(project_dir) / "project_data.json"
-            project_knowledge_base = ProjectKnowledgeBase.load_from_file(str(project_data_path)) 
+            project_knowledge_base = ProjectKnowledgeBase.load_from_file(str(project_data_path))
             if not project_knowledge_base:
               print(f"ERROR: Could not load project data from {project_data_path}")
               return
@@ -51,7 +51,7 @@ class FormattingAgent(Agent):
             formatted_markdown = self.llm_client.generate_content(prompt, max_tokens=120000) # May need large token limit
 
             # Add title page (before LLM formatting, for simplicity)
-            title_page = self.create_title_page(project_knowledge_base) 
+            title_page = self.create_title_page(project_knowledge_base)
             formatted_markdown = title_page + formatted_markdown
 
 
@@ -71,14 +71,30 @@ class FormattingAgent(Agent):
             print(f"ERROR: Failed to format the book. See log.")
 
     def create_title_page(self, project_knowledge_base:ProjectKnowledgeBase) -> str: # now accepts ProjectKnowledgeBase
-        """Creates a Markdown title page."""
+        """Creates a Markdown title page, don't use the header(#) reserved for the chapter."""
         title = project_knowledge_base.title
         author = project_knowledge_base.get('author', 'Unknown Author')  # Assuming you might add author later
         genre = project_knowledge_base.genre
+        language = project_knowledge_base.language
 
-        title_page = f"# {title}\n\n"
-        title_page += f"## By {author}\n\n"
-        title_page += f"**Genre:** {genre}\n\n"
+        title_page = f"Title: {title}\n\n"
+
+        # Check language for different title page formats
+        if language == "English":
+            title_page += f"By {author}\n\n"
+            title_page += f"**Genre:** {genre}\n\n"
+        elif language == "Brazilian Portuguese":
+            title_page += f"Por {author}\n\n"
+            title_page += f"**Gênero:** {genre}\n\n"
+        elif language == "French":
+            title_page += f"Par {author}\n\n"
+            title_page += f"**Genre:** {genre}\n\n"
+        # Add other language variations as needed
+        else:
+            # Default to English if language not specifically handled
+            title_page += f"By {author}\n\n"
+            title_page += f"**Genre:** {genre}\n\n"
+
         return title_page
 
     def markdown_to_pdf(self, markdown_text:str, output_path:str):
