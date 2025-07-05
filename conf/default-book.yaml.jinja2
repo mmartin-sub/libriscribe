@@ -1,45 +1,55 @@
 # Document Metadata
 # Essential information about the book for title pages, PDF properties, and indexing.
-title: "Titre par défaut"              # Main title of the book (used in PDF title page and headers).
-subtitle: "Sous-titre par défaut"      # Subtitle (shown under the title).
+title: "{{ title | default('Titre par défaut') }}"              # Main title of the book (used in PDF title page and headers).
+subtitle: "{{ subtitle | default('Sous-titre par défaut') }}"      # Subtitle (shown under the title).
 author:                                # Author name(s). Use a list for multiple authors.
-  - "Auteur inconnu"
-date: "July 3, 2025"                   # Publication date. Can be a string or LaTeX command like \today.
+{%- set author_list = author | default(['Auteur inconnu']) %}
+{%- for item in author_list %}
+  - "{{ item }}"
+{%- endfor %}
+date: "{{ date | default('July 3, 2025') }}"                   # Publication date. Can be a string or LaTeX command like \today.
 
 # This field is intended for a concise summary of your book's content, often displayed as an "abstract" section within the document itself, particularly in academic or technical publications.
 # Pandoc uses the abstract variable to populate an abstract environment in LaTeX output (if the template supports it) or to generate an abstract section in HTML, EPUB, and DOCX formats.
 # It can contain Markdown formatting, which Pandoc will convert to the appropriate output format (e.g., HTML paragraphs for web output).
 abstract: |
+{%- if abstract %}
+  {{- abstract | indent(2) }}
+{%- else %}
   Résumé par défaut du livre. Ce document est configuré pour une publication professionnelle,
   prenant en charge le contenu multilingue, les caractères Unicode et les emojis,
-  ainsi que la conformité PDF/A pour l'archivage. # Short summary, used in PDF metadata. Use '|' for multi-line strings.
+  ainsi que la conformité PDF/A pour l'archivage.
+{%- endif %} # Short summary, used in PDF metadata. Use '|' for multi-line strings.
 keywords:                              # List of relevant keywords for indexing and PDF metadata.
-  - hero
-  - fantasy
-  - imaginaire
-  - multilingual
-  - emoji
-  - PDF/A
-  - Pandoc
-  - LaTeX
-subject: "PSubject of the book" # Document subject for PDF metadata. [2]
+{%- set kw_list = keywords | default(['hero', 'fantasy', 'imaginaire', 'multilingual', 'emoji', 'PDF/A', 'Pandoc', 'LaTeX']) %}
+{%- for item in kw_list %}
+  - {{ item }}
+{%- endfor %}
+subject: "{{ subject | default('PSubject of the book') }}" # Document subject for PDF metadata. [2]
 
 # Purpose: This field is generally used for a longer, more detailed description of the document, primarily for metadata purposes in various file formats.
 #  Pandoc includes the description in the metadata of ODT, DOCX, and PPTX files. Some applications might display this as "Comments" metadata in the PDF properties.  It is not typically rendered directly within the visible content of the LaTeX PDF document itself, unlike abstract.
 description: |
+{%- if description %}
+  {{- description | indent(2) }}
+{%- else %}
   Personalized book
-# Longer description for PDF metadata. [2]
+{%- endif %} # Longer description for PDF metadata. [2]
 
 # "Fiction", "Non-Fiction", "Science", "History", "Technical Documentation", "Academic Research", etc.
-category: "Fiction"                    # Document category for PDF metadata. [2]
-publisher: "Auto-édition"              # Publisher name (used in PDF metadata).
-isbn: ""                               # ISBN number (optional, for cataloging).
-rights: "© 2025 Substantifik. All Rights Reserved." # Copyright or license info.
+category: "{{ category | default('Fiction') }}"                    # Document category for PDF metadata. [2]
+publisher: "{{ publisher | default('Auto-édition') }}"              # Publisher name (used in PDF metadata).
+isbn: "{{ isbn | default('') }}"                               # ISBN number (optional, for cataloging).
+rights: "{{ rights | default('© 2025 Substantifik. All Rights Reserved.') }}" # Copyright or license info.
+outline: |
+{%- if outline %}
+  {{- outline | indent(2) }}
+{%- endif %}                            # Book outline, populated from project data. This is a placeholder and will be overridden.
 
 # Language Configuration
 # 'lang' identifies the primary language using IETF BCP 47 tags (e.g., en-US, fr-CA).
 # This is critical for hyphenation and correct language-specific typesetting with polyglossia.
-lang: fr-FR                            # Primary language of the document. Set to French (France). [2]
+lang: "{{ lang | default('fr-FR') }}"                            # Primary language of the document. Set to French (France). [2]
 dir: ltr                               # Base script direction: 'ltr' for left-to-right (default).
                                        # Important for bidirectional languages like Arabic or Hebrew. [2]
 

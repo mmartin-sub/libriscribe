@@ -2,22 +2,13 @@ import os
 from datetime import datetime
 import yaml
 import langcodes
+from jinja2 import Environment, StrictUndefined, TemplateError, FileSystemLoader, select_autoescape
+import json
 
-class LiteralStr(str):
-    pass
-
-def literal_str_representer(dumper, data):
-    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
-
-yaml.add_representer(LiteralStr, literal_str_representer)
-
-def ensure_literal_block(val):
-    """Convert multiline strings to LiteralStr for YAML block style."""
-    if isinstance(val, str) and '\n' in val:
-        return LiteralStr(val)
-    if isinstance(val, list):
-        return [ensure_literal_block(v) for v in val]
-    return val
+# The LiteralStr class and its associated functions are no longer needed.
+# The new approach uses Jinja2 to render the YAML template directly,
+# which correctly handles multi-line strings using the `indent` filter
+# within the template itself (e.g., `{{ description | indent(2) }}`).
 
 def normalize_language(lang_value):
     """Normalize language names to BCP 47 codes using langcodes."""
@@ -30,109 +21,90 @@ def normalize_language(lang_value):
         return lang_value  # fallback to original if not recognized
 
 def generate_yaml_metadata(project_knowledge_base, write_to_file=True):
-    import copy
-    # Load defaults from default.yaml
-    defaults = {}
-    # Find project root (three levels up from this file)
-    project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    default_yaml_path = os.path.join(project_root, "conf", "default-book.yaml")
-    if os.path.isfile(default_yaml_path):
-        with open(default_yaml_path, "r", encoding="utf-8") as f:
-            defaults = yaml.safe_load(f) or {}
+    """
+    Generate YAML metadata by rendering the default-book.yaml Jinja2 template.
+    This approach is more robust for complex values like multi-line strings.
+    """
+    # Find project root (four levels up from this file: utils -> libriscribe -> src -> project_root)
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    template_dir = os.path.join(project_root, "conf")
+    template_file = "default-book.yaml.jinja2" # The template file
 
-    # Start with all keys from default.yaml
-    metadata = copy.deepcopy(defaults)
+    # 1. Prepare the context dictionary from the project knowledge base.
+    context = {}
 
-    # List of keys to override (project_data.json → YAML mapping)
+    def get_field(key):
+        if hasattr(project_knowledge_base, key):
+            return getattr(project_knowledge_base, key, None)
+        return project_knowledge_base.get(key, None)
+
     override_map = {
         "title": "title",
         "subtitle": "subtitle",
         "author": "author",
         "language": "lang",
-        "abstract": "abstract",         # If you want to override the résumé
-        "description": "description",   # For PDF comment metadata
+        "abstract": "abstract",
+        "description": "description",
         "date": "date",
         "keywords": "keywords",
         "publisher": "publisher",
         "isbn": "isbn",
         "rights": "rights",
-        "subject": "subject",           # Add if you want to override
-        "category": "category",         # Add if you want to override
+        "subject": "subject",
+        "category": "category",
         "outline": "outline",
     }
 
-    # Helper to get value from project_knowledge_base (attribute or dict)
-    def get_field(key):
-        return getattr(project_knowledge_base, key, None) or project_knowledge_base.get(key, None)
-
-    # Only replace if present in project data
-    for src_key, yaml_key in override_map.items():
+    for src_key, template_key in override_map.items():
         value = get_field(src_key)
-        if value is not None:
-            print(f"Key for debugger: {yaml_key}")
-            if yaml_key == "keywords":
-                if isinstance(value, str):
-                    value = [w.strip() for w in value.split(",")]
-                metadata[yaml_key] = value
-            elif yaml_key == "lang":
-                metadata[yaml_key] = normalize_language(value)
+        # We only add non-empty values to the context. The template's `default()`
+        # filter will handle cases where a value is not provided.
+        if value is not None and value not in ["", []]:
+            if template_key == "keywords" and isinstance(value, str):
+                context[template_key] = [w.strip() for w in value.split(",")]
+            elif template_key == "lang":
+                context[template_key] = normalize_language(value)
+            elif template_key == "author" and isinstance(value, str):
+                # Ensure author is always a list for the template's for-loop
+                context[template_key] = [value]
             else:
-                # Apply ensure_literal_block to all other string values
-                metadata[yaml_key] = ensure_literal_block(value)
+                context[template_key] = value
 
-    # Remove empty values
-    metadata = {k: v for k, v in metadata.items() if v not in [None, "", []]}
+    # 2. Set up Jinja2 environment.
+    env = Environment(
+        loader=FileSystemLoader(template_dir),
+        autoescape=select_autoescape(disabled_extensions=('yaml',)),
+        undefined=StrictUndefined,
+        trim_blocks=True,
+        lstrip_blocks=True,
+    )
 
-    # Ensure block style for multiline header-includes
-    if "header-includes" in metadata:
-        metadata["header-includes"] = [
-            ensure_literal_block(item) for item in metadata["header-includes"]
-        ]
-
+    # 3. Load and render the template.
     try:
-        yaml_block = "---\n" + yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True, default_flow_style=False) + "---\n"
-    except Exception as e:
-        print("DEBUG: description value:", repr(metadata.get("description")))
-        error_path = os.path.join(
-            getattr(project_knowledge_base, 'project_dir', os.getcwd()),
-            "config-error.yaml"
-        )
+        template = env.get_template(template_file)
+        rendered_yaml = template.render(**context)
+    except TemplateError as e:
+        # Provide a more informative error message for debugging.
+        print(f"[red]❌ Jinja2 template error in '{os.path.join(template_dir, template_file)}':[/red]")
+        print(f"[red]   Error: {e}[/red]")
+        print(f"[yellow]   Context provided to template:[/yellow]")
+        # Pretty-print the context for readability
+        print(f"[yellow]{json.dumps(context, indent=2, ensure_ascii=False)}[/yellow]")
+        raise
 
-        print("[DEBUG] Metadata field types (on YAML serialization error):")
-        for k, v in metadata.items():
-            print(f"  {k}: {type(v)}")
-        print("[DEBUG] Testing YAML serialization for each metadata field:")
-        for k, v in metadata.items():
-            try:
-                yaml.safe_dump({k: v}, allow_unicode=True)
-                print(f"  [OK] {k}")
-            except Exception as field_exc:
-                print(f"  [FAIL] {k}: {field_exc}")
+    # 4. Wrap in YAML front matter fences for Pandoc.
+    yaml_block = f"---\n{rendered_yaml.strip()}\n---\n"
 
-        raise e
-        with open(error_path, "w", encoding="utf-8") as f:
-            f.write("# YAML serialization error. Raw metadata below:\n")
-            try:
-                yaml.safe_dump(metadata, f, sort_keys=False, allow_unicode=True)
-            except Exception:
-                f.write(repr(metadata))
+    print(f"[LOG] YAML metadata updated (Jinja2)")
 
-        print(f"[red]❌ Error serializing YAML metadata. Saved problematic data to: {error_path}[/red]")
-        raise e
-
-    # Add log message
-    print(f"[LOG] YAML metadata updated")
-
-    # Optionally write to config-metadata.yaml
     if write_to_file:
-        # Save config-metadata.yaml in the same directory as chapter_*.md files
         config_dir = getattr(project_knowledge_base, 'project_dir', None)
         if config_dir is not None:
             config_path = os.path.join(str(config_dir), "config-metadata.yaml")
         else:
             config_path = os.path.join(project_root, "config-metadata.yaml")
         with open(config_path, "w", encoding="utf-8") as f:
-            yaml.safe_dump(metadata, f, sort_keys=False, allow_unicode=True)
+            f.write(yaml_block)
         print(f"[green]📝 Metadata YAML generated at: {config_path}[/green]")
 
     return yaml_block

@@ -11,6 +11,8 @@ src/libriscribe/agents/__pycache__/
 projects/
 libriscribe.log
 libriscribe_llm.log
+copy_log.txt
+*.log
 *.log
 .trunk/
 .trunk/logs/

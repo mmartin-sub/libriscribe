@@ -1,5 +1,5 @@
-# libriscribe/requirements.txt
-typer
+
+typer[all]
 openai
 python-dotenv
 pydantic
@@ -14,5 +14,7 @@ requests
 tenacity
 rich
 pick
-pyyaml
+
+PyYAML
 langcodes
+Jinja2
