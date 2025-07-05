@@ -100,6 +100,7 @@ class ProjectKnowledgeBase(BaseModel):
     num_chapters_str: str = "" #Keep for advanced
     llm_provider: str = "openai"
     dynamic_questions: Dict[str, str] = {} #Keep for advanced
+    keywords: List[str] = Field(default_factory=list, description="A list of keywords for the book.")
 
     characters: Dict[str, Character] = {}  # Character name -> Character object
     worldbuilding: Worldbuilding = Field(default_factory=Worldbuilding)
@@ -185,11 +186,11 @@ class ProjectKnowledgeBase(BaseModel):
         except Exception as e:
             print(f"ERROR loading knowledge base from {file_path}: {e}")
             return None
-    
+
     worldbuilding_needed: bool = False
     # Make worldbuilding conditional on worldbuilding_needed
     worldbuilding: Optional[Worldbuilding] = None
-    
+
     # Add a validator to ensure worldbuilding is None when not needed
     @validator("worldbuilding", pre=True, always=True)
     def set_worldbuilding(cls, v, values):

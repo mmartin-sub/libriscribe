@@ -444,6 +444,27 @@ SCENE_TITLE_INSTRUCTION = (
     "(as a Markdown heading, not bold, not triple #, no extra formatting)"
 )
 
+KEYWORD_GENERATION_PROMPT = """
+Based on the following book title and description, generate a list of 5-10 relevant keywords.
+The book is written in {language}.
+
+Title: {title}
+Description: {description}
+
+Return the keywords as a JSON array of strings inside a markdown code block.
+
+For example:
+```json
+[
+    "keyword1",
+    "keyword2",
+    "keyword3"
+]
+```
+
+Return ONLY the markdown block with valid JSON, nothing else.
+"""
+
 def clean_worldbuilding_for_category(project_knowledge_base: ProjectKnowledgeBase):
     """
     Clean the worldbuilding object to only keep fields relevant to the project category.

@@ -82,7 +82,7 @@ class ConceptGeneratorAgent(Agent):
             {json.dumps(initial_concept_json)}
             ```
             The book should be written in {project_knowledge_base.language}.
-           
+
             Evaluate:
             - **Title:** Is it compelling and relevant?
             - **Logline:** Is it concise and does it capture the core conflict?
@@ -134,6 +134,29 @@ class ConceptGeneratorAgent(Agent):
                 project_knowledge_base.logline = refined_concept_json['logline']
             if 'description' in refined_concept_json:
                 project_knowledge_base.description = refined_concept_json['description']
+
+            # --- Step 5: Generate Keywords ---
+            console.print(f"🔑 [cyan]Generating keywords from description...[/cyan]")
+            keyword_prompt = prompts.KEYWORD_GENERATION_PROMPT.format(
+                title=project_knowledge_base.title,
+                description=project_knowledge_base.description,
+                language=project_knowledge_base.language
+            )
+            keywords_md = self.llm_client.generate_content_with_json_repair(keyword_prompt)
+            if not keywords_md:
+                logger.warning("Keyword generation failed. No keywords will be added.")
+            else:
+                keywords_json = extract_json_from_markdown(keywords_md)
+                if keywords_json and isinstance(keywords_json, list):
+                    # Ensure all items are strings
+                    keywords_list = [str(item) for item in keywords_json]
+                    # --- Step 6: Update ProjectKnowledgeBase with keywords ---
+                    project_knowledge_base.keywords = keywords_list
+                    logger.info(f"Keywords generated: {project_knowledge_base.keywords}")
+                    console.print(f"[green]✅ Keywords generated: {', '.join(keywords_list)}[/green]")
+                else:
+                    logger.warning(f"Keyword parsing failed. Could not extract list from: {keywords_md}")
+                    console.print("[yellow]Could not parse keywords from AI response.[/yellow]")
 
             logger.info(f"Concept generated (refined): Title: {project_knowledge_base.title}, Logline: {project_knowledge_base.logline}")
 

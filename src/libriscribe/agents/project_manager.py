@@ -310,7 +310,7 @@ class ProjectManagerAgent:
             # Add title page
             title_page = self.agents["formatting"].create_title_page(self.project_knowledge_base)
             yaml_metadata = generate_yaml_metadata(self.project_knowledge_base, write_to_file=True)
-            formatted_original = yaml_metadata + title_page + formatted_original
+            formatted_original = title_page + formatted_original
 
             # Determine output path for original version
             original_output_path = output_path.replace(".md", "_original.md").replace(".pdf", "_original.pdf")
@@ -368,7 +368,7 @@ class ProjectManagerAgent:
             console.print(f"{self.agents['formatting'].name} is: Formatting Revised Chapters...")
             prompt_revised = prompts.FORMATTING_PROMPT.format(language=self.project_knowledge_base.language, chapters=revised_content)
             formatted_revised = self.llm_client.generate_content(prompt_revised) #, max_tokens=8000
-            formatted_revised = yaml_metadata + title_page + formatted_revised
+            formatted_revised = title_page + formatted_revised # yaml_metadata is removed
 
             # Save as Markdown or PDF (revised)
             if output_path.endswith(".md"):
