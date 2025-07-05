@@ -21,3 +21,23 @@ Formatting book with 15 chapters...
 ✓ Added original Chapter 14
 ✓ Added original Chapter 15
 FormattingAgent is: Formatting Original Chapters...
+[LOG] YAML metadata updated (Jinja2)
+[green]📝 Metadata YAML generated at: /home/shuther/Documents/Projects/libriscribe/projects/my_book/config-metadata.yaml[/green]
+Manuscript stats: 23920 words, 147659 characters.
+📚 Original version formatted and saved!
+✓ Added revised Chapter 1
+✓ Added revised Chapter 2
+✓ Added revised Chapter 3
+✓ Added revised Chapter 4
+✓ Added revised Chapter 5
+✓ Added revised Chapter 6
+✓ Added revised Chapter 7
+✓ Added revised Chapter 8
+✓ Added revised Chapter 9
+✓ Added revised Chapter 10
+✓ Added revised Chapter 11
+✓ Added revised Chapter 12
+✓ Added revised Chapter 13
+✓ Added revised Chapter 14
+✓ Added revised Chapter 15
+FormattingAgent is: Formatting Revised Chapters...

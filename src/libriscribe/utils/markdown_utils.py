@@ -38,14 +38,20 @@ def generate_yaml_metadata(project_knowledge_base, write_to_file=True):
             return getattr(project_knowledge_base, key, None)
         return project_knowledge_base.get(key, None)
 
+    # The override_map defines the mapping between fields in the ProjectKnowledgeBase
+    # and the variables used in the Jinja2 template.
+    # - The key (e.g., "title") is the attribute name in the ProjectKnowledgeBase.
+    # - The value (e.g., "title") is the variable name inside the template.
+    # This allows for flexibility, for instance, mapping `project_knowledge_base.language`
+    # to the `lang` variable in the template.
     override_map = {
         "title": "title",
         "subtitle": "subtitle",
         "author": "author",
         "language": "lang",
-        "abstract": "abstract",
-        "description": "description",
-        "date": "date",
+#        "description": "description",  # for metadata
+        "description": "abstract", # published resume
+        "date": "date", # not in the file but value will be automatically set
         "keywords": "keywords",
         "publisher": "publisher",
         "isbn": "isbn",
@@ -56,16 +62,26 @@ def generate_yaml_metadata(project_knowledge_base, write_to_file=True):
     }
 
     for src_key, template_key in override_map.items():
-        value = get_field(src_key)
-        # We only add non-empty values to the context. The template's `default()`
-        # filter will handle cases where a value is not provided.
+        value = get_field(src_key)  # This will be None if the field doesn't exist.
+
+        # Special handling for date: use today's date if not present in the project data.
+        if src_key == "date" and not value:
+            value = datetime.now().strftime("%Y-%m-%d")
+
+        # We only add non-empty values to the context. The template's `default()` filter
+        # will handle cases where a value is not provided in the context.
+        # Fields not present in ProjectKnowledgeBase (e.g., subtitle, author) will be
+        # None and thus skipped, unless handled by a special case like 'date'.
         if value is not None and value not in ["", []]:
             if template_key == "keywords" and isinstance(value, str):
                 context[template_key] = [w.strip() for w in value.split(",")]
+            elif template_key == "keywords" and isinstance(value, list):
+                # It's already a list, so just use it.
+                context[template_key] = value
             elif template_key == "lang":
                 context[template_key] = normalize_language(value)
             elif template_key == "author" and isinstance(value, str):
-                # Ensure author is always a list for the template's for-loop
+                # Ensure 'author' is always a list for the template's for-loop.
                 context[template_key] = [value]
             else:
                 context[template_key] = value
@@ -74,7 +90,11 @@ def generate_yaml_metadata(project_knowledge_base, write_to_file=True):
     env = Environment(
         loader=FileSystemLoader(template_dir),
         autoescape=select_autoescape(disabled_extensions=('yaml',)),
-        undefined=StrictUndefined,
+        undefined=StrictUndefined, # we keep it for now
+        # We do not use StrictUndefined here. This allows the template to gracefully
+        # handle optional fields (like 'subtitle', 'isbn', 'subject') that may not be
+        # present in the context, preventing errors during rendering.
+
         trim_blocks=True,
         lstrip_blocks=True,
     )

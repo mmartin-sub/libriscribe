@@ -2,35 +2,46 @@
 # Essential information about the book for title pages, PDF properties, and indexing.
 title: "{{ title | default('Titre par défaut') }}"              # Main title of the book (used in PDF title page and headers).
 subtitle: "{{ subtitle | default('Sous-titre par défaut') }}"      # Subtitle (shown under the title).
-author:                                # Author name(s). Use a list for multiple authors.
-{%- set author_list = author | default(['Auteur inconnu']) %}
-{%- for item in author_list %}
+author: # Author name(s). Use a list for multiple authors.
+{%- if author is defined and author %}
+{%- for item in author %}
   - "{{ item }}"
 {%- endfor %}
-date: "{{ date | default('July 3, 2025') }}"                   # Publication date. Can be a string or LaTeX command like \today.
+{%- else %}
+  - "Auteur inconnu"
+{%- endif %}
+date: "{{ date | default('\\today') }}"                   # Publication date. Defaults to the LaTeX command for the current date.
 
 # This field is intended for a concise summary of your book's content, often displayed as an "abstract" section within the document itself, particularly in academic or technical publications.
 # Pandoc uses the abstract variable to populate an abstract environment in LaTeX output (if the template supports it) or to generate an abstract section in HTML, EPUB, and DOCX formats.
 # It can contain Markdown formatting, which Pandoc will convert to the appropriate output format (e.g., HTML paragraphs for web output).
 abstract: |
-{%- if abstract %}
+{%- if abstract is defined and abstract %}
   {{- abstract | indent(2) }}
 {%- else %}
   Résumé par défaut du livre. Ce document est configuré pour une publication professionnelle,
   prenant en charge le contenu multilingue, les caractères Unicode et les emojis,
   ainsi que la conformité PDF/A pour l'archivage.
 {%- endif %} # Short summary, used in PDF metadata. Use '|' for multi-line strings.
-keywords:                              # List of relevant keywords for indexing and PDF metadata.
-{%- set kw_list = keywords | default(['hero', 'fantasy', 'imaginaire', 'multilingual', 'emoji', 'PDF/A', 'Pandoc', 'LaTeX']) %}
-{%- for item in kw_list %}
-  - {{ item }}
+keywords: # List of relevant keywords for indexing and PDF metadata.
+{%- if keywords is defined and keywords %}
+{%- for item in keywords %}
+  - "{{ item }}"
 {%- endfor %}
+{%- else %}
+  - hero
+  - fantasy
+  - imaginaire
+  - multilingual
+  - emoji
+  - PDF/A
+{%- endif %}
 subject: "{{ subject | default('PSubject of the book') }}" # Document subject for PDF metadata. [2]
 
 # Purpose: This field is generally used for a longer, more detailed description of the document, primarily for metadata purposes in various file formats.
 #  Pandoc includes the description in the metadata of ODT, DOCX, and PPTX files. Some applications might display this as "Comments" metadata in the PDF properties.  It is not typically rendered directly within the visible content of the LaTeX PDF document itself, unlike abstract.
 description: |
-{%- if description %}
+{%- if description is defined and description %}
   {{- description | indent(2) }}
 {%- else %}
   Personalized book
@@ -42,9 +53,9 @@ publisher: "{{ publisher | default('Auto-édition') }}"              # Publisher
 isbn: "{{ isbn | default('') }}"                               # ISBN number (optional, for cataloging).
 rights: "{{ rights | default('© 2025 Substantifik. All Rights Reserved.') }}" # Copyright or license info.
 outline: |
-{%- if outline %}
+{%- if outline is defined and outline %}
   {{- outline | indent(2) }}
-{%- endif %}                            # Book outline, populated from project data. This is a placeholder and will be overridden.
+{%- endif %} # Book outline, populated from project data. This is a placeholder and will be overridden.
 
 # Language Configuration
 # 'lang' identifies the primary language using IETF BCP 47 tags (e.g., en-US, fr-CA).
@@ -180,10 +191,12 @@ header-includes: |
   % \cleardoublepage ensures content starts on a new right-hand page (recto), adding a blank page if needed.
   \newcommand{\sectionbreak}{\clearpage}  % Start each section on a new page (if desired, otherwise remove).
   \usepackage{etoolbox} % Needed for \preto.
+{% raw %}
   \preto\chapter{%
     \cleardoublepage%
-    \ifodd\value{page}\else\hbox{}\\newpage\\fi%
+    \ifodd\value{page}\else\hbox{}\newpage\fi%
   } % Ensures chapters start on right-hand (recto) pages (adds blank if needed).
+{% endraw %}
 
   % Fix for pagecolor (keep with caution for print-ready PDFs)
   % While functional, setting a non-white page color might complicate PDF/A compliance for print.
@@ -197,11 +210,13 @@ header-includes: |
 
   % Command to place the cover image on the title page
   % This will place the image as a background, scaled to fit the page.
+{% raw %}
   \AddToShipoutPictureBG*{%
     \AtPageLowerLeft{%
-      \includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio]{cover-image-path}%
+      \includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio]{$cover-image-path$}%
     }%
   }
+{% endraw %}
   % Note: 'cover-image-path' here is a Pandoc variable.
   % Pandoc will replace it with the value from your YAML.
   % Ensure the path is correct relative to where Pandoc is executed,
