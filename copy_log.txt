@@ -1,0 +1,23 @@
+Project 'my_book' loaded. Resuming...
+Outline already exists. Skipping outline generation.
+Characters already generated or not needed. Skipping.
+Worldbuilding already generated or not needed. Skipping.
+Last written chapter: 15/15
+
+Formatting book with 15 chapters...
+✓ Added original Chapter 1
+✓ Added original Chapter 2
+✓ Added original Chapter 3
+✓ Added original Chapter 4
+✓ Added original Chapter 5
+✓ Added original Chapter 6
+✓ Added original Chapter 7
+✓ Added original Chapter 8
+✓ Added original Chapter 9
+✓ Added original Chapter 10
+✓ Added original Chapter 11
+✓ Added original Chapter 12
+✓ Added original Chapter 13
+✓ Added original Chapter 14
+✓ Added original Chapter 15
+FormattingAgent is: Formatting Original Chapters...

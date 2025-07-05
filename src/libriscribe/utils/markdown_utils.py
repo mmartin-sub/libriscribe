@@ -69,6 +69,7 @@ def generate_yaml_metadata(project_knowledge_base, write_to_file=True):
     for src_key, yaml_key in override_map.items():
         value = get_field(src_key)
         if value is not None:
+            print(f"Key for debugger: {yaml_key}")
             if yaml_key == "keywords":
                 if isinstance(value, str):
                     value = [w.strip() for w in value.split(",")]
@@ -89,22 +90,33 @@ def generate_yaml_metadata(project_knowledge_base, write_to_file=True):
         ]
 
     try:
-        yaml_block = "---\n" + yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True) + "---\n"
+        yaml_block = "---\n" + yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True, default_flow_style=False) + "---\n"
     except Exception as e:
-        # Save the problematic metadata for debugging
+        print("DEBUG: description value:", repr(metadata.get("description")))
         error_path = os.path.join(
             getattr(project_knowledge_base, 'project_dir', os.getcwd()),
             "config-error.yaml"
         )
-        with open(error_path, "w", encoding="utf-8") as f:
-            # Use repr() to ensure all objects are stringified
-            import pprint
-            f.write("# YAML serialization error. Raw metadata below:\n")
-            pprint.pprint(metadata, stream=f, width=120)
-        # Print types of all metadata fields for debugging
+
         print("[DEBUG] Metadata field types (on YAML serialization error):")
         for k, v in metadata.items():
             print(f"  {k}: {type(v)}")
+        print("[DEBUG] Testing YAML serialization for each metadata field:")
+        for k, v in metadata.items():
+            try:
+                yaml.safe_dump({k: v}, allow_unicode=True)
+                print(f"  [OK] {k}")
+            except Exception as field_exc:
+                print(f"  [FAIL] {k}: {field_exc}")
+
+        raise e
+        with open(error_path, "w", encoding="utf-8") as f:
+            f.write("# YAML serialization error. Raw metadata below:\n")
+            try:
+                yaml.safe_dump(metadata, f, sort_keys=False, allow_unicode=True)
+            except Exception:
+                f.write(repr(metadata))
+
         print(f"[red]❌ Error serializing YAML metadata. Saved problematic data to: {error_path}[/red]")
         raise e
 
