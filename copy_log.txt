@@ -1,6 +1,0 @@
-Project 'my_book' loaded. Resuming...
-Outline already exists. Skipping outline generation.
-Characters already generated or not needed. Skipping.
-Worldbuilding already generated or not needed. Skipping.
-Last written chapter: 15/15
-Book already formatted or chapters missing. Skipping formatting.

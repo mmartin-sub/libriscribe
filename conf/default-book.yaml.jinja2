@@ -127,102 +127,104 @@ cover-image-path: images/my_book_cover.jpg # Path to your cover image.
 # Note: Pandoc's $header-includes$ might not be at the very end of the preamble.
 # If code depends on later declarations, wrap it in \AtEndPreamble from etoolbox. [14]
 header-includes: |
-  \usepackage{calc} % Required for arithmetic operations in LaTeX dimensions (e.g., adding bleed).
-  % Define dimensions including bleed for print-ready output based on YAML variables.
-  \newcommand{\calculatedPaperWidth}{\dimexpr\book-width-core+\bleed-amount*2\relax}
-  \newcommand{\calculatedPaperHeight}{\dimexpr\book-height-core+\bleed-amount*2\relax}
+  - text: |
+    \usepackage{calc} % Required for arithmetic operations in LaTeX dimensions (e.g., adding bleed).
+    % Define dimensions including bleed for print-ready output based on YAML variables.
+    \newcommand{\calculatedPaperWidth}{\dimexpr\book-width-core+\bleed-amount*2\relax}
+    \newcommand{\calculatedPaperHeight}{\dimexpr\book-height-core+\bleed-amount*2\relax}
 
-  \usepackage[
-    paperwidth=\calculatedPaperWidth,
-    paperheight=\calculatedPaperHeight,
-    top=0.75in,
-    bottom=0.75in,
-    inner=0.75in,
-    outer=0.5in,
-    includehead,
-    includefoot
-  ]{geometry} % [1]
+    \usepackage[
+      paperwidth=\calculatedPaperWidth,
+      paperheight=\calculatedPaperHeight,
+      top=0.75in,
+      bottom=0.75in,
+      inner=0.75in,
+      outer=0.5in,
+      includehead,
+      includefoot
+    ]{geometry} % [1]
 
-  \usepackage{fontspec} % Required for 'mainfont', 'sansfont', 'monofont', 'mathfont' variables to work with LuaLaTeX. [8, 15]
-  \usepackage{polyglossia} % For advanced multilingual support, preferred over 'babel' with LuaLaTeX. [16, 17]
-  \usepackage{emoji} % For robust color emoji support. [18]
+    \usepackage{fontspec} % Required for 'mainfont', 'sansfont', 'monofont', 'mathfont' variables to work with LuaLaTeX. [8, 15]
+    \usepackage{polyglossia} % For advanced multilingual support, preferred over 'babel' with LuaLaTeX. [16, 17]
+    \usepackage{emoji} % For robust color emoji support. [18]
 
-  % Set the default language for polyglossia (IETF BCP 47 tag).
-  \setdefaultlanguage[variant=us]{english} % Setting English as default for internal LaTeX commands. [17, 19]
-  \setmainlanguage[variant=fr]{french} % Explicitly set French as the main document language. [17, 19]
-  % Declare other languages used in the book. This enables correct hyphenation and typography.
-  \setotherlanguages{german,japanese,arabic,hebrew} % Add any other languages you plan to use. [17, 19]
+    % Set the default language for polyglossia (IETF BCP 47 tag).
+    \setdefaultlanguage[variant=us]{english} % Setting English as default for internal LaTeX commands. [17, 19]
+    \setmainlanguage[variant=fr]{french} % Explicitly set French as the main document language. [17, 19]
+    % Declare other languages used in the book. This enables correct hyphenation and typography.
+    \setotherlanguages{german,japanese,arabic,hebrew} % Add any other languages you plan to use. [17, 19]
 
-  % Define custom fonts for specific languages if they require different typefaces (e.g., CJK fonts).
-  % These fonts must be installed on your system or provided in a 'fonts' directory.
-  % Noto CJK fonts are recommended for East Asian scripts. [9]
-  \babelfont[japanese]{rm}{Noto Serif CJK JP} % Serif font for Japanese text. [19]
-  \babelfont[japanese]{sf}{Noto Sans CJK JP} % Sans-serif font for Japanese text. [19]
-  \babelfont[arabic]{rm}{Noto Naskh Arabic} % Naskh style Arabic font. [19, 20]
-  \babelfont[hebrew]{rm}{Noto Serif Hebrew} % Serif font for Hebrew text. [19, 20]
+    % Define custom fonts for specific languages if they require different typefaces (e.g., CJK fonts).
+    % These fonts must be installed on your system or provided in a 'fonts' directory.
+    % Noto CJK fonts are recommended for East Asian scripts. [9]
+    \babelfont[japanese]{rm}{Noto Serif CJK JP} % Serif font for Japanese text. [19]
+    \babelfont[japanese]{sf}{Noto Sans CJK JP} % Sans-serif font for Japanese text. [19]
+    \babelfont[arabic]{rm}{Noto Naskh Arabic} % Naskh style Arabic font. [19, 20]
+    \babelfont[hebrew]{rm}{Noto Serif Hebrew} % Serif font for Hebrew text. [19, 20]
 
-  % Configure robust emoji font fallback using LuaTeX's luaotfload.add_fallback.
-  % This is crucial for ensuring all emojis render correctly, even if not present in main fonts. [21, 22]
-  \directlua{luaotfload.add_fallback ("emojifallback", {
-    "Noto Color Emoji:mode=harf;",   % Primary color emoji font (Google). [21]
-    "Segoe UI Emoji:mode=harf;",     % Backup color emoji font (Microsoft, Windows 11 default). [21]
-  })}
-  % Apply the fallback mechanism to your main document fonts.
-  \setmainfont{Noto Serif}
-  \setsansfont{Noto Sans}
-  \setmonofont{Noto Sans Mono}
+    % Configure robust emoji font fallback using LuaTeX's luaotfload.add_fallback.
+    % This is crucial for ensuring all emojis render correctly, even if not present in main fonts. [21, 22]
+    \directlua{luaotfload.add_fallback ("emojifallback", {
+      "Noto Color Emoji:mode=harf;",   % Primary color emoji font (Google). [21]
+      "Segoe UI Emoji:mode=harf;",     % Backup color emoji font (Microsoft, Windows 11 default). [21]
+    })}
+    % Apply the fallback mechanism to your main document fonts.
+    \setmainfont{Noto Serif}
+    \setsansfont{Noto Sans}
+    \setmonofont{Noto Sans Mono}
 
-  % PDF/A-3u Compliance (Requires LuaLaTeX and pdfx package)
-  % 'a-3u' ensures PDF/A-3b compliance with additional Unicode text mapping. [23, 24]
-  \usepackage[a-3u,mathxmp]{pdfx} % Generates PDF/A-3u compliant PDF. 'mathxmp' for math metadata. [23, 24]
-  \usepackage[pdfa]{hyperref} % Ensures hyperlinks are PDF/A compliant, crucial for archival. [23]
+    % PDF/A-3u Compliance (Requires LuaLaTeX and pdfx package)
+    % 'a-3u' ensures PDF/A-3b compliance with additional Unicode text mapping. [23, 24]
+    \usepackage[a-3u,mathxmp]{pdfx} % Generates PDF/A-3u compliant PDF. 'mathxmp' for math metadata. [23, 24]
+    \usepackage[pdfa]{hyperref} % Ensures hyperlinks are PDF/A compliant, crucial for archival. [23]
 
-  % Microtypography for professional output.
-  % 'microtype' package provides subtle adjustments for improved text appearance (e.g., protrusion, expansion). [1]
-  \usepackage[final]{microtype}
+    % Microtypography for professional output.
+    % 'microtype' package provides subtle adjustments for improved text appearance (e.g., protrusion, expansion). [1]
+    \usepackage[final]{microtype}
 
-  % Proper quotation marks.
-  \usepackage{csquotes}
+    % Proper quotation marks.
+    \usepackage{csquotes}
 
-  % For page numbering like "Page X / LastPage".
-  \usepackage{lastpage}
+    % For page numbering like "Page X / LastPage".
+    \usepackage{lastpage}
 
-  % Chapter/Page Break Control
-  % \clearpage ensures content starts on a new page.
-  % \cleardoublepage ensures content starts on a new right-hand page (recto), adding a blank page if needed.
-  \newcommand{\sectionbreak}{\clearpage}  % Start each section on a new page (if desired, otherwise remove).
-  \usepackage{etoolbox} % Needed for \preto.
-{% raw %}
-  \preto\chapter{%
-    \cleardoublepage%
-    \ifodd\value{page}\else\hbox{}\newpage\fi%
-  } % Ensures chapters start on right-hand (recto) pages (adds blank if needed).
-{% endraw %}
+    % Chapter/Page Break Control
+    % \clearpage ensures content starts on a new page.
+    % \cleardoublepage ensures content starts on a new right-hand page (recto), adding a blank page if needed.
+    \newcommand{\sectionbreak}{\clearpage}  % Start each section on a new page (if desired, otherwise remove).
+    \usepackage{etoolbox} % Needed for \preto.
+  {% raw %}
+    \preto\chapter{%
+      \cleardoublepage%
+      \ifodd\value{page}\else\hbox{}\newpage\fi%
+    } % Ensures chapters start on right-hand (recto) pages (adds blank if needed).
+  {% endraw %}
 
-  % Fix for pagecolor (keep with caution for print-ready PDFs)
-  % While functional, setting a non-white page color might complicate PDF/A compliance for print.
-  % For print, it's generally best to let the printer handle paper color.
-  \usepackage{xcolor}
-  \usepackage{pagecolor}
-  \pagecolor{white}
+    % Fix for pagecolor (keep with caution for print-ready PDFs)
+    % While functional, setting a non-white page color might complicate PDF/A compliance for print.
+    % For print, it's generally best to let the printer handle paper color.
+    \usepackage{xcolor}
+    \usepackage{pagecolor}
+    \pagecolor{white}
 
-  \usepackage{eso-pic} % For adding content to the background of pages
-  \usepackage{graphicx} % For including graphics
+    \usepackage{eso-pic} % For adding content to the background of pages
+    \usepackage{graphicx} % For including graphics
 
-  % Command to place the cover image on the title page
-  % This will place the image as a background, scaled to fit the page.
-{% raw %}
-  \AddToShipoutPictureBG*{%
-    \AtPageLowerLeft{%
-      \includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio]{$cover-image-path$}%
-    }%
-  }
-{% endraw %}
-  % Note: 'cover-image-path' here is a Pandoc variable.
-  % Pandoc will replace it with the value from your YAML.
-  % Ensure the path is correct relative to where Pandoc is executed,
-  % or use --resource-path in your Pandoc command.
-  % If you want the image to be *only* on the title page,
-  % you might need more advanced LaTeX logic (e.g., using \ifthispageodd
-  % or specific title page hooks provided by scrbook or a custom template).
-  % For a simple full-page background on the first page, this works.
+    % Command to place the cover image on the title page
+    % This will place the image as a background, scaled to fit the page.
+  {% raw %}
+    \AddToShipoutPictureBG*{%
+      \AtPageLowerLeft{%
+        \includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio]{$cover-image-path$}%
+      }%
+    }
+  {% endraw %}
+    % Note: 'cover-image-path' here is a Pandoc variable.
+    % Pandoc will replace it with the value from your YAML.
+    % Ensure the path is correct relative to where Pandoc is executed,
+    % or use --resource-path in your Pandoc command.
+    % If you want the image to be *only* on the title page,
+    % you might need more advanced LaTeX logic (e.g., using \ifthispageodd
+    % or specific title page hooks provided by scrbook or a custom template).
+    % For a simple full-page background on the first page, this works.
+  format: latex

@@ -385,7 +385,7 @@ IMPORTANT: The content should be written entirely in {language}.
 """
 
 FORMATTING_PROMPT = """
-Combine the provided chapters into a single, well-formatted Markdown document representing the complete book manuscript.
+Directly combine the provided chapters into a single, well-formatted Markdown document. Do NOT add any introduction, conclusion, or conversational text. Start immediately with the content of Chapter 1.
 The book is written in {language}.
 Chapters:
 {chapters}
@@ -406,7 +406,7 @@ Consistent Formatting: Maintain consistent formatting throughout the document (e
 
 Table of Contents (Optional): If requested, generate a table of contents with links to each chapter. (Note: This requires a Markdown processor that supports ToC generation). For this basic version, just list the chapter titles.
 
-Output: Return the complete book manuscript in Markdown format.
+Output: Return the complete book manuscript in Markdown format. Nothing else, no comment.
 
 
 """
