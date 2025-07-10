@@ -254,9 +254,21 @@ header-left: "A Book for You"          # Text on the left side of the header. [1
 footer-right:  "\\thepage"
 #"\\thepage / \\pageref{LastPage}" # Text on the right side of the footer (often page number). [12]
 
+# --- Custom Cover Page ---
+custom-coverpage: true             # Set to true to enable the custom cover page
+cover-background-color: "C0C0C0"   # Hex color code for background (e.g., "C0C0C0" for silver)
 # Cover Image (for title page in PDF)
 cover-image-path: "images/my_book_cover.jpg" # Path to your cover image.
 
+# --- Custom Last Page ---
+custom-lastpage: true              # Set to true to enable the custom last page
+lastpage-image-path: "images/my_colophon_image.png" # Path to your last page image
+lastpage-background-color: "EEEEEE" # Hex color code for background (e.g., "000000" for black)
+lastpage-text: |                   # Optional text for the last page (colophon)
+  This book was typeset using \LaTeX\ and Pandoc.
+  Fonts used: Noto Serif, Noto Sans.
+  \vspace{0.5em}
+  Copyright \copyright\ 2023 Your Name.
 highlighting-style: null # or tango, pygments, kate, etc.
 
 # --- LaTeX header-includes ---

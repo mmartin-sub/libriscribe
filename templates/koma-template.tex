@@ -1,0 +1,136 @@
+% This is a Pandoc LaTeX template for scrbook (KOMA-Script)
+% designed for book production, including variables for bleed, core page size, etc.
+
+\documentclass[$if(fontsize)$$fontsize$,$endif$]{$documentclass$}
+
+% --- Define YAML variables as LaTeX macros ---
+% This is necessary so they can be used in header-includes that rely on these dimensions
+% Pandoc variables are expanded here BEFORE header-includes is inserted
+\newcommand{\bookwidthcore}{$book-width-core$}
+\newcommand{\bookheightcore}{$book-height-core$}
+\newcommand{\bleedamount}{$bleed-amount$}
+
+% --- Package Loading & Basic Setup ---
+\usepackage{fontspec} % For OpenType/TrueType fonts (requires LuaLaTeX or XeLaTeX)
+\usepackage{scrlayer-scrpage} % KOMA-Script's advanced page style package
+\usepackage{graphicx} % Needed for \includegraphics
+\usepackage{calc} % Needed for \dimexpr
+\usepackage{tikz} % Needed for the KOMA-Script cover image hook (\AddToHook)
+\usepackage[a-3u,mathxmp]{pdfx}
+
+% --- Insert header-includes from YAML ---
+% Geometry, Polyglossia, PDF/A, hyperref, font fallbacks, etc. go here
+% This block is correctly placed in the LaTeX preamble
+$for(header-includes)$
+$header-includes$
+$endfor$
+
+\usepackage{fancyvrb} % Needed for Verbatim environment
+
+% --- Manual definition for the Shaded environment (uses fancyvrb and etoolbox) ---
+% Add this block AFTER the YAML header-includes insertion point.
+% It relies on etoolbox being loaded by the YAML header-includes above.
+\usepackage{fancyvrb} % Needed for Verbatim environment (Pandoc might not load this with --no-highlight)
+
+% Manual definition for the Shaded environment
+% This is a workaround if Pandoc outputs \begin{Shaded} even with --no-highlight
+% It makes Shaded blocks behave like standard Verbatim blocks
+% THIS MUST BE AFTER \usepackage{etoolbox}, which comes from YAML header-includes.
+\IfEnvironmentUndefined{Shaded}{
+  \newenvironment{Shaded}{%
+    \VerbatimEnvironment % Allows using Verbatim inside this environment
+    \begin{Verbatim}
+  }{%
+    \end{Verbatim}
+  }
+}{} % Provide empty else part for \IfEnvironmentUndefined
+
+% You might also want to add some basic formatting for Shaded blocks
+% For example, a slightly different font size or margin if needed
+\setkomafont{listingtext}{\small\ttfamily} % Example: smaller monospaced font
+% The Verbatim environment itself handles font and line breaks.
+% --- END MANUAL SHADED BLOCK ---
+
+
+% --- Template & Document Metadata ---
+$if(title)$
+  \title{$title$}
+  $if(subtitle)$
+    \subtitle{$subtitle$}
+  $endif$
+$endif$
+$if(author)$
+  % Using \and for multiple authors is standard LaTeX, handled by Pandoc
+  \author{$for(author)$$author$$sep$ \and $endfor$}
+$endif$
+$if(date)$\date{$date$}$endif$
+$if(rights)$
+  % KOMA-Script equivalent for publisher info
+  \publishers{$rights$}
+$endif$
+
+% --- Header and Footer Configuration (Keep in template) ---
+% Remove header/footer setup from YAML header-includes if duplicated
+\clearpairofpagestyles % Clear all default page styles (like fancyplain)
+% Use \ohead and \ofoot* for outer side (right odd, left even). * affects plain pages.
+\ohead{\usekomafont{pageheadfoot}$header-left$} % Outer header
+\ofoot*{\usekomafont{pageheadfoot}$footer-right$} % Outer footer (plain pages too)
+\setkomafont{pageheadfoot}{\sffamily\normalfont} % Use sans-serif font for headers/footers, ensure normal font attributes
+
+% --- Cover Image on Title Page (Use ONE consistent method) ---
+% Assuming you prefer the KOMA hook over eso-pic
+$if(cover-image-path)$
+% Ensure the image path is correct relative to where pandoc is run
+% This requires TikZ (uncommented above)
+\AddToHook{titlepage/background}{%
+  \begin{tikzpicture}[remember picture, overlay]
+    % Position the image from the center of the current page.
+    % Scale to \paperwidth and \paperheight, which geometry (set in header-includes)
+    % should define to include the bleed amount.
+    \node at (current page.center) {\includegraphics[width=\paperwidth,height=\paperheight]{$cover-image-path$}};
+  \end{tikzpicture}%
+}
+$endif$
+
+% --- Start of Document Body ---
+\begin{document}
+
+% --- Title Page ---
+$if(titlepage)$
+  \maketitle % Pandoc's default title page command. Adds text/metadata.
+  % The AddToHook command adds the background image before the title page content is typeset.
+$endif$
+
+% --- Front Matter ---
+\frontmatter % Roman numeral page numbers, unnumbered chapters (e.g., TOC, Dedication, Acknowledgments)
+
+% Table of Contents (Use KOMA-Script command, placed in the body)
+% Remove TOC definition from YAML header-includes if duplicated
+$if(toc)$
+  % Pandoc will automatically insert \tableofcontents and set tocdepth based on YAML
+  \tableofcontents
+$endif$
+
+$if(lof)$ \listoffigures $endif$ % List of Figures (usually in frontmatter)
+$if(lot)$ \listoftables $endif$ % List of Tables (usually in frontmatter)
+
+% Pandoc inserts content from input files here, BEFORE $body$ if specified via --include-before-body
+% or as part of $body$ if concatenated before main chapters.
+% E.g., content of 00_frontmatter/01_acknowledgments.tex could come here.
+% This file should contain \addchap{Remerciements} or similar KOMA commands.
+
+% --- Main Content ---
+\mainmatter % Arabic page numbers, numbered chapters (e.g., Chapter 1, Chapter 2...)
+
+$body$ % Pandoc inserts the concatenated content of input files (main chapters) here
+
+% --- Back Matter ---
+\backmatter % Appendix, bibliography, index, image credits, colophon (unnumbered)
+
+% Pandoc inserts content from input files here, AFTER $body$ if specified via --include-after-body
+% or as part of $body$ if concatenated after main chapters.
+% E.g., content of 99_backmatter/01_image_credits.tex could come here.
+% This file should contain \addchap{Crédits Images} or similar KOMA commands.
+
+% End of Document Body
+\end{document}
