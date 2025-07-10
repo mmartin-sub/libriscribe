@@ -49,6 +49,7 @@ def generate_yaml_metadata(project_knowledge_base, write_to_file=True):
         "subtitle": "subtitle",
         "author": "author",
         "language": "lang",
+        "lang_long": "lang_long",
 #        "description": "description",  # for metadata
         "description": "abstract", # published resume
         "date": "date", # not in the file but value will be automatically set
@@ -80,6 +81,9 @@ def generate_yaml_metadata(project_knowledge_base, write_to_file=True):
                 context[template_key] = value
             elif template_key == "lang":
                 context[template_key] = normalize_language(value)
+            elif template_key == "lang_long":
+                context[template_key] = get_field("lang") # long format
+                # @todo, this should populate \setmainlanguage{french}
             elif template_key == "author" and isinstance(value, str):
                 # Ensure 'author' is always a list for the template's for-loop.
                 context[template_key] = [value]

@@ -1,0 +1,318 @@
+---
+# Document Metadata
+# Essential information about the book for title pages, PDF properties, and indexing.
+title: "2 soeurs à Lausanne"              # Main title of the book (used in PDF title page and headers).
+subtitle: "Sous-titre par défaut"      # Subtitle (shown under the title).
+
+author: # Author name(s). Use a list for multiple authors.  - "Auteur inconnu"
+  - "Auteur inconnu"
+
+date: "2025-07-05"                   # Publication date. Defaults to the LaTeX command for the current date.
+
+# This field is intended for a concise summary of your book's content, often displayed as an "abstract" section within the document itself, particularly in academic or technical publications.
+# Pandoc uses the abstract variable to populate an abstract environment in LaTeX output (if the template supports it) or to generate an abstract section in HTML, EPUB, and DOCX formats.
+# It can contain Markdown formatting, which Pandoc will convert to the appropriate output format (e.g., HTML paragraphs for web output).
+
+abstract: |
+  "2 sœurs à Lausanne" raconte le parcours initiatique d'Eva et Judith, deux sœurs élevées à Lausanne sous la règle familiale stricte de la limitation des écrans. Bien que cette contrainte ait été vécue comme une privation pendant leur jeunesse, elle se révèle être un avantage considérable à mesure qu'elles grandissent. Le roman explore leur développement personnel, leurs aspirations, leurs défis et l'évolution de leur lien fraternel face aux pressions sociales et familiales, mettant en lumière les bienfaits d'une vie moins dépendante de la technologie, dans un style inspiré du "Petit Prince".
+  Le récit débute avec Judith, 16 ans, à l'aube de vacances d'été gâchées par un secret dévoilé sur les réseaux sociaux. Hyper-connectée et sarcastique, elle est confrontée aux conséquences de ses actes numériques. Cette épreuve initiale, couplée aux leçons de vie partagées avec sa sœur aînée Eva, la pousse à une prise de conscience progressive de sa propre identité et de sa place dans le monde, tout en redécouvrant peut-être la valeur des liens humains et des expériences vécues hors des écrans.
+  Au fil des chapitres, le lecteur suivra l'émancipation des deux sœurs, leurs études, leurs premières expériences amoureuses, leurs choix de carrière, et la manière dont elles parviennent à concilier les valeurs familiales avec les réalités de la vie contemporaine. La relation fraternelle évolue, passant de la rivalité et de la complicité enfantine à un soutien mutuel dans les moments cruciaux de leur vie d'adulte, le tout ancré dans le décor pittoresque de Lausanne. # Short summary, used in PDF metadata. Use '|' for multi-line strings.
+
+keywords: # List of relevant keywords for indexing and PDF metadata.  - hero
+  - fantasy
+  - imaginaire
+  - multilingual
+  - emoji
+  - PDF/A
+subject: "PSubject of the book" # Document subject for PDF metadata. [2]
+
+# Purpose: This field is generally used for a longer, more detailed description of the document, primarily for metadata purposes in various file formats.
+#  Pandoc includes the description in the metadata of ODT, DOCX, and PPTX files. Some applications might display this as "Comments" metadata in the PDF properties.  It is not typically rendered directly within the visible content of the LaTeX PDF document itself, unlike abstract.
+description: |
+  Personalized book # Longer description for PDF metadata. [2]
+
+# "Fiction", "Non-Fiction", "Science", "History", "Technical Documentation", "Academic Research", etc.
+category: "Non-Fiction"                    # Document category for PDF metadata. [2]
+publisher: "Auto-édition"              # Publisher name (used in PDF metadata).
+isbn: ""                               # ISBN number (optional, for cataloging).
+rights: "© 2025 Substantifik. All Rights Reserved." # Copyright or license info.
+outline: |  # Résumé du Livre
+  "2 sœurs à Lausanne" est un roman initiatique non-fictionnel qui suit le parcours d'Eva et Judith, deux sœurs ayant grandi à Lausanne sous une règle familiale stricte de limitation des écrans. Ce qui était perçu comme une privation durant leur jeunesse se révèle être un atout majeur à l'âge adulte, leur permettant de développer une identité forte et des liens humains authentiques dans un monde de plus en plus numérisé.
+
+  Le récit commence avec Judith, 16 ans, dont les vacances d'été sont assombries par un secret révélé sur les réseaux sociaux. Hyper-connectée et sarcastique, elle est confrontée aux conséquences de ses actions numériques. Cette épreuve, combinée aux sages conseils de sa sœur aînée Eva, l'amène à une prise de conscience progressive de son identité et de sa place dans le monde, redécouvrant la valeur des expériences vécues hors des écrans.
+
+  Au fil des chapitres, le lecteur découvre l'émancipation des deux sœurs, leurs études, leurs premières expériences amoureuses, leurs choix de carrière, et comment elles concilient les valeurs familiales avec les réalités de la vie contemporaine. Leur relation fraternelle évolue de la rivalité enfantine à un soutien mutuel dans les moments cruciaux de leur vie d'adulte, le tout ancré dans le décor pittoresque de Lausanne. Le style, inspiré du "Petit Prince", met en lumière les bienfaits d'une vie moins dépendante de la technologie.
+
+  # Liste des Chapitres
+  15
+
+  # Détails des Chapitres
+
+  ## Chapitre 1: L'été des secrets numériques
+  ### Résumé
+  Judith, 16 ans, voit ses vacances d'été à Lausanne gâchées par la diffusion d'un secret la concernant sur les réseaux sociaux. Hyper-connectée et habituée à une communication rapide et souvent superficielle, elle est dévastée par les conséquences de cette exposition publique. Ce chapitre pose le décor de sa vie actuelle, marquée par une forte présence en ligne et une certaine distance émotionnelle.
+
+  ### Événements Clés
+  - La découverte du secret révélé en ligne.
+  - La réaction initiale de Judith : choc, colère, sentiment de trahison.
+  - La confrontation avec ses amis virtuels et la réalité de leur soutien.
+
+  ## Chapitre 2: La règle des écrans
+  ### Résumé
+  Ce chapitre explore les origines de la règle familiale stricte sur la limitation des écrans, imposée par leurs parents. Eva, l'aînée, se souvient de son enfance et de la manière dont cette contrainte a façonné sa perception du monde. Elle commence à comprendre les motivations de ses parents, même si elle a elle-même ressenti un sentiment de privation à l'époque.
+
+  ### Événements Clés
+  - Flashback sur l'enfance d'Eva et Judith sous la règle des écrans.
+  - Les discussions des parents sur les dangers de la technologie.
+  - Les premières manifestations de la différence de Judith face à cette règle.
+
+  ## Chapitre 3: Le murmure d'Eva
+  ### Résumé
+  Eva, plus âgée et ayant déjà traversé des épreuves similaires, prend le temps de parler à Judith. Elle partage son expérience de la vie sans surconnexion, mettant en avant les joies simples et la profondeur des relations humaines. Ses paroles, empreintes de sagesse et d'une douceur inspirée du "Petit Prince", commencent à faire écho chez Judith.
+
+  ### Événements Clés
+  - Eva rend visite à Judith pour la réconforter.
+  - Eva partage des anecdotes personnelles sur sa jeunesse et ses propres défis.
+  - Judith commence à écouter attentivement, intriguée par le point de vue d'Eva.
+
+  ## Chapitre 4: Lausanne, un autre regard
+  ### Résumé
+  Judith, forcée de se retirer des réseaux sociaux pendant un temps, commence à observer Lausanne sous un nouveau jour. Elle redécouvre les lieux familiers de sa ville, mais cette fois-ci, elle les voit sans le filtre constant de son téléphone. Elle remarque des détails qu'elle avait toujours ignorés, des interactions humaines dans la rue, la beauté des paysages lémaniques.
+
+  ### Événements Clés
+  - Judith se promène seule dans Lausanne.
+  - Elle observe les gens et leurs interactions sans son téléphone.
+  - Elle est surprise par la richesse des détails visuels et sonores qu'elle découvre.
+
+  ## Chapitre 5: La première conversation sans écran
+  ### Résumé
+  Eva et Judith partagent un moment de complicité authentique, sans aucune distraction technologique. Elles discutent de leurs rêves, de leurs peurs, et de ce que signifie grandir à Lausanne. Cette conversation, simple et profonde, marque un tournant dans leur relation fraternelle, renforçant leur lien.
+
+  ### Événements Clés
+  - Les deux sœurs partagent un repas ou une activité sans téléphone.
+  - Elles parlent ouvertement de leurs sentiments et de leurs aspirations.
+  - Judith ressent un sentiment de connexion et de compréhension avec Eva.
+
+  ## Chapitre 6: Les études et les nouvelles rencontres
+  ### Résumé
+  Judith commence ses études supérieures à Lausanne. Elle est confrontée à un nouvel environnement où la technologie est omniprésente. Elle doit apprendre à naviguer dans ce monde tout en conservant les valeurs de connexion humaine qu'elle commence à chérir, et fait de nouvelles rencontres qui la poussent à réfléchir sur ses choix.
+
+  ### Événements Clés
+  - Premier jour à l'université pour Judith.
+  - Rencontre avec de nouveaux camarades, certains très connectés.
+  - Premières réflexions de Judith sur la façon de s'intégrer sans perdre son identité.
+
+  ## Chapitre 7: Le premier amour, hors ligne
+  ### Résumé
+  Judith fait la connaissance de quelqu'un qui partage son intérêt pour les activités hors ligne. Cette relation naissante est différente de celles qu'elle avait pu connaître virtuellement. Elle découvre la patience, l'écoute et la profondeur d'une connexion qui se construit lentement, loin des notifications constantes.
+
+  ### Événements Clés
+  - Rencontre avec un nouveau personnage, sensible à la nature et aux arts.
+  - Premiers rendez-vous, axés sur des expériences partagées.
+  - Judith ressent une attirance sincère et une connexion émotionnelle forte.
+
+  ## Chapitre 8: Les choix de carrière d'Eva
+  ### Résumé
+  Eva, quant à elle, est à un carrefour professionnel. Elle doit choisir entre une carrière prometteuse dans un domaine très compétitif et une voie plus alignée avec ses valeurs personnelles. Elle consulte Judith, et leurs discussions les amènent à réfléchir sur le sens du succès et le bonheur.
+
+  ### Événements Clés
+  - Eva reçoit plusieurs offres d'emploi.
+  - Elle discute de ses dilemmes avec Judith.
+  - Les deux sœurs échangent sur leurs visions du succès et de l'épanouissement.
+
+  ## Chapitre 9: Le défi de la famille
+  ### Résumé
+  Les parents d'Eva et Judith expriment leurs inquiétudes quant à leurs choix de vie, notamment la distance que Judith semble prendre avec le monde numérique et les aspirations plus "traditionnelles" d'Eva. Les sœurs doivent trouver un moyen de respecter les valeurs familiales tout en affirmant leur propre chemin.
+
+  ### Événements Clés
+  - Une réunion de famille tendue.
+  - Les parents font part de leurs doutes et de leurs attentes.
+  - Eva et Judith défendent leurs choix avec respect.
+
+  ## Chapitre 10: L'amitié virtuelle vs. l'amitié réelle
+  ### Résumé
+  Judith est confrontée à une situation où ses "amis" virtuels réagissent différemment de ses amis réels lors d'une difficulté. Elle réalise la superficialité de certaines connexions en ligne et la profondeur du soutien qu'elle reçoit de ses amis proches, ceux qu'elle voit et avec qui elle partage des moments concrets.
+
+  ### Événements Clés
+  - Judith traverse une épreuve personnelle.
+  - Elle constate la différence de réaction entre ses contacts en ligne et ses amis réels.
+  - Elle prend conscience de la valeur des amitiés authentiques.
+
+  ## Chapitre 11: Le retour aux sources
+  ### Résumé
+  Fatiguée par les pressions de la vie urbaine et des études, Judith décide de passer quelques jours dans un endroit plus calme, peut-être à la campagne autour de Lausanne, pour se ressourcer. Elle y retrouve une connexion avec la nature et une simplicité qui lui rappellent les valeurs de son enfance.
+
+  ### Événements Clés
+  - Judith s'éloigne de la ville pour quelques jours.
+  - Elle retrouve le plaisir des activités simples et de la nature.
+  - Elle se sent plus en paix et plus ancrée.
+
+  ## Chapitre 12: Le soutien d'Eva dans le doute
+  ### Résumé
+  Eva traverse une période de doute professionnel et personnel. Judith, ayant elle-même appris à surmonter ses propres difficultés, est là pour la soutenir. Leur relation s'est inversée dans ce chapitre, montrant la maturité de Judith et la force de leur lien fraternel.
+
+  ### Événements Clés
+  - Eva exprime ses doutes et ses peurs à Judith.
+  - Judith offre un soutien inconditionnel et des conseils avisés.
+  - Leur complicité est plus forte que jamais.
+
+  ## Chapitre 13: Les premiers pas dans le monde professionnel
+  ### Résumé
+  Eva prend une décision audacieuse concernant sa carrière, choisissant une voie qui allie ses compétences et ses valeurs. Judith l'accompagne dans cette nouvelle étape, et elles partagent l'excitation et l'appréhension des débuts dans le monde adulte.
+
+  ### Événements Clés
+  - Eva commence son nouveau travail ou projet.
+  - Judith est présente pour la soutenir lors de ses premiers jours.
+  - Elles célèbrent ensemble cette nouvelle étape.
+
+  ## Chapitre 14: La conciliation des mondes
+  ### Résumé
+  Les deux sœurs parviennent à trouver un équilibre entre les valeurs familiales de simplicité et de connexion humaine, et les réalités de la vie moderne. Elles développent des stratégies pour utiliser la technologie de manière consciente et bénéfique, sans en devenir dépendantes.
+
+  ### Événements Clés
+  - Les sœurs discutent de leur approche de la technologie.
+  - Elles partagent des astuces pour une utilisation saine et équilibrée.
+  - Elles montrent comment elles intègrent ces valeurs dans leur vie quotidienne.
+
+  ## Chapitre 15: L'envol à Lausanne
+  ### Résumé
+  Le roman se termine sur une note d'espoir et d'accomplissement. Eva et Judith, désormais jeunes femmes, sont prêtes à affronter l'avenir, fortes de leur lien fraternel et des leçons apprises grâce à leur éducation particulière. Elles ont trouvé leur place à Lausanne, une ville qui a été le témoin de leur croissance et de leur émancipation.
+
+  ### Événements Clés
+  - Les sœurs partagent un moment de réflexion sur leur parcours.
+  - Elles expriment leur gratitude pour leur éducation et leur lien.
+  - Elles regardent vers l'avenir avec confiance et sérénité, ancrées à Lausanne. # Book outline, populated from project data. This is a placeholder and will be overridden.
+
+# Language Configuration
+# 'lang' identifies the primary language using IETF BCP 47 tags (e.g., en-US, fr-CA).
+# This is critical for hyphenation and correct language-specific typesetting with polyglossia.
+lang: "fr"                            # Primary language of the document. Set to French (France). [2]
+dir: ltr                               # Base script direction: 'ltr' for left-to-right (default).
+                                       # Important for bidirectional languages like Arabic or Hebrew. [2]
+
+# LaTeX Engine and Document Class
+# 'pdf-engine' specifies the LaTeX processor. LuaLaTeX is crucial for advanced features.
+pdf-engine: lualatex                   # Essential for robust Unicode, multilingual, and color emoji support. [3, 4]
+documentclass: scrbook                 # Recommended document class from KOMA-Script for professional book typesetting. [1]
+                                       # Offers superior typography and extensive layout flexibility. [1, 5]
+fontsize: 12pt                         # Base font size for the document. Common options: 10pt, 11pt, 12pt. [6, 7]
+
+# Core Book Dimensions for Easy Adjustment (US Trade 6x9 inches with bleed)
+# Modify these values to change the book's physical size.
+# For US Trade 6x9 (152x229mm):
+book-width-core: 6in                   # Core book width (e.g., 6 inches). [1]
+book-height-core: 9in                  # Core book height (e.g., 9 inches). [1]
+bleed-amount: 0.125in                  # Standard bleed for print (e.g., 0.125 inches on each edge). [1]
+
+bibliography: # leave blank or omit if not using biblatex for now
+# Example if using: bibliography: myrefs.bib
+
+# Add this variable to control chapter starting page (optional)
+chapter-starts-on-right: true # or false/omit
+
+documentclass: scrbook
+classoption: [11pt, twoside, open=right]
+pdfa: true
+
+smart: true # Converts straight quotes (", ') to curly quotes (“, ”, ‘, ’), three hyphens (---) to em-dashes (—), two hyphens (--) to en-dashes (–), and three dots (...) to ellipses (…). This significantly improves the typography of your document.
+
+# TO CHANGE TO A4 (210x297mm) with 3.175mm bleed:
+# book-width-core: 210mm
+# book-height-core: 297mm
+# bleed-amount: 3.175mm
+
+# Font Configuration (Requires LuaLaTeX and fontspec)
+# Using Noto fonts for broad Unicode coverage and visual harmony across scripts is highly recommended. [8, 9, 10]
+# Ensure these fonts are installed on your system.
+mainfont: "Noto Serif"                 # Primary serif font for body text. [8, 10]
+
+#mainfontoptions:
+#  - Ligatures=TeX # Enable standard TeX ligatures
+#  - SmallCaps=On # Enable small caps feature
+#  - RawFeature=+onum # Enable old-style numerals (if supported by font)
+
+sansfont: "Noto Sans"                  # Sans-serif font for headings, captions, etc. [8, 10]
+monofont: "Noto Sans Mono"             # Monospace font for code blocks and fixed-width text. [8, 10]
+mathfont: "Latin Modern Math"          # Dedicated font for mathematical expressions. [11]
+
+# Table of Contents and Book Structure
+toc: true                              # Generates a Table of Contents. [12]
+toc-title: "Table des Matières"        # Title for the TOC. [13]
+toc-depth: 1                           # Includes up to subsections (Chapter, Section, Subsection) in the TOC. [13]
+toc-own-page: true                     # Ensures the Table of Contents starts on a new page. [12]
+titlepage: true                        # Turns on the title page. [12]
+book: true                             # Tells Pandoc to use book-specific typesetting features in the LaTeX template. [12]
+first-chapter: 1                       # Specifies the starting number for the first chapter. Useful for multi-volume books. [12]
+
+lof: false                              # List of Figures (set true if you have figures/images).
+lot: false                              # List of Tables (set true if you have tables).
+
+colorlinks: true                       # Use colored links in PDF (recommended for digital).
+linkcolor: "blue"                      # Color for links (e.g., blue, red, etc.). [13]
+
+header-left: "A Book for You"          # Text on the left side of the header. [12]
+footer-right:  "\\thepage"
+#"\\thepage / \\pageref{LastPage}" # Text on the right side of the footer (often page number). [12]
+
+# Cover Image (for title page in PDF)
+cover-image-path: "images/my_book_cover.jpg" # Path to your cover image.
+
+highlighting-style: null # or tango, pygments, kate, etc.
+
+# --- LaTeX header-includes ---
+# This section allows injecting raw LaTeX code directly into the document's preamble.
+# It's used for loading specific packages, defining custom commands, and fine-tuning font fallbacks.
+# Note: Pandoc's $header-includes$ might not be at the very end of the preamble.
+# If code depends on later declarations, wrap it in \AtEndPreamble from etoolbox. [14]
+
+# Geometry setup using defined macros #
+# Make sure bookwidthcore, bookheightcore, bleedamount macros are defined in the template BEFORE header-includes
+
+# Define other languages if needed for switching #
+# Fallback fonts for specific languages/scripts #
+
+# Add cleardoublepage before chapters (useful for mainmatter)
+# Be mindful this applies to *any* \chapter command, including those you might manually place
+# in input files if you use \chapter instead of Markdown #.
+
+# showframe is for debugging layout issues, remove in production
+header-includes:
+  - |
+    \usepackage[
+      paperwidth=\dimexpr\bookwidthcore+\bleedamount*2\relax,
+      paperheight=\dimexpr\bookheightcore+\bleedamount*2\relax,
+      top=0.75in, bottom=0.75in, inner=0.75in, outer=0.5in,
+      includehead, includefoot
+    ]{geometry}
+
+  - |
+    \usepackage{polyglossia}
+    \setdefaultlanguage{french}
+    \setmainfont{Noto Serif}
+    \setsansfont{Noto Sans}
+    \setmonofont{Noto Sans Mono}
+    \setotherlanguages{english,german,japanese,arabic,hebrew}
+
+  - |
+    \usepackage{etoolbox}
+    \preto\chapter{\cleardoublepage}
+
+  - |
+    \directlua{luaotfload.add_fallback ("emojifallback", {
+      "Noto Color Emoji:mode=harf;",
+      "Segoe UI Emoji:mode=harf;",
+    })}
+
+  - |
+    \usepackage[final]{microtype}
+    \usepackage{csquotes}
+    \usepackage{lastpage}
+
+
+  # --- Removed from header-includes ---
+  # Removed: geometry definition macros (\calculatedPaperWidth, \calculatedPaperHeight) - handled by template macros
+  # Removed: geometry package call using calculated macros - handled by direct use of template macros above
+  # Removed: KOMA TOC definition (\begingroup...\printcontents...\endgroup) - moved to template body
+  # Removed: scrlayer-scrpage header/footer setup - kept in template
+  # Removed: eso-pic cover image code - replaced by KOMA hook in template
+---

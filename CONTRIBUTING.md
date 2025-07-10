@@ -11,19 +11,45 @@ We welcome contributions from the community!  Here's how you can help improve Li
 *   **Testing:**  Help us test the software and report any issues you encounter.
 
 ## Code Contribution Guidelines
-
-1.  **Fork the repository:** Create a fork of the LibriScribe repository on GitHub.
-2.  **Clone your fork:**
-    ```bash
-    git clone https://github.com/YOUR_USERNAME/libriscribe.git
-    cd libriscribe
-    ```
-3.  **Create a branch:** Create a new branch for your changes:
+1.  **Set up your environment:**
+    *   Fork the repository and clone it locally.
+    *   It's highly recommended to use a Python virtual environment.
+      ```bash
+      # Navigate to the project root
+      cd libriscribe
+      # Create a virtual environment
+      python3 -m venv .venv
+      # Activate it
+      source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
+      ```
+    *   Install the project in editable mode along with development tools.
+      ```bash
+      # Install project dependencies
+      pip install -e .
+      # Install development tools
+      pip install ruff
+      ```
+    *   If you plan to work with `.tex` files, you will need a TeX distribution like TeX Live. You can install `latexindent` using its package manager:
+      ```bash
+      tlmgr install latexindent
+      ```
+2.  **Create a branch:** Create a new branch for your changes:
     ```bash
     git checkout -b my-feature-branch
     ```
     Use a descriptive branch name (e.g., `fix-bug-123`, `add-new-agent`).
-4.  **Make your changes:**  Write your code, following the existing code style and conventions.
+3.  **Make your changes:**  Write your code, following the project's code style.
+4.  **Format your code:** Before committing, please run the formatters.
+    ```bash
+    # Format Python files
+    ruff format .
+
+    # Check for Python linting issues and auto-fix
+    ruff check --fix .
+
+    # Format a .tex file (run on each one you change)
+    latexindent.pl path/to/your/file.tex
+    ```
 5.  **Write tests:**  If you're adding a new feature or fixing a bug, write unit tests to ensure your code works correctly.
 6.  **Run tests:**  Make sure all tests pass before submitting your pull request.
 7.  **Commit your changes:**
@@ -34,12 +60,13 @@ We welcome contributions from the community!  Here's how you can help improve Li
     ```bash
     git push origin my-feature-branch
     ```
-9.  **Create a pull request:**  Create a pull request from your branch to the `main` branch of the LibriScribe repository.  Provide a clear description of your changes and any relevant information.
+9.  **Create a pull request:**  Create a pull request from your branch to the `main` branch of the LibriScribe repository. Provide a clear description of your changes and any relevant information.
 10. **Address feedback:** Be prepared to address feedback provided.
 
 ## Code Style
 
-*   Follow PEP 8 guidelines for Python code style.
+*   We use Ruff for Python and `latexindent.pl` for LaTeX to ensure consistent code style.
+*   Configuration is in `pyproject.toml` for Ruff and `.latexindent.yaml` for LaTeX. Please adhere to these styles.
 *   Use clear and descriptive variable and function names.
 *   Add docstrings to your functions and classes.
 *   Keep your code well-organized and easy to understand.

@@ -44,7 +44,7 @@ class FactCheckerAgent(Agent):
         """
 
         try:
-            claims_json_str = self.llm_client.generate_content(identify_claims_prompt, max_tokens=1000)
+            claims_json_str = self.llm_client.generate_content(identify_claims_prompt) # , max_tokens=1000
             claims = extract_json_from_markdown(claims_json_str)
             if claims is None:
                 print("ERROR: Invalid claims data received.")

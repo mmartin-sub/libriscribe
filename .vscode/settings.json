@@ -27,5 +27,19 @@
   "dotnetAcquisitionExtension.enableTelemetry": false,
   "genieai.telemetry.disable": false,
   "stripe.telemetry.enabled": false,
-  "code-runner.enableAppInsights": false
+  "code-runner.enableAppInsights": false,
+  "cSpell.ignorePaths": [
+  "**/my-latex-folder/**",
+  "**/*.tex"
+],
+  "cSpell.language": "en,fr",
+  "cSpell.enabled": true,
+  "cSpell.userWords": [
+    "latexmk",
+    "lualatex",
+    "xelatex",
+    "bibtex",
+    "biber",
+    "texlive"
+  ]
 }
