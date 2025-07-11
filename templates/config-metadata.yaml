@@ -193,9 +193,21 @@ dir: ltr                               # Base script direction: 'ltr' for left-t
 # LaTeX Engine and Document Class
 # 'pdf-engine' specifies the LaTeX processor. LuaLaTeX is crucial for advanced features.
 pdf-engine: lualatex                   # Essential for robust Unicode, multilingual, and color emoji support. [3, 4]
-documentclass: scrbook                 # Recommended document class from KOMA-Script for professional book typesetting. [1]
-                                       # Offers superior typography and extensive layout flexibility. [1, 5]
-fontsize: 12pt                         # Base font size for the document. Common options: 10pt, 11pt, 12pt. [6, 7]
+# --- Document Class Options (in \documentclass{}) ---
+documentclass: scrbook
+fontsize: 11pt
+classoption: [twoside, open=right]
+# --- Keep options that must be in documentclass here (e.g., twoside) ---
+
+# --- KOMA-Script Options  ---
+# Options that can be set after documentclass, applied in the preamble.
+# koma-options: open=right, toc=graduated, numbers=auto, chapterprefix=true, headings=standard, captions=tableheading %
+koma-options: open=right, toc=graduated, numbers=auto, chapterprefix=true
+
+# --- Hyperref Colors (Optional) ---
+# urlcolor: blue
+# linkcolor: blue
+# citecolor: blue
 
 # Core Book Dimensions for Easy Adjustment (US Trade 6x9 inches with bleed)
 # Modify these values to change the book's physical size.
@@ -210,8 +222,7 @@ bibliography: # leave blank or omit if not using biblatex for now
 # Add this variable to control chapter starting page (optional)
 chapter-starts-on-right: true # or false/omit
 
-documentclass: scrbook
-classoption: [11pt, twoside, open=right]
+# font not specifiec here.
 pdfa: true
 
 smart: true # Converts straight quotes (", ') to curly quotes (“, ”, ‘, ’), three hyphens (---) to em-dashes (—), two hyphens (--) to en-dashes (–), and three dots (...) to ellipses (…). This significantly improves the typography of your document.
@@ -264,12 +275,7 @@ cover-image-path: "images/my_book_cover.jpg" # Path to your cover image.
 custom-lastpage: true              # Set to true to enable the custom last page
 lastpage-image-path: "images/my_colophon_image.png" # Path to your last page image
 lastpage-background-color: "EEEEEE" # Hex color code for background (e.g., "000000" for black)
-lastpage-text: |                   # Optional text for the last page (colophon)
-  This book was typeset using \LaTeX\ and Pandoc.
-  Fonts used: Noto Serif, Noto Sans.
-  \vspace{0.5em}
-  Copyright \copyright\ 2023 Your Name.
-highlighting-style: null # or tango, pygments, kate, etc.
+lastpage-tex-path: "99_backmatter/last_page_colophon.tex" # Path to the LaTeX file for the last page content
 
 # --- LaTeX header-includes ---
 # This section allows injecting raw LaTeX code directly into the document's preamble.
@@ -288,37 +294,9 @@ highlighting-style: null # or tango, pygments, kate, etc.
 # in input files if you use \chapter instead of Markdown #.
 
 # showframe is for debugging layout issues, remove in production
-header-includes:
-  - |
-    \usepackage[
-      paperwidth=\dimexpr\bookwidthcore+\bleedamount*2\relax,
-      paperheight=\dimexpr\bookheightcore+\bleedamount*2\relax,
-      top=0.75in, bottom=0.75in, inner=0.75in, outer=0.5in,
-      includehead, includefoot
-    ]{geometry}
-
-  - |
-    \usepackage{polyglossia}
-    \setdefaultlanguage{french}
-    \setmainfont{Noto Serif}
-    \setsansfont{Noto Sans}
-    \setmonofont{Noto Sans Mono}
-    \setotherlanguages{english,german,japanese,arabic,hebrew}
-
-  - |
-    \usepackage{etoolbox}
-    \preto\chapter{\cleardoublepage}
-
-  - |
-    \directlua{luaotfload.add_fallback ("emojifallback", {
-      "Noto Color Emoji:mode=harf;",
-      "Segoe UI Emoji:mode=harf;",
-    })}
-
-  - |
-    \usepackage[final]{microtype}
-    \usepackage{csquotes}
-    \usepackage{lastpage}
+#header-includes:
+#  - |
+#    \usepackage[final]{microtype}
 
 
   # --- Removed from header-includes ---
