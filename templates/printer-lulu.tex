@@ -1,36 +1,28 @@
 % ===================================================================
-% PRINTER PROFILE: LULU.COM (v2)
+% PRINTER PROFILE: LULU.COM (v3 - Final)
 %
 % PURPOSE:
-%   - Sets all page geometry (paper size, bleed, margins) for the INTERIOR PDF.
-%   - Dynamically calculates the gutter based on total page count and binding.
-%   - Uses \RequirePackage, which is the best practice for included files.
+%   - Sets page geometry for the INTERIOR PDF.
+%   - Dynamically calculates gutter based on page count using the
+%     standard `refcount` and `lastpage` packages.
 %
 % USAGE:
 %   - \input{this_file.tex} in your main template's preamble.
-%
-% REQUIRED PANDOC VARIABLES:
-%   - book-width-core:  Final trim width (e.g., 6in).
-%   - book-height-core: Final trim height (e.g., 9in).
-%   - binding-type:     'paperback' or 'hardcover'.
 % ===================================================================
 
-% 1. Load essential packages using \RequirePackage
-% This is the standard command for dependencies within packages or class files.
-\RequirePackage{etoolbox} % For string comparison (\ifstrequal)
-\RequirePackage{lastpage}   % To get the total page count (\pageref{LastPage})
-\RequirePackage{ifpaged}    % For easy numerical comparison of page counts (\ifpagesgt)
-\RequirePackage{geometry}   % To set the page layout
+% 1. Load essential, standard packages using \RequirePackage.
+\RequirePackage{etoolbox}
+\RequirePackage{lastpage}   % Provides the `LastPage` label.
+\RequirePackage{refcount}   % Provides `\getrefnumber` to read the label as a number.
+\RequirePackage{geometry}
 
-% 2. Define Lulu's fixed specifications for the interior file
+% 2. Define Lulu's fixed specifications.
 \newlength{\luluBleedAmount}
-\setlength{\luluBleedAmount}{0.125in} % Standard 1/8 inch bleed. [1]
-
+\setlength{\luluBleedAmount}{0.125in}
 \newlength{\luluOuterSafetyMargin}
-\setlength{\luluOuterSafetyMargin}{0.5in} % For top, bottom, and outside edges. [2]
+\setlength{\luluOuterSafetyMargin}{0.5in}
 
-% 3. Calculate the full bleed paper size from the core trim size
-% These values are passed from Pandoc variables $book-width-core$ and $book-height-core$.
+% 3. Calculate the full bleed paper size from Pandoc variables.
 \newlength{\bookwidthcore}
 \newlength{\bookheightcore}
 \setlength{\bookwidthcore}{$book-width-core$}
@@ -41,36 +33,48 @@
 \setlength{\calculatedpaperwidth}{\dimexpr\bookwidthcore + 2\luluBleedAmount\relax}
 \setlength{\calculatedpaperheight}{\dimexpr\bookheightcore + 2\luluBleedAmount\relax}
 
-% 4. Defer the final geometry setup until the page count is known
-% The \AtBeginDocument hook runs after LaTeX knows the total page count from the previous run.
+% 4. Defer the final geometry setup until the page count is known.
 \AtBeginDocument{%
   \newlength{\luluGutterMargin}
 
-  % === DYNAMIC GUTTER LOGIC ===
-  % This logic checks the 'binding-type' variable and then the total page count
-  % to select the correct gutter margin as specified by Lulu. [2]
+  % === DYNAMIC GUTTER LOGIC (using \ifnum and \getrefnumber) ===
+  % This is the standard, robust method for numerical comparison of labels.
 
   % --- HARDCOVER GUTTER REQUIREMENTS ---
   \ifstrequal{$binding-type$}{hardcover}{%
-    \ifpagesgt{500}{\setlength{\luluGutterMargin}{1.175in}}%
-    {\ifpagesgt{300}{\setlength{\luluGutterMargin}{1.05in}}%
-    {\ifpagesgt{150}{\setlength{\luluGutterMargin}{0.925in}}%
-    {\setlength{\luluGutterMargin}{0.8in}}% Default for up to 150 pages
-    }}%
+    \ifnum\getrefnumber{LastPage}>500
+      \setlength{\luluGutterMargin}{1.175in}%
+    \else
+      \ifnum\getrefnumber{LastPage}>300
+        \setlength{\luluGutterMargin}{1.05in}%
+      \else
+        \ifnum\getrefnumber{LastPage}>150
+          \setlength{\luluGutterMargin}{0.925in}%
+        \else
+          \setlength{\luluGutterMargin}{0.8in}%
+        \fi
+      \fi
+    \fi
   }{}% Empty 'else' part
 
   % --- PAPERBACK GUTTER REQUIREMENTS ---
   \ifstrequal{$binding-type$}{paperback}{%
-    \ifpagesgt{500}{\setlength{\luluGutterMargin}{0.875in}}%
-    {\ifpagesgt{300}{\setlength{\luluGutterMargin}{0.75in}}%
-    {\ifpagesgt{150}{\setlength{\luluGutterMargin}{0.625in}}%
-    {\setlength{\luluGutterMargin}{0.5in}}% Default for up to 150 pages
-    }}%
+    \ifnum\getrefnumber{LastPage}>500
+      \setlength{\luluGutterMargin}{0.875in}%
+    \else
+      \ifnum\getrefnumber{LastPage}>300
+        \setlength{\luluGutterMargin}{0.75in}%
+      \else
+        \ifnum\getrefnumber{LastPage}>150
+          \setlength{\luluGutterMargin}{0.625in}%
+        \else
+          \setlength{\luluGutterMargin}{0.5in}%
+        \fi
+      \fi
+    \fi
   }{}% Empty 'else' part
 
-  % 5. Apply the final, calculated geometry for the document
-  % Margins are calculated from the *bleed edge* to the text block.
-  % The 'inner' margin value now correctly includes Lulu's required gutter.
+  % 5. Apply the final, calculated geometry.
   \geometry{
     paperwidth=\calculatedpaperwidth,
     paperheight=\calculatedpaperheight,
@@ -80,6 +84,6 @@
     inner=\dimexpr\luluBleedAmount + \luluGutterMargin\relax,
     includehead,
     includefoot
-    % showframe % Uncomment to visualize layout boxes during debugging
+    %showframe % Uncomment to visualize layout boxes during debugging
   }
 }
