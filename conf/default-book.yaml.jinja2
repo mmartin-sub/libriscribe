@@ -1,3 +1,7 @@
+---
+# Input format with recommended extensions
+from: markdown+emoji+tex_math_gfm+yaml_metadata_block+latex_macros+smart+auto_identifiers+implicit_figures+table_captions+raw_tex
+
 # Document Metadata
 # Essential information about the book for title pages, PDF properties, and indexing.
 title: "{{ title | default('Titre par défaut') }}"              # Main title of the book (used in PDF title page and headers).
@@ -12,9 +16,6 @@ author: # Author name(s). Use a list for multiple authors.
 {% endif %}
 date: "{{ date | default('\\today') }}"                   # Publication date. Defaults to the LaTeX command for the current date.
 
-# This field is intended for a concise summary of your book's content, often displayed as an "abstract" section within the document itself, particularly in academic or technical publications.
-# Pandoc uses the abstract variable to populate an abstract environment in LaTeX output (if the template supports it) or to generate an abstract section in HTML, EPUB, and DOCX formats.
-# It can contain Markdown formatting, which Pandoc will convert to the appropriate output format (e.g., HTML paragraphs for web output).
 abstract: |
 {% if abstract is defined and abstract %}
   {{ abstract | indent(2) }}
@@ -35,130 +36,117 @@ keywords: # List of relevant keywords for indexing and PDF metadata.
   - imaginaire
   - multilingual
   - emoji
-  - PDF/A
+  - PDF/X
 {% endif %}
-subject: "{{ subject | default('PSubject of the book') }}" # Document subject for PDF metadata. [2]
-
-# Purpose: This field is generally used for a longer, more detailed description of the document, primarily for metadata purposes in various file formats.
-#  Pandoc includes the description in the metadata of ODT, DOCX, and PPTX files. Some applications might display this as "Comments" metadata in the PDF properties.  It is not typically rendered directly within the visible content of the LaTeX PDF document itself, unlike abstract.
+subject: "{{ subject | default('PSubject of the book') }}" # Document subject for PDF metadata.
 description: |
 {% if description is defined and description %}
   {{ description | indent(2) }}
 {% else %}
   Personalized book
-{% endif %} # Longer description for PDF metadata. [2]
+{% endif %} # Longer description for PDF metadata.
 
-# "Fiction", "Non-Fiction", "Science", "History", "Technical Documentation", "Academic Research", etc.
-category: "{{ category | default('Fiction') }}"                    # Document category for PDF metadata. [2]
-publisher: "{{ publisher | default('Auto-édition') }}"              # Publisher name (used in PDF metadata).
-isbn: "{{ isbn | default('') }}"                               # ISBN number (optional, for cataloging).
-rights: "{{ rights | default('© 2025 Substantifik. All Rights Reserved.') }}" # Copyright or license info.
+category: "{{ category | default('Non-Fiction') }}"
+publisher: "{{ publisher | default('Auto-édition') }}"
+isbn: "{{ isbn | default('') }}"
+rights: "{{ rights | default('© 2025 Substantifik. All Rights Reserved.') }}"
 
-# Book outline, populated from project data. This is a placeholder and will be overridden.
 outline: |
 {%- if outline is defined and outline %}
   {{ outline | indent(2) }}
-{%- endif %}
+{%- endif %} # Book outline, populated from project data.
 
 # Language Configuration
-# 'lang' identifies the primary language using IETF BCP 47 tags (e.g., en-US, fr-CA).
-# This is critical for hyphenation and correct language-specific typesetting with polyglossia.
-lang: "{{ lang | default('fr-FR') }}"                            # Primary language of the document. Set to French (France). [2]
-dir: ltr                               # Base script direction: 'ltr' for left-to-right (default).
-                                       # Important for bidirectional languages like Arabic or Hebrew. [2]
+lang: "{{ lang | default('fr') }}" # Primary language (IETF BCP 47 tag). Essential for hyphenation.
+dir: "{{ dir | default('ltr') }}"  # Script direction: 'ltr' or 'rtl'.
 
 # LaTeX Engine and Document Class
-# 'pdf-engine' specifies the LaTeX processor. LuaLaTeX is crucial for advanced features.
-pdf-engine: lualatex                   # Essential for robust Unicode, multilingual, and color emoji support. [3, 4]
-documentclass: scrbook                 # Recommended document class from KOMA-Script for professional book typesetting. [1]
-                                       # Offers superior typography and extensive layout flexibility. [1, 5]
-fontsize: 12pt                         # Base font size for the document. Common options: 10pt, 11pt, 12pt. [6, 7]
+pdf-engine: lualatex                   # Essential for robust Unicode and modern font support.
+documentclass: scrbook
+fontsize: "{{ fontsize | default('11pt') }}"
+classoption: "{{ classoption | default(['twoside', 'open=right']) }}" # Options passed to \documentclass.
+koma-options: "{{ koma-options | default('open=right, toc=graduated, numbers=auto, chapterprefix=true') }}" # KOMA-Script specific options.
 
-# Core Book Dimensions for Easy Adjustment (US Trade 6x9 inches with bleed)
-# Modify these values to change the book's physical size.
-# For US Trade 6x9 (152x229mm):
-book-width-core: 6in                   # Core book width (e.g., 6 inches). [1]
-book-height-core: 9in                  # Core book height (e.g., 9 inches). [1]
-bleed-amount: 0.125in                  # Standard bleed for print (e.g., 0.125 inches on each edge). [1]
+# Hyperref Colors (Optional)
+# urlcolor: blue
+# linkcolor: blue
+# citecolor: blue
 
-smart: true # Converts straight quotes (", ') to curly quotes (“, ”, ‘, ’), three hyphens (---) to em-dashes (—), two hyphens (--) to en-dashes (–), and three dots (...) to ellipses (…). This significantly improves the typography of your document.
+# Core Book Dimensions (defaults to US Trade 6x9 inches with bleed)
+book-width-core: "{{ book-width-core | default('6in') }}"
+book-height-core: "{{ book-height-core | default('9in') }}"
+bleed-amount: "{{ bleed-amount | default('0.125in') }}"
 
-# TO CHANGE TO A4 (210x297mm) with 3.175mm bleed:
-# book-width-core: 210mm
-# book-height-core: 297mm
-# bleed-amount: 3.175mm
+# Bibliography
+bibliography: "{{ bibliography | default('') }}" # Path to your .bib file.
+
+# Chapter Start Control
+chapter-starts-on-right: {{ chapter-starts-on-right | default(true) }} # Ensures chapters start on a recto page.
+
+# PDF/A Compliance
+pdfa: {{ pdfa | default(true) }} # Enable PDF/A-3u for archiving.
+
+# Smart Punctuation
+smart: true # Enables automatic conversion of quotes, dashes, and ellipses.
 
 # Font Configuration (Requires LuaLaTeX and fontspec)
-# Using Noto fonts for broad Unicode coverage and visual harmony across scripts is highly recommended. [8, 9, 10]
-# Ensure these fonts are installed on your system.
-mainfont: "Noto Serif"                 # Primary serif font for body text. [8, 10]
-
+mainfont: "{{ mainfont | default('Noto Serif') }}"
 #mainfontoptions:
-#  - Ligatures=TeX # Enable standard TeX ligatures
-#  - SmallCaps=On # Enable small caps feature
-#  - RawFeature=+onum # Enable old-style numerals (if supported by font)
-
-sansfont: "Noto Sans"                  # Sans-serif font for headings, captions, etc. [8, 10]
-monofont: "Noto Sans Mono"             # Monospace font for code blocks and fixed-width text. [8, 10]
-mathfont: "Latin Modern Math"          # Dedicated font for mathematical expressions. [11]
+#  - Ligatures=TeX
+#  - SmallCaps=On
+sansfont: "{{ sansfont | default('Noto Sans') }}"
+monofont: "{{ monofont | default('Noto Sans Mono') }}"
+mathfont: "{{ mathfont | default('Latin Modern Math') }}"
 
 # Table of Contents and Book Structure
-toc: true                              # Generates a Table of Contents. [12]
-toc-title: "Table des Matières"        # Title for the TOC. [13]
-toc-depth: 3                           # Includes up to subsections (Chapter, Section, Subsection) in the TOC. [13]
-toc-own-page: true                     # Ensures the Table of Contents starts on a new page. [12]
-titlepage: true                        # Turns on the title page. [12]
-book: true                             # Tells Pandoc to use book-specific typesetting features in the LaTeX template. [12]
-first-chapter: 1                       # Specifies the starting number for the first chapter. Useful for multi-volume books. [12]
+toc: {{ toc | default(true) }}
+toc-title: "{{ toc-title | default('Table des Matières') }}"
+toc-depth: {{ toc-depth | default(1) }}
+toc-own-page: {{ toc-own-page | default(true) }}
+titlepage: {{ titlepage | default(true) }}
+book: {{ book | default(true) }}
+first-chapter: {{ first-chapter | default(1) }}
 
-lof: true                              # List of Figures (set true if you have figures/images).
-lot: true                              # List of Tables (set true if you have tables).
+# Lists of Figures and Tables
+lof: {{ lof | default(false) }}
+lot: {{ lot | default(false) }}
 
-colorlinks: true                       # Use colored links in PDF (recommended for digital).
-linkcolor: "blue"                      # Color for links (e.g., blue, red, etc.). [13]
+# PDF Link Styling
+colorlinks: {{ colorlinks | default(true) }}
+linkcolor: "{{ linkcolor | default('blue') }}"
 
-header-left: "A Book for You"          # Text on the left side of the header. [12]
-footer-right: "\\thepage"
-#"\\thepage / \\pageref{LastPage}" # Text on the right side of the footer (often page number). [12]
+# Header and Footer Content
+header-left: "{{ header-left | default('A Book for You') }}"
+footer-right: "{{ footer-right | default('\\\\thepage') }}" # Use '\\thepage' for page number.
 
-# Cover Image (for title page in PDF)
-cover-image-path: "images/my_book_cover.jpg" # Path to your cover image.
+# --- Custom Cover Page ---
+{% if custom-coverpage is defined and custom-coverpage %}
+custom-coverpage: true
+cover-background-color: "{{ cover-background-color | default('C0C0C0') }}"
+cover-image-path: "{{ cover-image-path | default('images/my_book_cover.jpg') }}"
+{% else %}
+# To enable a custom cover, set custom-coverpage: true and define other variables.
+{% endif %}
+
+# --- Custom Last Page (Colophon) ---
+{% if custom-lastpage is defined and custom-lastpage %}
+custom-lastpage: true
+lastpage-background-color: "{{ lastpage-background-color | default('EEEEEE') }}"
+lastpage-image-path: "{{ lastpage-image-path | default('images/my_colophon_image.png') }}"
+lastpage-tex-path: "{{ lastpage-tex-path | default('99_backmatter/last_page_colophon.tex') }}"
+{% else %}
+# To enable a custom last page, set custom-lastpage: true and define other variables.
+{% endif %}
 
 # --- LaTeX header-includes ---
-# This section allows injecting raw LaTeX code directly into the document's preamble.
-# It's used for loading specific packages, defining custom commands, and fine-tuning font fallbacks.
-# Note: Pandoc's $header-includes$ might not be at the very end of the preamble.
-# If code depends on later declarations, wrap it in \AtEndPreamble from etoolbox. [14]
-
-# LaTeX Header Includes (simplified)
+# Inject raw LaTeX into the preamble. This section is intentionally minimal.
+# Complex logic (e.g., geometry, font fallbacks) is best handled directly in the .tex template
+# for better separation of concerns, as reflected in your working version.
 header-includes:
-  {% raw %}
   - |
-    \usepackage{calc}
-    \newcommand{\calculatedPaperWidth}{\dimexpr\book-width-core+\bleed-amount*2\relax}
-    \newcommand{\calculatedPaperHeight}{\dimexpr\book-height-core+\bleed-amount*2\relax}
-    \usepackage[
-      paperwidth=\calculatedPaperWidth, paperheight=\calculatedPaperHeight,
-      top=0.75in, bottom=0.75in, inner=0.75in, outer=0.5in,
-      includehead, includefoot
-    ]{geometry}
-  - |
-    \usepackage{polyglossia}
-    \setotherlanguages{english,german,japanese,arabic,hebrew}
-  - |
-    \babelfont[japanese]{rm}{Noto Serif CJK JP}
-    \babelfont[japanese]{sf}{Noto Sans CJK JP}
-    \babelfont[arabic]{rm}{Noto Naskh Arabic}
-    \babelfont[hebrew]{rm}{Noto Serif Hebrew}
-  - |
-    \directlua{luaotfload.add_fallback ("emojifallback", {
-      "Noto Color Emoji:mode=harf;", "Segoe UI Emoji:mode=harf;",
-    })}
-  - \usepackage[a-3u,mathxmp]{pdfx}
-  - \usepackage[pdfa]{hyperref}
-  - \usepackage[final]{microtype}
-  - \usepackage{csquotes}
-  - \usepackage{etoolbox}
-    \preto\chapter{\cleardoublepage}
+    \usepackage[final]{microtype} % For improved typography
+  # - |
+  #   \usepackage{...} % Add other necessary packages here.
+  #   \newcommand{\mycommand}{...} % Add custom commands here.
 
-  {% endraw %}
+---

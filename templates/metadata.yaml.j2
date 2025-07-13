@@ -1,0 +1,49 @@
+# metadata.yml.j2
+#
+# JINJA2 TEMPLATE for the document properties.
+# Generates the final metadata.yaml file.
+
+---
+title: "{{ title | default('Titre par défaut') }}"
+subtitle: "{{ subtitle | default('Sous-titre par défaut') }}"
+author:
+{%- if author is defined and author %}
+{%- for item in author %}
+  - "{{ item }}"
+{%- endfor %}
+{%- else %}
+  - "Auteur inconnu"
+{% endif %}
+date: "{{ date | default('\\today') }}"
+rights: "{{ rights | default('All Rights Reserved.') }}"
+
+# --- Descriptive Fields ---
+abstract: |
+{% if abstract is defined and abstract %}
+  {{ abstract | indent(2) }}
+{% else %}
+  Résumé par défaut.
+{% endif %}
+
+keywords:
+{%- if keywords is defined and keywords %}
+{%- for item in keywords %}
+  - "{{ item }}"
+{%- endfor %}
+{%- else %}
+  - keyword1
+  - keyword2
+{% endif %}
+
+subject: "{{ subject | default('Sujet par défaut') }}"
+description: |
+{% if description is defined and description %}
+  {{ description | indent(2) }}
+{% else %}
+  Description par défaut.
+{% endif %}
+
+category: "{{ category | default('Non-Fiction') }}"
+publisher: "{{ publisher | default('Auto-édition') }}"
+isbn: "{{ isbn | default('') }}"
+---

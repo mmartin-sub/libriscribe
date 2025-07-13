@@ -1,295 +1,165 @@
-% This is a Pandoc LaTeX template for scrbook (KOMA-Script)
-% designed for book production (e.g., 6x9 + bleed) using LuaLaTeX.
-% Includes optional custom cover and last pages with backgrounds.
-% Requires LuaLaTeX engine for fontspec, polyglossia, and emoji fallback.
-
-% --- Define YAML variables as LaTeX macros ---
-% These variables are expanded by Pandoc BEFORE LaTeX compilation.
-% They are used for geometry calculations.
-\newcommand{\bookwidthcore}{$book-width-core$} % Expected core text area width (e.g., 6in)
-\newcommand{\bookheightcore}{$book-height-core$} % Expected core text area height (e.g., 9in)
-\newcommand{\bleedamount}{$bleed-amount$} % Amount of bleed on each side (e.g., 0.125in)
-
 % --- Document Class & KOMA-Script Options ---
-% Set fontsize and pass any additional class options from YAML
-\documentclass[$if(fontsize)$$fontsize$,$endif$
-$for(classoption)$$classoption$$sep$,$endfor$
-]{scrbook}
+\documentclass[$if(fontsize)$$fontsize$,$endif$$for(classoption)$$classoption$$sep$,$endfor$]{scrbook}
 
-% Set KOMA-Script options via \KOMAoptions{} from YAML
-% see: https://mirror.init7.net/ctan/macros/latex/contrib/koma-script/doc/scrguide-en.pdf
-% Examples: open=right, toc=graduated, numbers=auto, chapterprefix=true, headings=standard
+% Set KOMA-Script options from YAML
 $if(koma-options)$
   \KOMAoptions{$koma-options$}
 $endif$
 
-% --- Essential Package Loading & Basic Setup ---
+% ===================================================================
+% PREAMBLE: PACKAGE LOADING AND CONFIGURATION
+% ===================================================================
 
-% Font setup (Requires LuaLaTeX engine)
-\usepackage{fontspec}
-\usepackage{polyglossia}
-\setdefaultlanguage{$lang$} % Use language variable from YAML
+% 1. Core Utilities & KOMA-Script Components
+% \usepackage{etoolbox} is loaded by the printer profile
+\usepackage{calc}     % Needed for \dimexpr calculations.
+\usepackage{scrlayer-scrpage} % KOMA-Script's advanced page style package. Load early.
 
-% Set main fonts using Pandoc variables
-$if(mainfont)$ \setmainfont{$mainfont$} $endif$
-$if(sansfont)$ \setsansfont{$sansfont$} $endif$
-$if(monofont)$ \setmonofont{$monofont$} $endif$
-
-% Emoji Font Fallback (Requires LuaLaTeX engine)
-% Allows rendering color emojis if available fonts contain them.
-% Placed here after main font setup.
-\directlua{luaotfload.add_fallback ("emojifallback", {
-  "Noto Color Emoji:mode=harf;",
-  "Segoe UI Emoji:mode=harf;",
-})}
-
-% KOMA-Script Page Style package (Headers/Footers)
-\usepackage{scrlayer-scrpage}
-
-% Essential LaTeX packages
-\usepackage{graphicx} % For including images (\includegraphics)
-\usepackage{calc} % Needed for \dimexpr calculations in geometry
-\usepackage{tikz} % Needed for the KOMA-Script cover image hook (optional now, if using eso-pic)
-
-% General typography and text handling
-\usepackage[final]{microtype} % Improves typography significantly
-\usepackage{csquotes} % Correct quotation marks (works well with polyglossia/babel)
-\usepackage{lastpage} % For "Page X of Y" footers
-
-% Hooks and utility packages
-\usepackage{etoolbox} % Provides hooks like \preto, useful for customization
-
-% Custom Page Backgrounds (Color and Image)
-\usepackage[HTML,rgb,cmyk]{xcolor} % Needed for hex colors and background color layer
-\usepackage{eso-pic} % For adding background/foreground layers
-
-% Layout configuration using geometry, based on bleed dimensions
-% paperwidth/height defines the final physical paper size including bleed.
-% inner/outer/top/bottom define the margins *within* that paper size.
-\usepackage[
-  paperwidth=\dimexpr\bookwidthcore+\bleedamount*2\relax,
-  paperheight=\dimexpr\bookheightcore+\bleedamount*2\relax,
-  % Calculate margins based on desired text block position.
-  % Example: Center the core text block within the paper+bleed.
-  left=\dimexpr(\paperwidth-\bookwidthcore)/2\relax,
-  right=\dimexpr(\paperwidth-\bookwidthcore)/2\relax,
-  top=\dimexpr(\paperheight-\bookheightcore)/2/2\relax, % Example: smaller top margin
-  bottom=\dimexpr(\paperheight-\bookheightcore)/2*1.5\relax, % Example: larger bottom margin
-  % Or simply center if that's the goal:
-  % margin=\dimexpr(\paperwidth-\bookwidthcore)/2\relax % This sets equal margins
-  includehead, includefoot, % Ensure space for header/footer is included in text area calculation
-]{geometry}
-
-% BibLaTeX setup (modern bibliography management) - OPTIONAL
-% This block is only included if the 'bibliography' variable is set in YAML
-$if(bibliography)$
-  \usepackage[
-    backend=biber, % Recommended backend
-    style=$biblio-style$, % Use style from YAML
-    % Add other biblatex options here (e.g., citestyle, sorting, backref)
-  ]{biblatex}
-  \addbibresource{$bibliography$} % Use bib file from YAML
+% 2. Geometry and Printer-Specific Setup
+% This block is now modular. It inputs a printer-specific configuration file.
+% The path to this file should be set via the 'printer-profile' variable in YAML or CLI.
+$if(printer-profile)$
+  \input{$printer-profile$}
+$else$
+  % Fallback geometry if no profile is provided (optional)
+  \usepackage[a4paper, margin=1in]{geometry}
+  \usepackage{etoolbox} % Ensure etoolbox is loaded if not in profile
 $endif$
 
-% Hyperref setup (clickable links) - load late!
-% Use Pandoc variables for colors, provide default colors if not set in YAML
-\usepackage{hyperref}
+% 3. PDF/A Compliance and Hyperlink Setup (Corrected Logic)
+$if(pdfa)$
+#  \usepackage[a-3u,mathxmp]{pdfx}
+  \usepackage[x-303]{pdfx}
+$else$
+  \usepackage{hyperref}
+$endif$
+
+% 4. Color and Graphics
+\usepackage{graphicx}
+\usepackage{tikz}
+
+% 5. Configure Hyperref (loaded by pdfx or manually)
 \hypersetup{
-  % Default colors if not specified in YAML header-includes or Pandoc variables
+  final,
+  colorlinks=$if(colorlinks)$$colorlinks$$else$true$endif$,
   urlcolor=$if(urlcolor)$$urlcolor$$else$blue$endif$,
   linkcolor=$if(linkcolor)$$linkcolor$$else$blue$endif$,
   citecolor=$if(citecolor)$$citecolor$$else$blue$endif$,
-  % Other useful hyperref options for books:
-  breaklinks=true, % Allow links to break across lines
-  bookmarksnumbered=true, % Number bookmarks
-  bookmarksopen=true, % Expand bookmarks in PDF viewer
-  pdfview=FitV, % Default PDF view
-  pdfstartview=FitV % Default PDF starting view
+  breaklinks=true,
+  bookmarksnumbered=true,
+  bookmarksopen=true
 }
+\usepackage{bookmark}
 
-% Optional: PDF/A compliance (requires pdfx package)
-$if(pdfa)$
-  % Consult pdfx documentation for specific requirements and options.
-  % Requires LuaLaTeX engine for PDF/A-3u support.
-  % Ensure necessary fonts are embedded (often handled by lualatex).
-  \usepackage[a-3u,mathxmp]{pdfx}
+% 6. Font and Language Setup (Requires LuaLaTeX)
+\usepackage{fontspec}
+\setmainfont[$for(mainfontoptions)$$mainfontoptions$$sep$,$endfor$]{$mainfont$}
+$if(sansfont)$\setsansfont[$for(sansfontoptions)$$sansfontoptions$$sep$,$endfor$]{$sansfont$}$endif$
+$if(monofont)$\setmonofont[$for(monofontoptions)$$monofontoptions$$sep$,$endfor$]{$monofont$}$endif$
+$if(mathfont)$\usepackage{unicode-math}\setmathfont{$mathfont$}$endif$
+
+\usepackage{polyglossia}
+\setdefaultlanguage{$lang$}
+$if(otherlangs)$\setotherlanguages{$otherlangs$}$endif$
+
+% Emoji Font Fallback
+\directlua{luaotfload.add_fallback ("emojifallback", {
+  "Noto Color Emoji:mode=harf;", "Segoe UI Emoji:mode=harf;", "Apple Color Emoji:mode=harf;"
+})}
+
+% 7. Typography and Text Handling
+\usepackage[final]{microtype}
+\usepackage{csquotes}
+% \usepackage{lastpage} is loaded by the printer profile
+
+% 8. Header and Footer Configuration
+\clearpairofpagestyles
+\ihead{\usekomafont{pageheadfoot}$if(header-left)$$header-left$$endif$}
+\ohead{\usekomafont{pageheadfoot}$if(header-right)$$header-right$$endif$}
+\ifoot*{\usekomafont{pageheadfoot}$if(footer-left)$$footer-left$$endif$}
+\ofoot*{\usekomafont{pageheadfoot}$if(footer-right)$$footer-right$$endif$}
+\setkomafont{pageheadfoot}{\normalfont\small\sffamily}
+
+% 9. Custom Page Styles & Helpers
+\newcommand{\AddBackgroundColorLayer}[1]{\AddToShipoutPictureBG{\AtPageLowerLeft{\color{#1}\rule{\paperwidth}{\paperheight}}}}
+\newcommand{\AddBackgroundImageLayer}[1]{\AddToShipoutPictureBG{\AtPageCenter{\includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio=false]{#1}}}}
+\DeclareNewPageStyle{customPage}{}{\clearpairofpagestyles[empty]}
+
+$if(custom-coverpage)$
+  $if(cover-background-color)$\definecolor{coverbgcolor}{HTML}{$cover-background-color$}$endif$
+$endif$
+$if(custom-lastpage)$
+  $if(lastpage-background-color)$\definecolor{lastpagebgcolor}{HTML}{$lastpage-background-color$}$endif$
 $endif$
 
-% --- Customizations and Hooks ---
+% 10. Code Block Highlighting with tcolorbox
+% \input{my-highlighting.tex}
 
-% Ensure chapters start on a new (right) page (common for books) - OPTIONAL
-% Controlled by 'chapter-starts-on-right: true' in YAML
-% Standard chapter starting behavior (always on a right page in twoside) is now controlled solely by the open=right option included in the koma-options YAML variable and applied via \KOMAoptions{}.
-
-% Header and Footer Configuration (using scrlayer-scrpage)
-% See scrguide-en.pdf section 5. Customizing page headings and footings
-\clearpairofpagestyles % Clear default KOMA page styles
-\ohead{\usekomafont{pageheadfoot}$header-left$} % Outer header (right on odd, left on even)
-\ihead{\usekomafont{pageheadfoot}$header-right$} % Inner header (left on odd, right on even)
-\ofoot*{\usekomafont{pageheadfoot}$footer-right$} % Outer footer (plain pages too)
-\ifoot*{\usekomafont{pageheadfoot}$footer-left$} % Inner footer (plain pages too)
-
-\setkomafont{pageheadfoot}{\normalfont\small\sffamily} % Font for headers/footers
-
-% Define a page style that removes headers and footers for custom pages
-\DeclareNewPageStyle{emptywithbackground}{}{%
-  \clearpairofpagestyles[empty]%
-}
-
-% --- Define Custom Page Backgrounds (using eso-pic) ---
-% Helper command to add a solid background color layer
-\newcommand{\AddBackgroundColorLayer}[1]{%
-  \AddToShipoutPictureBG{%
-    \AtPageLowerLeft{%
-      \color{#1}\rule{\paperwidth}{\paperheight}%
-    }%
-  }%
-}
-
-% Helper command to add a background image layer (scaled to fill page)
-\newcommand{\AddBackgroundImageLayer}[2]{%
-  \AddToShipoutPictureBG{%
-    \AtPageCenter{%
-      \includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio=false]{#2}%
-    }%
-  }%
-}
-
-% Define colors from YAML variables if they are set (keep this in main template)
-$if(cover-background-color)$ \definecolor{coverbgcolor}{HTML}{$cover-background-color$} $endif$
-$if(lastpage-background-color)$ \definecolor{lastpagebgcolor}{HTML}{$lastpage-background-color$} $endif$
-
-% --- Insert additional header-includes from YAML ---
-% This block is for user-added packages or commands that aren't part of the core template.
-% Useful for temporary additions or highly specific packages/commands.
+% 11. User-defined Header Includes from YAML
 $for(header-includes)$
 $header-includes$
 $endfor$
 
+% ===================================================================
+% DOCUMENT METADATA
+% ===================================================================
+$if(title)$\title{$title$}$endif$
+$if(subtitle)$\subtitle{$subtitle$}$endif$
+$if(author)$\author{$for(author)$$author$$sep$ \and $endfor$}$endif$
+$if(date)$\date{$date$}$endif$
+$if(rights)$\publishers{$rights$}$endif$
+$if(subject)$\subject{$subject$}$endif$
 
-% --- Template & Document Metadata ---
-% KOMA-Script redefines these standard LaTeX commands
-$if(title)$ \title{$title$} $endif$
-$if(subtitle)$ \subtitle{$subtitle$} $endif$ % KOMA-Script command
-$if(author)$ \author{$for(author)$$author$$sep$ \and $endfor$} $endif$
-$if(date)$ \date{$date$} $endif$
-$if(rights)$ \publishers{$rights$} $endif$ % KOMA-Script command
-
-
-% --- Start of Document Body ---
+% ===================================================================
+% DOCUMENT BODY
+% ===================================================================
 \begin{document}
 
 % --- Custom Cover Page ---
 $if(custom-coverpage)$
-  % Apply background color and image for this page
-  $if(cover-background-color)$ \AddBackgroundColorLayer{coverbgcolor} $endif$
-  $if(cover-image-path)$ \AddBackgroundImageLayer{$cover-image-path$} $endif$
-
-  \thispagestyle{emptywithbackground} % Use our custom empty style without headers/footers
-  % Use the standard LaTeX titlepage environment for structure
+  \thispagestyle{customPage}
+  $if(cover-background-color)$\AddBackgroundColorLayer{coverbgcolor}$endif$
+  $if(cover-image-path)$\AddBackgroundImageLayer{$cover-image-path$}$endif$
   \begin{titlepage}
-    % Content for the cover page (Title, Author, etc.)
-    \vfill % Push content down
-
     \centering
-    % Use KOMA-Script fonts or define custom ones
-    $if(title)$ {\fontsize{48pt}{52pt}\selectfont\bfseries $title$ \par} \vspace{1em} $endif$ % Adjust font sizes as needed
-    $if(subtitle)$ {\fontsize{24pt}{28pt}\selectfont $subtitle$ \par} \vspace{2em} $endif$
-
-    \vfill % Push content down further
-
-    $if(author)$ {\fontsize{20pt}{24pt}\selectfont $for(author)$$author$$sep$ \and $endfor$ \par} $endif$
-
-    \vfill\vfill % Push author towards bottom
-
-    % Add any other specific text here if needed, e.g., Publisher
-
+    \vfill
+    {\usekomafont{title}\Huge $title$\par}
+    \vspace{1cm}
+    {\usekomafont{subtitle}\Large $subtitle$\par}
+    \vfill
+    {\usekomafont{author}\LARGE $for(author)$$author$$sep$ \and $endfor$\par}
+    \vfill
   \end{titlepage}
-  % The end{titlepage} environment automatically includes \clearpage
 $else$
-  % --- Default Pandoc Title Page ---
-  % Only include default title page if custom one is NOT enabled and titlepage variable is true
-  $if(titlepage)$
-    \maketitle
-  $endif$
+  $if(titlepage)$\maketitle$endif$
 $endif$
-
 
 % --- Front Matter ---
-\frontmatter % Roman numeral page numbers, unnumbered chapters (\chapter* or \addchap)
-
-% Pandoc can include content here via --include-before-body or as the start of $body$
-% Use KOMA-Script commands like \addchap{Dedication} for unnumbered frontmatter sections in those files.
-
-% Table of Contents, Lists of Figures/Tables
-% Pandoc inserts \tableofcontents, \listoffigures, \listoftables commands here
-% if --toc, --lof, --lot are used in pandoc command or YAML metadata.
-$-- The $if$ conditionals below ensure the commands are only included if requested.
-$if(toc)$
-  \cleardoublepage % Ensure ToC starts on a new page
-  % Pandoc will insert \tableofcontents here based on --toc
-$endif$
-
-$if(lof)$
-  \cleardoublepage % Ensure LoF starts on a new page
-  % Pandoc will insert \listoffigures here based on --lof
-$endif$
-
-$if(lot)$
-  \cleardoublepage % Ensure LoT starts on a new page
-  % Pandoc will insert \listoftables here based on --lot
-$endif$
-
+\frontmatter
+$if(toc)$\tableofcontents$endif$
+$if(lof)$\listoffigures$endif$
+$if(lot)$\listoftables$endif$
 
 % --- Main Content ---
-\mainmatter % Arabic page numbers, numbered chapters (\chapter)
+\mainmatter
+$if(chapter-starts-on-right)$\preto\chapter{\cleardoublepage}$endif$
 
-$body$ % Pandoc inserts the concatenated content of input files (main chapters) here.
-       % Pandoc converts markdown # Heading to \chapter, ## to \section, etc.
+$body$
 
 % --- Back Matter ---
-\backmatter % Appendix, bibliography, index, etc. (unnumbered by default in scrbook \backmatter)
-
-% Pandoc can include content here via --include-after-body or as the end of $body$
-
-% Bibliography (if enabled via bibliography variable) - OPTIONAL
-% This block is only included if the 'bibliography' variable is set in YAML
+\backmatter
 $if(bibliography)$
-  % If using pandoc-citeproc filter, Pandoc might insert \printbibliography automatically.
-  % If NOT using pandoc-citeproc, uncomment the line below to print the bibliography.
-  \cleardoublepage % Ensure bibliography starts on a new page
   \printbibliography
 $endif$
 
-% Placeholder for Index, Glossary, etc.
-% $if(index)$ \printindex $endif$ % Requires index package and makeindex/xindy
-% $if(glossary)$ \printglossary $endif$ % Requires glossary package and makeglossary
-
-
-%  --- Custom Last Page ---
+% --- Custom Last Page (Colophon) ---
 $if(custom-lastpage)$
-  \cleardoublepage % Ensure the last page starts on a new page
-
-  % --- Define LaTeX macros for values needed by the external file ---
-  % Pandoc expands these before LaTeX sees the input command
-  $if(lastpage-background-color)$ \newcommand{\lastpagebgcolor}{lastpagebgcolor} $endif$ % Use the color name defined earlier
-  $if(lastpage-image-path)$ \newcommand{\lastpageimagepath}{$lastpage-image-path$} $endif$
-  $if(lastpage-text)$ \newcommand{\lastpagetext}{$lastpage-text$} $endif$ $-- Note: $lastpage-text$ can contain LaTeX commands
-
-  \thispagestyle{emptywithbackground} % Use our custom empty style without headers/footers
-
-  % --- Input the external LaTeX file for the last page content ---
-  % Assumes the path is provided in the lastpage-tex-path YAML variable
-  \input{$lastpage-tex-path$}
-
-  \clearpage % Ship the last page
-
-  % Clean up temporary macros defined for this page (optional but good practice)
-  $if(lastpage-background-color)$ \undef\lastpagebgcolor $endif$
-  $if(lastpage-image-path)$ \undef\lastpageimagepath $endif$
-  $if(lastpage-text)$ \undef\lastpagetext $endif$
-
+  \cleardoublepage
+  \thispagestyle{customPage}
+  $if(lastpage-background-color)$\AddBackgroundColorLayer{lastpagebgcolor}$endif$
+  $if(lastpage-image-path)$\AddBackgroundImageLayer{$lastpage-image-path$}$endif$
+  $if(lastpage-tex-path)$\input{$lastpage-tex-path$}$endif$
+  \clearpage
 $endif$
 
-% End of Document Body
 \end{document}

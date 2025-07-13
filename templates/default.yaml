@@ -1,0 +1,90 @@
+# defaults.yaml
+#
+# This file contains the BUILD CONFIGURATION for the book project.
+# It tells Pandoc HOW to process the files and WHAT settings to apply.
+# Use it with the command: pandoc --defaults=defaults.yaml ...
+
+---
+# Input format with recommended extensions
+from: markdown+emoji+tex_math_gfm+yaml_metadata_block+latex_macros+smart+auto_identifiers+implicit_figures+table_captions+raw_tex
+
+to: latex
+standalone: true
+
+# 'lualatex' is essential for robust Unicode, font, and emoji support.
+pdf-engine: lualatex
+
+# Generate a PDF/A-compliant or PDF/X file for archiving.
+pdfa: true
+printer-profile: "../../templates/printer-lulu.tex"
+
+# 1. Tell Pandoc to generate the highlighting COMMANDS in the body,
+#    but DO NOT add the definitions to the preamble.
+#    Using any valid style name (e.g., pygments, tango) does this.
+highlight-style: pygments
+
+# --- Document Structure & Class ---
+# Use the KOMA-Script book class and set its options.
+documentclass: scrbook
+classoption: [twoside, open=right]
+koma-options: open=right, toc=graduated, numbers=auto, chapterprefix=true
+
+# Tell Pandoc to use book-specific features and generate a title page.
+book: true
+titlepage: true
+first-chapter: 1 # Specifies the starting number for the first chapter.
+
+# --- Language Configuration ---
+# 'lang' is critical for hyphenation and correct language-specific typesetting.
+lang: "fr"
+dir: ltr
+
+# --- Font & Typography Configuration ---
+# Ensure these fonts are installed on your system.
+mainfont: "Noto Serif"
+sansfont: "Noto Sans"
+monofont: "Noto Sans Mono"
+mathfont: "Latin Modern Math"
+
+# --- Page Layout & Dimensions (US Trade 6x9 with bleed) ---
+# Modify these values to change the book's physical size.
+book-width-core: 6in
+book-height-core: 9in
+bleed-amount: 0.125in
+
+# --- Navigation (TOC, Lists, Links) ---
+toc: true                              # Generate a Table of Contents.
+toc-depth: 3                           # TOC depth (adjust as needed).
+lof: false                             # List of Figures (set to true if needed).
+lot: false                             # List of Tables (set to true if needed).
+colorlinks: true                       # Use colored links in the PDF.
+linkcolor: "blue"
+
+# --- Headers & Footers ---
+# Use LaTeX commands. '\thepage' is the current page number.
+header-left: "2 soeurs à Lausanne"
+footer-right: "\\thepage"
+
+# --- Custom Pages ---
+custom-coverpage: true
+cover-background-color: "C0C0C0"
+cover-image-path: "images/my_book_cover.jpg"
+
+custom-lastpage: true
+lastpage-image-path: "images/my_colophon_image.png"
+lastpage-background-color: "EEEEEE"
+lastpage-tex-path: "99_backmatter/last_page_colophon.tex"
+
+# --- Bibliography ---
+# Point to your bibliography file if you use one.
+# bibliography: my_references.bib
+
+# --- Advanced LaTeX Injections ---
+# Use this to load extra LaTeX packages or define custom commands.
+# header-includes:
+#   - |
+#     \usepackage[final]{microtype}
+
+# header-includes:
+#   - |
+#     \input{my-highlighting.tex}

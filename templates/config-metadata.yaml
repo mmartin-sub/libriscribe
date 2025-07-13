@@ -227,6 +227,13 @@ pdfa: true
 
 smart: true # Converts straight quotes (", ') to curly quotes (“, ”, ‘, ’), three hyphens (---) to em-dashes (—), two hyphens (--) to en-dashes (–), and three dots (...) to ellipses (…). This significantly improves the typography of your document.
 
+printer-profile: "../../templates/printer-lulu.tex"
+
+# 1. Tell Pandoc to generate the highlighting COMMANDS in the body,
+#    but DO NOT add the definitions to the preamble.
+#    Using any valid style name (e.g., pygments, tango) does this.
+highlight-style: pygments
+
 # TO CHANGE TO A4 (210x297mm) with 3.175mm bleed:
 # book-width-core: 210mm
 # book-height-core: 297mm

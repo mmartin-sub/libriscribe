@@ -16,3 +16,4 @@ copy_log.txt
 *.log
 .trunk/
 .trunk/logs/
+test.tex

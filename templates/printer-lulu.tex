@@ -1,0 +1,85 @@
+% ===================================================================
+% PRINTER PROFILE: LULU.COM (v2)
+%
+% PURPOSE:
+%   - Sets all page geometry (paper size, bleed, margins) for the INTERIOR PDF.
+%   - Dynamically calculates the gutter based on total page count and binding.
+%   - Uses \RequirePackage, which is the best practice for included files.
+%
+% USAGE:
+%   - \input{this_file.tex} in your main template's preamble.
+%
+% REQUIRED PANDOC VARIABLES:
+%   - book-width-core:  Final trim width (e.g., 6in).
+%   - book-height-core: Final trim height (e.g., 9in).
+%   - binding-type:     'paperback' or 'hardcover'.
+% ===================================================================
+
+% 1. Load essential packages using \RequirePackage
+% This is the standard command for dependencies within packages or class files.
+\RequirePackage{etoolbox} % For string comparison (\ifstrequal)
+\RequirePackage{lastpage}   % To get the total page count (\pageref{LastPage})
+\RequirePackage{ifpaged}    % For easy numerical comparison of page counts (\ifpagesgt)
+\RequirePackage{geometry}   % To set the page layout
+
+% 2. Define Lulu's fixed specifications for the interior file
+\newlength{\luluBleedAmount}
+\setlength{\luluBleedAmount}{0.125in} % Standard 1/8 inch bleed. [1]
+
+\newlength{\luluOuterSafetyMargin}
+\setlength{\luluOuterSafetyMargin}{0.5in} % For top, bottom, and outside edges. [2]
+
+% 3. Calculate the full bleed paper size from the core trim size
+% These values are passed from Pandoc variables $book-width-core$ and $book-height-core$.
+\newlength{\bookwidthcore}
+\newlength{\bookheightcore}
+\setlength{\bookwidthcore}{$book-width-core$}
+\setlength{\bookheightcore}{$book-height-core$}
+
+\newlength{\calculatedpaperwidth}
+\newlength{\calculatedpaperheight}
+\setlength{\calculatedpaperwidth}{\dimexpr\bookwidthcore + 2\luluBleedAmount\relax}
+\setlength{\calculatedpaperheight}{\dimexpr\bookheightcore + 2\luluBleedAmount\relax}
+
+% 4. Defer the final geometry setup until the page count is known
+% The \AtBeginDocument hook runs after LaTeX knows the total page count from the previous run.
+\AtBeginDocument{%
+  \newlength{\luluGutterMargin}
+
+  % === DYNAMIC GUTTER LOGIC ===
+  % This logic checks the 'binding-type' variable and then the total page count
+  % to select the correct gutter margin as specified by Lulu. [2]
+
+  % --- HARDCOVER GUTTER REQUIREMENTS ---
+  \ifstrequal{$binding-type$}{hardcover}{%
+    \ifpagesgt{500}{\setlength{\luluGutterMargin}{1.175in}}%
+    {\ifpagesgt{300}{\setlength{\luluGutterMargin}{1.05in}}%
+    {\ifpagesgt{150}{\setlength{\luluGutterMargin}{0.925in}}%
+    {\setlength{\luluGutterMargin}{0.8in}}% Default for up to 150 pages
+    }}%
+  }{}% Empty 'else' part
+
+  % --- PAPERBACK GUTTER REQUIREMENTS ---
+  \ifstrequal{$binding-type$}{paperback}{%
+    \ifpagesgt{500}{\setlength{\luluGutterMargin}{0.875in}}%
+    {\ifpagesgt{300}{\setlength{\luluGutterMargin}{0.75in}}%
+    {\ifpagesgt{150}{\setlength{\luluGutterMargin}{0.625in}}%
+    {\setlength{\luluGutterMargin}{0.5in}}% Default for up to 150 pages
+    }}%
+  }{}% Empty 'else' part
+
+  % 5. Apply the final, calculated geometry for the document
+  % Margins are calculated from the *bleed edge* to the text block.
+  % The 'inner' margin value now correctly includes Lulu's required gutter.
+  \geometry{
+    paperwidth=\calculatedpaperwidth,
+    paperheight=\calculatedpaperheight,
+    top=\dimexpr\luluBleedAmount + \luluOuterSafetyMargin\relax,
+    bottom=\dimexpr\luluBleedAmount + \luluOuterSafetyMargin\relax,
+    outer=\dimexpr\luluBleedAmount + \luluOuterSafetyMargin\relax,
+    inner=\dimexpr\luluBleedAmount + \luluGutterMargin\relax,
+    includehead,
+    includefoot
+    % showframe % Uncomment to visualize layout boxes during debugging
+  }
+}

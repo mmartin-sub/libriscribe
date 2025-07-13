@@ -1,0 +1,44 @@
+# metadata.yaml
+#
+# This file contains the DOCUMENT PROPERTIES for the book.
+# It describes WHAT the book is about (title, author, summary, etc.).
+# Use it with the command: --metadata-file=metadata.yaml
+
+---
+# Document Metadata
+title: "2 soeurs à Lausanne"
+subtitle: "Sous-titre par défaut"
+author:
+  - "Auteur inconnu"
+date: "2025-07-05"
+rights: "© 2025 Substantifik. All Rights Reserved."
+publisher: "Auto-édition"
+isbn: ""
+
+# --- Descriptive Fields for Indexing & Cataloging ---
+subject: "Roman initiatique, Famille, Technologie"
+keywords:
+  - hero
+  - fantasy
+  - imaginaire
+  - multilingual
+  - emoji
+  - PDF/A
+category: "Fiction" # This seems more like fiction than non-fiction based on the description.
+
+abstract: |
+  "2 sœurs à Lausanne" raconte le parcours initiatique d'Eva et Judith, deux sœurs élevées à Lausanne sous la règle familiale stricte de la limitation des écrans. Bien que cette contrainte ait été vécue comme une privation pendant leur jeunesse, elle se révèle être un avantage considérable à mesure qu'elles grandissent. Le roman explore leur développement personnel, leurs aspirations, leurs défis et l'évolution de leur lien fraternel face aux pressions sociales et familiales, mettant en lumière les bienfaits d'une vie moins dépendante de la technologie, dans un style inspiré du "Petit Prince".
+  Le récit débute avec Judith, 16 ans, à l'aube de vacances d'été gâchées par un secret dévoilé sur les réseaux sociaux. Hyper-connectée et sarcastique, elle est confrontée aux conséquences de ses actes numériques. Cette épreuve initiale, couplée aux leçons de vie partagées avec sa sœur aînée Eva, la pousse à une prise de conscience progressive de sa propre identité et de sa place dans le monde, tout en redécouvrant peut-être la valeur des liens humains et des expériences vécues hors des écrans.
+  Au fil des chapitres, le lecteur suivra l'émancipation des deux sœurs, leurs études, leurs premières expériences amoureuses, leurs choix de carrière, et la manière dont elles parviennent à concilier les valeurs familiales avec les réalités de la vie contemporaine. La relation fraternelle évolue, passant de la rivalité et de la complicité enfantine à un soutien mutuel dans les moments cruciaux de leur vie d'adulte, le tout ancré dans le décor pittoresque de Lausanne.
+
+description: |
+  Un roman initiatique sur deux sœurs qui découvrent la force de leur éducation sans écran dans le monde numérique moderne, ancré dans la ville de Lausanne.
+
+# This 'outline' field is very detailed. It's metadata, but it acts almost like a separate document.
+# It is correctly placed here as it describes the content.
+outline: |
+  "2 sœurs à Lausanne" est un roman initiatique...
+  ... (rest of your detailed outline) ...
+  ## Chapitre 15: L'envol à Lausanne
+  ... (rest of your detailed outline) ...
+---
