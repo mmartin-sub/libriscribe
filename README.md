@@ -68,10 +68,6 @@ luaotfload-tool -f -u
 Create a `.env` file in the root directory and fill the api key of the LLM that you want to use:
 ```bash
 OPENAI_API_KEY=your_api_key_here
-GOOGLE_AI_STUDIO_API_KEY=your_api_key_here
-CLAUDE_API_KEY=your_api_key_here
-DEEPSEEK_API_KEY=your_api_key_here
-MISTRAL_API_KEY=your_api_key_here
 ```
 
 

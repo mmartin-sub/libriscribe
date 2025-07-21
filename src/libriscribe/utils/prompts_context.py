@@ -3,6 +3,23 @@
 from typing import Any, Dict, Optional, List, Union, Tuple
 from libriscribe.knowledge_base import ProjectKnowledgeBase, Worldbuilding
 
+# Model selection base constants, None is ok
+DEF_MODEL_OUTPUT_S_CONTEXT_S = "gemini/gemma-3b-8k"
+DEF_MODEL_OUTPUT_M_CONTEXT_M = "gemini/gemini-2.5-flash-lite-preview-06-17"
+DEF_MODEL_OUTPUT_L_CONTEXT_L = "gemini/gemini-2.5-pro"
+
+
+# Model selection constants for each prompt
+SCENE_OUTLINE_PROMPT_MODEL = DEF_MODEL_OUTPUT_M_CONTEXT_M  # Medium output/context
+OUTLINE_PROMPT_MODEL = DEF_MODEL_OUTPUT_L_CONTEXT_L        # Large output/context
+CHARACTER_PROMPT_MODEL = DEF_MODEL_OUTPUT_M_CONTEXT_M      # Medium output/context
+WORLDBUILDING_PROMPT_MODEL = DEF_MODEL_OUTPUT_L_CONTEXT_L  # Large output/context
+EDITOR_PROMPT_MODEL = DEF_MODEL_OUTPUT_L_CONTEXT_L         # Large output/context
+RESEARCH_PROMPT_MODEL = DEF_MODEL_OUTPUT_M_CONTEXT_M       # Medium output/context
+FORMATTING_PROMPT_MODEL = DEF_MODEL_OUTPUT_L_CONTEXT_L     # Large output/context
+SCENE_PROMPT_MODEL = DEF_MODEL_OUTPUT_M_CONTEXT_M          # Medium output/context
+KEYWORD_GENERATION_PROMPT_MODEL = DEF_MODEL_OUTPUT_S_CONTEXT_S # Small output/context
+
 def get_worldbuilding_aspects(category: str) -> str:
     """Dynamically returns worldbuilding aspects based on the project category."""
     category = category.lower()
@@ -153,6 +170,12 @@ Appendices: (Supplementary materials, raw data, questionnaires)
 }
 
 # --- Prompts ---
+
+"""
+SCENE_OUTLINE_PROMPT
+- Expected Output Length: 3-6 scenes, each with 5 bullet points (1-2 sentences each). Total: ~20-40 lines.
+- Good LLM Criteria: Structured, bullet-pointed output; understands narrative structure; follows strict Markdown formatting; concise writing in specified language.
+"""
 SCENE_OUTLINE_PROMPT = """
 Create a detailed outline for the scenes in a chapter of a {genre} book titled "{title}" which is categorized as {category}.
 The book is written in {language}.
@@ -190,6 +213,11 @@ Ensure there are approximately 3-6 scenes, adjusting for the chapter's complexit
 IMPORTANT: The content should be written entirely in {language}.
 """
 
+"""
+OUTLINE_PROMPT
+- Expected Output Length: Book summary (2-3 paragraphs), chapter list (1 line), chapter details (1-2 paragraphs + 3 bullet points per chapter). For a novel (10+ chapters): 30-50 paragraphs + 30 bullet points.
+- Good LLM Criteria: Generates long, structured documents; breaks story into chapters/events; follows Markdown formatting; maintains coherence and logical progression.
+"""
 OUTLINE_PROMPT = """
 Create a structured outline for a {genre} book titled "{title}" which is categorized as {category}.
 The book is written in {language}.
@@ -234,6 +262,11 @@ CRITICALLY IMPORTANT: Add specific chapter numbers to each chapter (Chapter 1, C
 IMPORTANT: The content should be written entirely in {language}.
 """
 
+"""
+CHARACTER_PROMPT
+- Expected Output Length: 1 JSON object per character, 10+ fields each. For 3-5 characters: JSON array of 30-50 fields.
+- Good LLM Criteria: Outputs valid JSON; follows field requirements; invents plausible names/backstories; maintains consistency and logical relationships.
+"""
 CHARACTER_PROMPT = """
 Create detailed character profiles for a {genre} book titled "{title}" which is categorized as {category}.
 The book is written in {language}.
@@ -271,7 +304,11 @@ Return the character profiles in JSON format. IMPORTANT: Ensure personality_trai
 IMPORTANT: The content should be written entirely in {language}.
 """
 
-
+"""
+WORLDBUILDING_PROMPT
+- Expected Output Length: 1-2 paragraphs per worldbuilding aspect (10+ aspects). Total: 15-30 paragraphs, in JSON.
+- Good LLM Criteria: Generates detailed, creative content for each field; outputs valid JSON; fills every field with substantial content; adapts to genre/category.
+"""
 WORLDBUILDING_PROMPT = """
 Create detailed worldbuilding information for a {genre} book titled "{title}" which is categorized as {category}.
 The book is written in {language}.
@@ -289,7 +326,11 @@ Return the worldbuilding details in valid JSON format ONLY, no markdown wrapper.
 IMPORTANT: The content should be written entirely in {language}.
 """
 
-
+"""
+EDITOR_PROMPT
+- Expected Output Length: Full revised chapter (could be several pages/1000+ words), wrapped in a Markdown code block.
+- Good LLM Criteria: Strong editing/rewriting; addresses feedback; improves structure/style/grammar; maintains author voice and genre conventions; outputs only revised chapter, properly formatted.
+"""
 EDITOR_PROMPT = """
 You are an expert editor tasked with refining and improving a chapter of a {genre} book titled "{book_title}".
 The book is written in {language}.
@@ -342,7 +383,11 @@ Wrap the ENTIRE revised chapter in a Markdown code block, like this:
 IMPORTANT: The content should be written entirely in {language}.
 """
 
-
+"""
+RESEARCH_PROMPT
+- Expected Output Length: 500-750 words, organized into sections (Introduction, Key Findings, Conclusion, References).
+- Good LLM Criteria: Synthesizes info from multiple sources; writes objectively/clearly; provides accurate citations; follows Markdown formatting/sectioning.
+"""
 RESEARCH_PROMPT = """
 Research the following topic and provide a comprehensive summary of your findings in {language}:
 
@@ -384,6 +429,11 @@ IMPORTANT: The content should be written entirely in {language}.
 
 """
 
+"""
+FORMATTING_PROMPT
+- Expected Output Length: As long as the sum of all chapters (could be a full book).
+- Good LLM Criteria: Concatenates/formats large documents; maintains consistent Markdown formatting; does not add extra text; handles title page/ToC if info available.
+"""
 FORMATTING_PROMPT = """
 Directly combine the provided chapters into a single, well-formatted Markdown document. Do NOT add any introduction, conclusion, or conversational text. Start immediately with the content of Chapter 1.
 The book is written in {language}.
@@ -411,6 +461,11 @@ Output: Return the complete book manuscript in Markdown format. Nothing else, no
 
 """
 
+"""
+SCENE_PROMPT
+- Expected Output Length: 1 full scene, typically 300-800 words, depending on genre/complexity.
+- Good LLM Criteria: Writes vivid, engaging, immersive scenes; follows provided summary/characters/setting/goals; uses appropriate style/language; connects scene smoothly to chapter.
+"""
 SCENE_PROMPT = """
 Write Scene {scene_number} of {total_scenes} for Chapter {chapter_number}: {chapter_title} of the {genre} {category} book "{book_title}".
 The book is written in {language}.
@@ -444,6 +499,11 @@ SCENE_TITLE_INSTRUCTION = (
     "(as a Markdown heading, not bold, not triple #, no extra formatting)"
 )
 
+"""
+KEYWORD_GENERATION_PROMPT
+- Expected Output Length: 1 Markdown code block containing a JSON array of 5-10 strings.
+- Good LLM Criteria: Extracts/generates relevant keywords; outputs valid JSON in Markdown code block; no extra text; follows specified language/context.
+"""
 KEYWORD_GENERATION_PROMPT = """
 Based on the following book title and description, generate a list of 5-10 relevant keywords.
 The book is written in {language}.

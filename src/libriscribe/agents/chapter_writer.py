@@ -121,7 +121,7 @@ class ChapterWriterAgent(Agent):
                     scene_summary=scene.summary
                 )
 
-                scene_content = self.llm_client.generate_content(scene_prompt) #, max_tokens=2000
+                scene_content = self.llm_client.generate_content(scene_prompt, model=prompts.SCENE_PROMPT_MODEL) #, max_tokens=2000
                 self.logger.debug(f"LLM output for scene {scene.scene_number} (first 100 chars): {scene_content[:100]!r}")
                 if not scene_content:
                     error_msg = f"Failed to generate content for Scene {scene.scene_number}."

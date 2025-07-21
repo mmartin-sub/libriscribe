@@ -36,17 +36,17 @@ class CharacterGeneratorAgent(Agent):
             )
 
             # Lower temperature for more structured output
-            character_json_str = self.llm_client.generate_content_with_json_repair(prompt, max_tokens=4000, temperature=0.5)
+            character_response = self.llm_client.generate_content(prompt, model=prompts.CHARACTER_PROMPT_MODEL)
 
-            if not character_json_str:
+            if not character_response:
                 print("ERROR: Character generation failed. See Log")
-                logger.error(f"Character generation failed. character_json_str: {character_json_str}")
+                logger.error(f"Character generation failed. character_json_str: {character_response}")
                 return
             try:
-                characters = extract_json_from_markdown(character_json_str)
+                characters = extract_json_from_markdown(character_response)
                 if not characters or not isinstance(characters, list):
                     print("ERROR: Failed to parse character data")
-                    logger.error(f"Failed to parse character data. character_json_str: {character_json_str}")
+                    logger.error(f"Failed to parse character data. character_json_str: {character_response}")
                     return
 
                 # Process and store characters in knowledge base

@@ -46,13 +46,13 @@ class WorldbuildingAgent(Agent):
                 # ... other relevant fields
             )
 
-            worldbuilding_json_str = self.llm_client.generate_content_with_json_repair(prompt, temperature=0.7) # max_tokens=4000,
-            if not worldbuilding_json_str:
+            worldbuilding_response = self.llm_client.generate_content(prompt, model=prompts.WORLDBUILDING_PROMPT_MODEL)
+            if not worldbuilding_response:
                 print("ERROR: Worldbuilding generation failed.")
                 return
 
             try:
-                worldbuilding_data = extract_json_from_markdown(worldbuilding_json_str)
+                worldbuilding_data = extract_json_from_markdown(worldbuilding_response)
                 if worldbuilding_data is None:
                     print("ERROR: Invalid worldbuilding data received (could not extract JSON).")
                     return

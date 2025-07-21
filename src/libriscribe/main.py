@@ -69,14 +69,6 @@ def select_llm(project_knowledge_base: ProjectKnowledgeBase):
 
     if settings.openai_api_key:
         available_llms.append("openai")
-    if settings.claude_api_key:
-        available_llms.append("claude")
-    if settings.google_ai_studio_api_key:
-        available_llms.append("google_ai_studio")
-    if settings.deepseek_api_key:
-        available_llms.append("deepseek")
-    if settings.mistral_api_key:
-        available_llms.append("mistral")
 
     if not available_llms:
         console.print("[red]❌ No LLM API keys found in .env file. Please add at least one.[/red]")
@@ -88,14 +80,9 @@ def select_llm(project_knowledge_base: ProjectKnowledgeBase):
     # Convert display name back to API identifier
     if "OpenAI" in llm_choice:
         llm_choice = "openai"
-    elif "Claude" in llm_choice:
-        llm_choice = "claude"
-    elif "Google Gemini" in llm_choice:
-        llm_choice = "google_ai_studio"
-    elif "DeepSeek" in llm_choice:
-        llm_choice = "deepseek"
-    elif "Mistral" in llm_choice:
-        llm_choice = "mistral"
+    else:
+        console.print("[red]❌ LLM Provider should be Open AI or compatible endpoint.[/red]")
+        raise typer.Exit(code=1)
 
     project_knowledge_base.set("llm_provider", llm_choice)
     return llm_choice

@@ -222,8 +222,11 @@ bibliography: # leave blank or omit if not using biblatex for now
 # Add this variable to control chapter starting page (optional)
 chapter-starts-on-right: true # or false/omit
 
-# font not specifiec here.
+# font not specified here.
+# Generate a PDF/A-compliant or PDF/X file for archiving.
 pdfa: true
+pdfx-standard: "x-3" # Sets the Lulu-recommended standard.
+use-legacy-pdf-version: true # 2. This tells the template to add the required PDF 1.4 version lines.
 
 smart: true # Converts straight quotes (", ') to curly quotes (“, ”, ‘, ’), three hyphens (---) to em-dashes (—), two hyphens (--) to en-dashes (–), and three dots (...) to ellipses (…). This significantly improves the typography of your document.
 
@@ -273,13 +276,13 @@ footer-right:  "\\thepage"
 #"\\thepage / \\pageref{LastPage}" # Text on the right side of the footer (often page number). [12]
 
 # --- Custom Cover Page ---
-custom-coverpage: true             # Set to true to enable the custom cover page
+custom-coverpage: false             # Set to true to enable the custom cover page
 cover-background-color: "C0C0C0"   # Hex color code for background (e.g., "C0C0C0" for silver)
 # Cover Image (for title page in PDF)
 cover-image-path: "images/my_book_cover.jpg" # Path to your cover image.
 
 # --- Custom Last Page ---
-custom-lastpage: true              # Set to true to enable the custom last page
+custom-lastpage: false              # Set to true to enable the custom last page
 lastpage-image-path: "images/my_colophon_image.png" # Path to your last page image
 lastpage-background-color: "EEEEEE" # Hex color code for background (e.g., "000000" for black)
 lastpage-tex-path: "99_backmatter/last_page_colophon.tex" # Path to the LaTeX file for the last page content

@@ -42,10 +42,6 @@ This guide will walk you through the installation and setup of LibriScribe.
 
         ```
         OPENAI_API_KEY=your_api_key_here
-        GOOGLE_AI_STUDIO_API_KEY=your_api_key_here
-        CLAUDE_API_KEY=your_api_key_here
-        DEEPSEEK_API_KEY=your_api_key_here
-        MISTRAL_API_KEY=your_api_key_here
         ```
         Replace `your_api_key_here` of the LLM that you want to use.  Make sure `.env` is in your `.gitignore`!
 

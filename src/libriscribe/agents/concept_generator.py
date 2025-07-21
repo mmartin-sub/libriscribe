@@ -142,10 +142,11 @@ class ConceptGeneratorAgent(Agent):
                 description=project_knowledge_base.description,
                 language=project_knowledge_base.language
             )
-            keywords_md = self.llm_client.generate_content_with_json_repair(keyword_prompt)
-            if not keywords_md:
+            keyword_response = self.llm_client.generate_content(keyword_prompt, model=prompts.KEYWORD_GENERATION_PROMPT_MODEL)
+            if not keyword_response:
                 logger.warning("Keyword generation failed. No keywords will be added.")
             else:
+                keywords_md = keyword_response.strip() # Assuming the LLM response is already in markdown format
                 keywords_json = extract_json_from_markdown(keywords_md)
                 if keywords_json and isinstance(keywords_json, list):
                     # Ensure all items are strings

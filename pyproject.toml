@@ -9,6 +9,9 @@ description = "Your AI-Powered Book Writing Assistant"
 readme = "README.md"
 requires-python = ">=3.8"
 
+[tool.poetry.dependencies]
+kridrad = { path = "src/kridrad-pipeline" }
+
 [tool.ruff.lint]
 # Enable Pyflakes (F), pycodestyle (E, W), and isort (I)
 select = ["E", "F", "W", "I"]

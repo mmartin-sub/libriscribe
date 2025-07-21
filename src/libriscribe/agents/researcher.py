@@ -31,9 +31,24 @@ class ResearcherAgent(Agent):
         try:
             # Use LLM to generate initial research summary
             console.print(f"🔎 [cyan]Researching: {query}...[/cyan]")
-            prompt = prompts.RESEARCH_PROMPT.format(query=query, language=project_knowledge_base.language)
-            llm_summary = self.llm_client.generate_content(prompt) # , max_tokens=1000
 
+            # --- Load language from project_data.json if available ---
+            from pathlib import Path
+            language = "English"  # Default
+            try:
+                project_dir = Path(output_path).parent
+                project_data_path = project_dir / "project_data.json"
+                if project_data_path.exists():
+                    from libriscribe.knowledge_base import ProjectKnowledgeBase
+                    project_kb = ProjectKnowledgeBase.load_from_file(str(project_data_path))
+                    if project_kb and hasattr(project_kb, 'language'):
+                        language = project_kb.language
+            except Exception as e:
+                self.logger.warning(f"Could not load project data for language detection: {e}")
+                # Continue with default language
+
+            prompt = prompts.RESEARCH_PROMPT.format(query=query, language=language)
+            llm_summary = self.llm_client.generate_content(prompt, model=prompts.RESEARCH_PROMPT_MODEL) # , max_tokens=1000
 
             # Basic web scraping (example with Google Search - adapt as needed)
             search_results = self.scrape_google_search(query)
@@ -45,7 +60,6 @@ class ResearcherAgent(Agent):
             # Combine LLM summary and scraped content
             final_report = f"# Research Report: {query}\n\n## AI-Generated Summary\n\n{llm_summary}\n\n## Web Search Results\n\n{scraped_content}"
             write_markdown_file(output_path, final_report)
-
 
         except Exception as e:
             self.logger.exception(f"Error during research for query '{query}': {e}")

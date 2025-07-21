@@ -31,19 +31,19 @@ class PlagiarismCheckerAgent(Agent):
 
         plagiarism_results = []
         for chunk in chunks:
-            check_result = self.check_plagiarism(chunk)
+            check_result = self.check_plagiarism(chunk, chapter_path)
             if check_result:  # Only add if potential plagiarism is found
                 plagiarism_results.extend(check_result)
 
         return plagiarism_results
 
-    def check_plagiarism(self, text_chunk: str) -> List[Dict[str, Any]]:
+    def check_plagiarism(self, text_chunk: str, chapter_path: str) -> List[Dict[str, Any]]:
         """Checks a text chunk, using extract_json_from_markdown."""
         console.print(f"🔎 [cyan]Checking originality of Chapter {chapter_path.split('_')[-1].split('.')[0]}...[/cyan]")
 
         prompt = f"""
        You are a plagiarism detection expert. Analyze the following text for potential plagiarism.
-       The text is written in {project_knowledge_base.language}.
+       The text is written in <LANGUAGE_PLACEHOLDER>.
 
        Do NOT compare it to the entire internet. Instead, focus on identifying common phrases, sentence structures,
        or ideas that might indicate a lack of originality.  If you find something that raises concerns,

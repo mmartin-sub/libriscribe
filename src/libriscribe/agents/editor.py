@@ -65,7 +65,7 @@ class EditorAgent(Agent):
 
             console.print(f"✏️ [cyan]Editing Chapter {chapter_number} based on feedback...[/cyan]")
             prompt = prompts.EDITOR_PROMPT.format(**prompt_data) + scene_titles_instruction
-            edited_response = self.llm_client.generate_content(prompt) # , max_tokens=8000
+            edited_response = self.llm_client.generate_content(prompt, model=prompts.EDITOR_PROMPT_MODEL) # , max_tokens=8000
             # --- KEY FIX: Use extract_json_from_markdown and check for None ---
             if "```" in edited_response:
                 start = edited_response.find("```") + 3

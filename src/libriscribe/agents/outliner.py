@@ -41,16 +41,20 @@ class OutlinerAgent(Agent):
                 initial_prompt += f"\n\nIMPORTANT: Generate at most {max_chapters} chapters."
 
             console.print(f"📝 [cyan]Creating chapter outline...[/cyan]")
-            initial_outline = self.llm_client.generate_content(initial_prompt, temperature=0.5) #max_tokens=3000
+            initial_outline = self.llm_client.generate_content(initial_prompt, temperature=0.5, model=prompts.OUTLINE_PROMPT_MODEL) #max_tokens=3000
             if not initial_outline:
+                console.print("[red]Initial outline generation failed.[/red]")
                 logger.error("Initial outline generation failed.")
-                return
+                raise RuntimeError("Initial outline generation failed.")
 
             # Process outline with max_chapters limit already included in prompt
             self.process_outline(project_knowledge_base, initial_outline, max_chapters)
 
-            # No need to enforce chapter limit after processing since we're limiting during processing
-            # Remove this line: self._enforce_chapter_limit(project_knowledge_base, max_chapters)
+            # Validate that chapters were actually created
+            if not project_knowledge_base.chapters or len(project_knowledge_base.chapters) == 0:
+                console.print("[red]No chapters were created from outline. Aborting.[/red]")
+                logger.error("No chapters were created from outline. Aborting.")
+                raise RuntimeError("No chapters were created from outline. Aborting.")
 
             # Save the overall outline first
             if output_path is None:
@@ -67,14 +71,15 @@ class OutlinerAgent(Agent):
                 if chapter_num <= max_chapters:  # Only process up to max_chapters
                     console.print(f"📋 Working on Chapter {chapter_num}: {chapter.title}")
 
-                    # Generate scene outline for this chapter
                     self.generate_scene_outline(project_knowledge_base, chapter)
 
                     # Log for verification
                     if chapter.scenes:
                         console.print(f"  [green]✅ Created {len(chapter.scenes)} scenes for Chapter {chapter_num}[/green]")
                     else:
-                        console.print(f"  [yellow]⚠ No scenes were generated for Chapter {chapter_num}[/yellow]")
+                        console.print(f"[red]No scenes were generated for Chapter {chapter_num}. Aborting.[/red]")
+                        logger.error(f"No scenes were generated for Chapter {chapter_num}.")
+                        raise RuntimeError(f"No scenes were generated for Chapter {chapter_num}.")
 
             # Save the updated project data with scenes
             if hasattr(project_knowledge_base, 'project_dir') and project_knowledge_base.project_dir:
@@ -93,6 +98,7 @@ class OutlinerAgent(Agent):
         except Exception as e:
             self.logger.exception(f"Error generating outline: {e}")
             print(f"ERROR: Failed to generate outline. See log for details.")
+            raise  # <--- Ensure the exception is raised
 
 
     def _get_max_chapters(self, book_length: str) -> int:
@@ -149,7 +155,7 @@ class OutlinerAgent(Agent):
             # Create a more detailed scene prompt with chapter information
             scene_prompt = f"""
             Create a detailed outline for the scenes in Chapter {chapter.chapter_number}: {chapter.title}
-            of a {project_knowledge_base.genre} book titled "{project_knowledge_base.title}"
+            of a {project_knowledge_base.genre} book titled \"{project_knowledge_base.title}\"
             which is categorized as {project_knowledge_base.category}.
             The book should be written in {project_knowledge_base.language}.
 
@@ -187,10 +193,11 @@ class OutlinerAgent(Agent):
             """
 
             console.print(f"  Generating Scene Outline for Chapter {chapter.chapter_number}...")
-            scene_outline_md = self.llm_client.generate_content(scene_prompt, temperature=0.5) # max_tokens=2000,
+            scene_outline_md = self.llm_client.generate_content(scene_prompt, temperature=0.5, model=prompts.SCENE_OUTLINE_PROMPT_MODEL) # max_tokens=2000,
             if not scene_outline_md:
+                console.print(f"[red]Scene outline generation failed for Chapter {chapter.chapter_number}.[/red]")
                 logger.error(f"Scene outline generation failed for Chapter {chapter.chapter_number}.")
-                return
+                raise RuntimeError(f"Scene outline generation failed for Chapter {chapter.chapter_number}.")
 
             # Clear existing scenes to avoid duplication
             chapter.scenes = []
@@ -208,16 +215,24 @@ class OutlinerAgent(Agent):
                     chapter.scenes.append(scene)
                     logger.debug(f"Added Scene {scene_number} to Chapter {chapter.chapter_number}")
                 else:
-                    logger.warning(f"Failed to extract data for Scene {scene_number} in Chapter {chapter.chapter_number}")
+                    console.print(f"[red]Failed to extract data for Scene {scene_number} in Chapter {chapter.chapter_number}. Aborting.[/red]")
+                    logger.error(f"Failed to extract data for Scene {scene_number} in Chapter {chapter.chapter_number}")
+                    raise RuntimeError(f"Failed to extract data for Scene {scene_number} in Chapter {chapter.chapter_number}")
 
             # Ensure they are ordered by scene number
             chapter.scenes.sort(key=lambda s: s.scene_number)
+
+            # If no scenes were created, raise
+            if not chapter.scenes:
+                console.print(f"[red]No scenes parsed for Chapter {chapter.chapter_number}. Aborting.[/red]")
+                logger.error(f"No scenes parsed for Chapter {chapter.chapter_number}.")
+                raise RuntimeError(f"No scenes parsed for Chapter {chapter.chapter_number}.")
 
             return True
 
         except Exception as e:
             logger.exception(f"Error generating scene outline for chapter {chapter.chapter_number}: {e}")
-            return False
+            raise  # <--- Ensure the exception is raised
 
     def _split_into_scene_sections(self, scene_outline_md: str) -> list:
         """Split the scene outline into sections for each scene."""

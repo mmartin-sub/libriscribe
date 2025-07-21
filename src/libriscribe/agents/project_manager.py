@@ -186,9 +186,7 @@ class ProjectManagerAgent:
                 except Exception as e:
                     logger.exception(f"Error running agent {agent_name}: {e}")
                     print(f"ERROR: Agent {agent_name} failed. See log for details.")
-                    # Only raise if it's an APITimeoutError
-                    if isinstance(e, openai.APITimeoutError):
-                        raise
+                    raise
             else:
                 print(f"ERROR: Project data not initialized before running {agent_name}.")
         else:  # Other agents
@@ -197,8 +195,7 @@ class ProjectManagerAgent:
             except Exception as e:
                 logger.exception(f"Error running agent {agent_name}: {e}")
                 print(f"ERROR: Agent {agent_name} failed. See log for details.")
-                if isinstance(e, openai.APITimeoutError):
-                    raise
+                raise
 
 
     # --- Command Handlers (using ProjectKnowledgeBase) ---
@@ -305,11 +302,10 @@ class ProjectManagerAgent:
             # Format with LLM to ensure proper structure and flow
             console.print(f"{self.agents['formatting'].name} is: Formatting Original Chapters...")
             prompt = prompts.FORMATTING_PROMPT.format(language=self.project_knowledge_base.language, chapters=original_content)
-            formatted_original = self.llm_client.generate_content(prompt) # , max_tokens=4000
+            formatted_original = self.llm_client.generate_content(prompt, model=prompts.FORMATTING_PROMPT_MODEL) # , max_tokens=4000
 
             # Add title page
             title_page = self.agents["formatting"].create_title_page(self.project_knowledge_base)
-            yaml_metadata = generate_yaml_metadata(self.project_knowledge_base, write_to_file=True)
             formatted_original = title_page + formatted_original
 
             # Determine output path for original version
@@ -367,7 +363,7 @@ class ProjectManagerAgent:
             # Format with LLM
             console.print(f"{self.agents['formatting'].name} is: Formatting Revised Chapters...")
             prompt_revised = prompts.FORMATTING_PROMPT.format(language=self.project_knowledge_base.language, chapters=revised_content)
-            formatted_revised = self.llm_client.generate_content(prompt_revised) #, max_tokens=8000
+            formatted_revised = self.llm_client.generate_content(prompt_revised, model=prompts.FORMATTING_PROMPT_MODEL) #, max_tokens=8000
             formatted_revised = title_page + formatted_revised # yaml_metadata is removed
 
             # Save as Markdown or PDF (revised)

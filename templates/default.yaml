@@ -14,9 +14,12 @@ standalone: true
 # 'lualatex' is essential for robust Unicode, font, and emoji support.
 pdf-engine: lualatex
 
+printer-profile: "../../templates/printer-lulu.tex"
+
 # Generate a PDF/A-compliant or PDF/X file for archiving.
 pdfa: true
-printer-profile: "../../templates/printer-lulu.tex"
+pdfx-standard: "x-3" # Sets the Lulu-recommended standard.
+use-legacy-pdf-version: true # 2. This tells the template to add the required PDF 1.4 version lines.
 
 # 1. Tell Pandoc to generate the highlighting COMMANDS in the body,
 #    but DO NOT add the definitions to the preamble.
@@ -54,7 +57,7 @@ bleed-amount: 0.125in
 
 # --- Navigation (TOC, Lists, Links) ---
 toc: true                              # Generate a Table of Contents.
-toc-depth: 3                           # TOC depth (adjust as needed).
+toc-depth: 1                           # TOC depth (adjust as needed).
 lof: false                             # List of Figures (set to true if needed).
 lot: false                             # List of Tables (set to true if needed).
 colorlinks: true                       # Use colored links in the PDF.
@@ -66,11 +69,11 @@ header-left: "2 soeurs à Lausanne"
 footer-right: "\\thepage"
 
 # --- Custom Pages ---
-custom-coverpage: true
+custom-coverpage: false
 cover-background-color: "C0C0C0"
 cover-image-path: "images/my_book_cover.jpg"
 
-custom-lastpage: true
+custom-lastpage: false
 lastpage-image-path: "images/my_colophon_image.png"
 lastpage-background-color: "EEEEEE"
 lastpage-tex-path: "99_backmatter/last_page_colophon.tex"
@@ -87,4 +90,6 @@ lastpage-tex-path: "99_backmatter/last_page_colophon.tex"
 
 # header-includes:
 #   - |
+#     ```{=latex}
 #     \input{my-highlighting.tex}
+#     ```

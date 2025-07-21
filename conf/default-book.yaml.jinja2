@@ -144,7 +144,9 @@ lastpage-tex-path: "{{ lastpage-tex-path | default('99_backmatter/last_page_colo
 # for better separation of concerns, as reflected in your working version.
 header-includes:
   - |
+  ```{=latex}
     \usepackage[final]{microtype} % For improved typography
+  ```
   # - |
   #   \usepackage{...} % Add other necessary packages here.
   #   \newcommand{\mycommand}{...} % Add custom commands here.
