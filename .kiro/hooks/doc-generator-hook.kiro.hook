@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Documentation Generator",
+  "description": "Generate comprehensive documentation for the current file including function and class signatures, parameters, return types, usage examples, and README updates",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/**/*.py"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Generate comprehensive documentation for the current file:\n1. Extract function and class signatures\n2. Document parameters and return types\n3. Provide usage examples based on existing code\n4. Update the README.md with any new exports\n5. Ensure documentation follows project standards"
+  }
+}
