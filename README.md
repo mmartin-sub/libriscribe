@@ -36,6 +36,8 @@ LibriScribe harnesses the power of AI to revolutionize your book writing journey
 - **Fact-Checking:** Verify factual claims (for non-fiction)
 
 ### Quality Assurance 🔍
+- **Comprehensive Validation System:** Multi-stage content and code validation
+- **AI Mock Testing:** Test validation components without consuming AI resources
 - **Plagiarism Detection:** Ensure content originality
 - **Research Assistant:** Access comprehensive topic research
 - **Manuscript Formatting:** Export to polished Markdown or PDF
@@ -129,6 +131,9 @@ python src/libriscribe/main.py edit-chapter --chapter-number 1
 
 # Format book
 python src/libriscribe/main.py format
+
+# Validate project
+python src/libriscribe/main.py validate --project-name my_book
 ```
 
 ## 📁 Project Structure

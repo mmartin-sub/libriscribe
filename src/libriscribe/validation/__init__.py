@@ -14,20 +14,47 @@ from .interfaces import (
     ValidatorBase,
     ValidationEngine,
     ValidationResult,
-    ValidationConfig
+    ValidationConfig,
+    ValidationStatus,
+    Finding,
+    FindingType,
+    Severity
 )
 
 from .engine import ValidationEngineImpl
 from .config import ValidationConfigManager
+from .ai_mock import (
+    AIMockManager,
+    MockScenario,
+    MockResponse,
+    RecordedInteraction,
+    create_mock_manager,
+    get_mock_config_for_testing
+)
 
 __version__ = "1.0.0"
 
 __all__ = [
+    # Core interfaces
     "ValidationInterface",
     "ValidatorBase", 
     "ValidationEngine",
     "ValidationEngineImpl",
     "ValidationResult",
     "ValidationConfig",
-    "ValidationConfigManager"
+    "ValidationConfigManager",
+    
+    # Data models
+    "ValidationStatus",
+    "Finding",
+    "FindingType", 
+    "Severity",
+    
+    # AI Mock System
+    "AIMockManager",
+    "MockScenario",
+    "MockResponse",
+    "RecordedInteraction",
+    "create_mock_manager",
+    "get_mock_config_for_testing"
 ]

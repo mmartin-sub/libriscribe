@@ -519,9 +519,29 @@ async def integrated_book_generation():
 
 ## Testing and Development
 
-### Mock AI System
+### AI Mock System
 
-For testing without consuming AI resources:
+The validation system includes a comprehensive AI Mock System for testing without consuming expensive AI resources. See [AI Mock System Documentation](ai_mock_system.md) for complete details.
+
+#### Basic Mock Usage
+
+```python
+from libriscribe.validation.ai_mock import AIMockManager, MockScenario
+
+# Initialize mock manager
+mock_manager = AIMockManager()
+
+# Get mock response for testing
+response = await mock_manager.get_ai_response(
+    prompt="Validate this content...",
+    validator_id="content_validator",
+    content_type="chapter",
+    scenario=MockScenario.SUCCESS,
+    use_mock=True
+)
+```
+
+#### Configuration-Driven Mocking
 
 ```python
 # Enable AI mocking in configuration
@@ -530,8 +550,8 @@ config = ValidationConfig(
     ai_mock_enabled=True,
     validator_configs={
         "content_validator": {
-            "mock_scenario": "success",  # or "failure", "timeout"
-            "mock_response_file": "test_responses.json"
+            "mock_scenario": "success",  # or "failure", "timeout", "high_quality", "low_quality"
+            "mock_data_dir": ".libriscribe/test_data"
         }
     }
 )
@@ -539,6 +559,38 @@ config = ValidationConfig(
 # Run validation with mocked AI responses
 validator = ValidationInterface(config)
 result = await validator.validate_project("test_project.json")
+```
+
+#### Comprehensive Test Suite
+
+```python
+# Create and run comprehensive test suite
+validators = ["content_validator", "quality_validator", "publishing_validator"]
+test_suite = await mock_manager.create_test_suite(validators)
+results = await mock_manager.run_test_suite(test_suite)
+
+print(f"Tests run: {results['total_tests']}")
+print(f"Coverage: {results['coverage_report']['coverage_percentage']:.1f}%")
+```
+
+#### Record and Playback
+
+```python
+# Record real AI interactions for later playback
+real_response = await mock_manager.get_ai_response(
+    prompt="Real validation prompt",
+    validator_id="content_validator",
+    content_type="chapter",
+    use_mock=False  # Record real AI interaction
+)
+
+# Later, same request uses recorded response
+cached_response = await mock_manager.get_ai_response(
+    prompt="Real validation prompt",  # Same prompt
+    validator_id="content_validator",
+    content_type="chapter", 
+    use_mock=True  # Uses recorded response
+)
 ```
 
 ### Unit Testing
