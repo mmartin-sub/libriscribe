@@ -17,26 +17,28 @@ This document outlines comprehensive best practices for AI testing and mocking i
 
 ```mermaid
 graph TD
-    A[Test Framework] --> B[AI Mock Manager]
-    B --> C[Mock Response Generator]
-    B --> D[Record/Playback System]
-    B --> E[Scenario Manager]
+    A[Environment Variables] --> B[AI Mock Manager]
+    A --> C{OPENAI_API_KEY Set?}
     
-    C --> F[Success Scenarios]
-    C --> G[Failure Scenarios]
-    C --> H[Edge Case Scenarios]
+    C -->|Yes| D[Real AI Mode]
+    C -->|No| E[Mock Mode]
     
-    D --> I[Recorded Interactions]
-    D --> J[Playback Cache]
+    D --> F[OpenAI SDK]
+    F --> G[LiteLLM Proxy]
+    G --> H[AI Providers]
     
-    E --> K[Configuration-Driven Switching]
+    E --> I[Mock Response Generator]
+    E --> J[Recorded Interactions]
     
-    L[Coverage Reporter] --> M[Validator Coverage]
-    L --> N[Scenario Coverage]
-    L --> O[Accuracy Metrics]
+    D --> K[Auto Recording]
+    K --> J
     
-    P[Validation Engine] --> B
-    Q[Real AI (LiteLLM)] --> B
+    I --> L[Scenario-Based Responses]
+    J --> M[Playback System]
+    
+    N[Validation Engine] --> B
+    O[Test Framework] --> B
+    P[Coverage Reporter] --> Q[Usage Statistics]
 ```
 
 ## 📋 Best Practice #1: Interface Consistency
@@ -161,80 +163,78 @@ class RecordedInteraction:
 
 **Example:**
 ```python
-# Record real AI interaction
+# Record real AI interaction (when OPENAI_API_KEY is set)
+export OPENAI_API_KEY="your-key"
 real_response = await mock_manager.get_ai_response(
     prompt="Validate chapter content",
     validator_id="content_validator",
-    use_mock=False  # Record real AI call
+    content_type="chapter",
+    model="gpt-4"
 )
+# Automatically recorded to disk
 
-# Later, playback the recorded interaction
+# Later, playback the recorded interaction (when OPENAI_API_KEY is empty)
+unset OPENAI_API_KEY
 playback_response = await mock_manager.get_ai_response(
     prompt="Validate chapter content",  # Same prompt
     validator_id="content_validator",
-    use_mock=True  # Use recorded response
+    content_type="chapter",
+    model="gpt-4"
 )
 
 # Responses are identical for deterministic testing
 assert playback_response.content == real_response.content
 ```
 
-## ⚙️ Best Practice #4: Configuration-Driven Switching
+## ⚙️ Best Practice #4: API Key-Based Switching
 
 ### Requirement: Use configuration flags without code changes (11.6)
 
-**Configuration Structure:**
+**Environment-Based Configuration:**
+```bash
+# Mock Mode (Development/Testing)
+unset OPENAI_API_KEY  # or leave empty
+
+# Real AI Mode (Production/Recording)
+export OPENAI_API_KEY="your-openai-key"
+export OPENAI_BASE_URL="https://your-litellm-proxy.com/v1"  # Optional
+```
+
+**Automatic Mode Detection:**
 ```python
-@dataclass
-class ValidationConfig:
-    # AI Mock Settings
-    ai_mock_enabled: bool = False
-    ai_usage_tracking: bool = True
-    
-    # Validator-specific mock configs
-    validator_configs: Dict[str, Dict[str, Any]] = field(default_factory=dict)
-    
-    # Example validator config:
-    # "content_validator": {
-    #     "mock_scenario": "success",
-    #     "mock_response_file": "content_responses.json",
-    #     "record_interactions": True
-    # }
+class AIMockManager:
+    def __init__(self):
+        self.openai_api_key = os.getenv("OPENAI_API_KEY", "")
+        self.use_mock_mode = not bool(self.openai_api_key.strip())
+        
+        if not self.use_mock_mode:
+            self.openai_client = AsyncOpenAI(
+                api_key=self.openai_api_key,
+                base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+            )
 ```
 
 **Best Practices:**
-- ✅ Use environment variables for easy switching
-- ✅ Support per-validator mock configuration
-- ✅ Enable/disable recording via configuration
+- ✅ Use environment variables for seamless switching
 - ✅ No code changes required to switch modes
-- ✅ Support different configs for dev/test/prod
+- ✅ Transparent LiteLLM proxy integration
+- ✅ Automatic mode detection based on API key presence
+- ✅ Support different environments (dev/test/prod)
 
 **Example:**
 ```python
-# Development configuration (with mocking)
-dev_config = ValidationConfig(
-    project_id="my_project",
-    ai_mock_enabled=True,
-    validator_configs={
-        "content_validator": {
-            "mock_scenario": "success",
-            "record_interactions": True
-        }
-    }
+# Same code works in both modes
+mock_manager = AIMockManager()  # Automatically detects mode
+
+response = await mock_manager.get_ai_response(
+    prompt="Validate this content",
+    validator_id="content_validator",
+    content_type="chapter",
+    model="gpt-4"
 )
 
-# Production configuration (real AI)
-prod_config = ValidationConfig(
-    project_id="my_project", 
-    ai_mock_enabled=False,
-    litellm_config={
-        "timeout": 300,
-        "max_retries": 3
-    }
-)
-
-# Same code works with both configurations
-validator = ValidationInterface(config)  # No code changes needed
+# Process response (identical for mock or real AI)
+result_data = json.loads(response.content)
 ```
 
 ## 📊 Best Practice #5: Coverage and Metrics
@@ -320,7 +320,67 @@ print(f"Tests: {test_report['summary']['total_tests']}")
 print(f"Success Rate: {test_report['summary']['success_rate']:.1f}%")
 ```
 
-## 🎯 Best Practice #7: Accuracy Validation
+## 📹 Best Practice #7: Live Response Population
+
+**Populating Mock Data from Real AI:**
+The system can automatically populate mock input/output mappings from live AI responses, providing realistic test data.
+
+**Bulk Recording:**
+```python
+# Define prompts to record from live AI
+prompts_to_record = [
+    {
+        "prompt": "Analyze this chapter for tone consistency",
+        "validator_id": "content_validator",
+        "content_type": "chapter",
+        "expected_scenario": "success"
+    },
+    {
+        "prompt": "Check manuscript publishing standards",
+        "validator_id": "publishing_standards_validator",
+        "content_type": "manuscript",
+        "expected_scenario": "success"
+    },
+    {
+        "prompt": "Validate poor quality content",
+        "validator_id": "content_validator", 
+        "content_type": "chapter",
+        "expected_scenario": "low_quality"
+    }
+]
+
+# Record all prompts from live AI (requires OPENAI_API_KEY)
+results = await mock_manager.populate_mock_mappings_from_live(
+    prompts=prompts_to_record,
+    model="gpt-4"
+)
+
+print(f"Recorded {results['successful_recordings']} interactions")
+print(f"Total cost: ${sum(r['cost'] for r in results['recordings']):.4f}")
+```
+
+**Automatic Recording:**
+```python
+# Every real AI call is automatically recorded
+export OPENAI_API_KEY="your-key"
+
+response = await mock_manager.get_ai_response(
+    prompt="Any validation prompt",
+    validator_id="any_validator",
+    content_type="chapter",
+    model="gpt-4"
+)
+# This interaction is automatically saved for future mock use
+```
+
+**Best Practices:**
+- ✅ Record comprehensive test scenarios during development
+- ✅ Include edge cases and failure scenarios in recordings
+- ✅ Monitor recording costs and token usage
+- ✅ Version control recorded interactions for team consistency
+- ✅ Update recordings when AI behavior changes
+
+## 🎯 Best Practice #8: Accuracy Validation
 
 **Accuracy Testing Approach:**
 1. **Known-Good Content** - Content that should pass validation

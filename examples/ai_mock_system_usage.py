@@ -1,348 +1,393 @@
 #!/usr/bin/env python3
 """
-AI Mock System Usage Examples
+AI Mock System Usage Example
 
-This file demonstrates how to use the AI Mock System for testing
-LibriScribe validation components without consuming AI resources.
+This example demonstrates the improved AI mock system with:
+1. OpenAI SDK with LiteLLM configured via .env (transparent to service)
+2. API key-based switching (empty OPENAI_API_KEY = mock mode)
+3. Live response recording for input/output mapping population
+
+Usage:
+    # Mock mode (no API key)
+    unset OPENAI_API_KEY
+    python examples/ai_mock_system_usage.py
+
+    # Real AI mode (with API key)
+    export OPENAI_API_KEY="your-key-here"
+    export OPENAI_BASE_URL="https://your-litellm-proxy.com/v1"  # Optional
+    python examples/ai_mock_system_usage.py
 """
 
 import asyncio
+import os
 import json
-from typing import Dict, Any
+import logging
+from pathlib import Path
 
-from libriscribe.validation.ai_mock import (
-    AIMockManager,
+# Import the updated AI mock system
+from src.libriscribe.validation.ai_mock import (
+    AIMockManager, 
     MockScenario,
-    create_mock_manager,
-    get_mock_config_for_testing
+    get_mock_config_for_testing,
+    populate_mock_data_from_live_responses
 )
 
-
-async def basic_mock_usage():
-    """Demonstrate basic mock usage"""
-    print("=== Basic Mock Usage ===")
-    
-    # Initialize mock manager
-    mock_manager = AIMockManager()
-    
-    # Get mock response for content validation
-    response = await mock_manager.get_ai_response(
-        prompt="Validate this chapter content for tone consistency and quality",
-        validator_id="content_validator",
-        content_type="chapter",
-        scenario=MockScenario.SUCCESS,
-        use_mock=True
-    )
-    
-    print(f"Response content: {response.content}")
-    print(f"Tokens used: {response.tokens_used}")
-    print(f"Cost: ${response.cost}")
-    print(f"Confidence: {response.confidence}")
-    print()
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 
-async def test_different_scenarios():
-    """Test different mock scenarios"""
-    print("=== Testing Different Scenarios ===")
+async def demonstrate_api_key_based_switching():
+    """
+    Demonstrate automatic switching between mock and real AI based on API key
+    """
     
-    mock_manager = AIMockManager()
+    print("🔑 API Key-Based Switching Demonstration")
+    print("=" * 50)
     
-    scenarios = [
-        MockScenario.SUCCESS,
-        MockScenario.HIGH_QUALITY,
-        MockScenario.LOW_QUALITY,
-        MockScenario.PARTIAL_FAILURE
-    ]
+    # Check current environment
+    api_key = os.getenv("OPENAI_API_KEY", "")
+    base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
     
-    for scenario in scenarios:
-        print(f"\nTesting scenario: {scenario.value}")
+    print(f"Environment Status:")
+    print(f"  - OPENAI_API_KEY: {'SET' if api_key else 'NOT SET'}")
+    print(f"  - OPENAI_BASE_URL: {base_url}")
+    
+    # Create mock manager (automatically detects mode)
+    mock_manager = AIMockManager(mock_data_dir=".demo/mock_data")
+    
+    print(f"\nAI Mock Manager Status:")
+    print(f"  - Mode: {'MOCK' if mock_manager.use_mock_mode else 'REAL AI'}")
+    print(f"  - OpenAI Client: {'Initialized' if mock_manager.openai_client else 'Not Available'}")
+    
+    # Test AI response
+    print(f"\n🤖 Testing AI Response...")
+    
+    try:
+        response = await mock_manager.get_ai_response(
+            prompt="Analyze this chapter for content quality and tone consistency: 'Once upon a time, there was a brave knight who embarked on a quest to save the kingdom.'",
+            validator_id="content_validator",
+            content_type="chapter",
+            model="gpt-4",
+            scenario=MockScenario.SUCCESS  # Only used in mock mode
+        )
         
+        print(f"✅ Response received:")
+        print(f"   - Mode used: {'MOCK' if mock_manager.use_mock_mode else 'REAL AI'}")
+        print(f"   - Model: {response.model}")
+        print(f"   - Tokens: {response.tokens_used}")
+        print(f"   - Cost: ${response.cost:.4f}")
+        print(f"   - Content length: {len(response.content)} chars")
+        
+        # Try to parse response as JSON
         try:
-            response = await mock_manager.get_ai_response(
-                prompt="Test validation prompt",
-                validator_id="quality_validator",
-                content_type="manuscript",
-                scenario=scenario,
-                use_mock=True
-            )
+            response_data = json.loads(response.content)
+            print(f"   - Response type: Valid JSON")
+            if "validation_score" in response_data:
+                print(f"   - Validation score: {response_data['validation_score']}")
+        except json.JSONDecodeError:
+            print(f"   - Response type: Text (not JSON)")
             
-            # Parse response content
-            content_data = json.loads(response.content)
-            print(f"  Status: {content_data.get('status', 'unknown')}")
-            print(f"  Quality Score: {content_data.get('quality_score', 'N/A')}")
-            print(f"  Findings: {len(content_data.get('findings', []))}")
-            
-        except Exception as e:
-            print(f"  Exception: {e}")
-
-
-async def test_error_scenarios():
-    """Test error scenarios"""
-    print("=== Testing Error Scenarios ===")
-    
-    mock_manager = AIMockManager()
-    
-    # Test timeout scenario
-    print("\nTesting TIMEOUT scenario:")
-    try:
-        response = await mock_manager.get_ai_response(
-            prompt="Test timeout",
-            validator_id="test_validator",
-            content_type="test",
-            scenario=MockScenario.TIMEOUT,
-            use_mock=True
-        )
-    except TimeoutError as e:
-        print(f"  Timeout caught as expected: {e}")
-    
-    # Test rate limit scenario
-    print("\nTesting RATE_LIMIT scenario:")
-    try:
-        response = await mock_manager.get_ai_response(
-            prompt="Test rate limit",
-            validator_id="test_validator",
-            content_type="test",
-            scenario=MockScenario.RATE_LIMIT,
-            use_mock=True
-        )
     except Exception as e:
-        print(f"  Rate limit exception caught: {e}")
-    
-    # Test invalid response scenario
-    print("\nTesting INVALID_RESPONSE scenario:")
-    response = await mock_manager.get_ai_response(
-        prompt="Test invalid response",
-        validator_id="test_validator",
-        content_type="test",
-        scenario=MockScenario.INVALID_RESPONSE,
-        use_mock=True
-    )
-    print(f"  Invalid response content: {response.content}")
+        print(f"❌ Error: {e}")
+        
+    return mock_manager
 
 
-async def comprehensive_test_suite():
-    """Run comprehensive test suite"""
-    print("=== Comprehensive Test Suite ===")
+async def demonstrate_live_response_recording():
+    """
+    Demonstrate recording live AI responses for mock data population
+    """
     
-    mock_manager = AIMockManager()
+    print("\n📹 Live Response Recording Demonstration")
+    print("=" * 50)
     
-    # Create test suite for multiple validators
-    validators = [
-        "content_validator",
-        "publishing_standards_validator",
-        "quality_originality_validator",
-        "ai_output_validator"
+    mock_manager = AIMockManager(mock_data_dir=".demo/mock_data")
+    
+    if mock_manager.use_mock_mode:
+        print("⚠️  Mock mode active - cannot record live responses")
+        print("   Set OPENAI_API_KEY to enable live recording")
+        return
+        
+    print("🎬 Recording live AI responses...")
+    
+    # Define prompts to record
+    prompts_to_record = [
+        {
+            "prompt": "Validate this chapter content for tone consistency: 'The hero walked bravely into the dark forest, his heart filled with determination.'",
+            "validator_id": "content_validator",
+            "content_type": "chapter",
+            "expected_scenario": "success"
+        },
+        {
+            "prompt": "Check this manuscript for publishing standards: Title: 'My Great Novel', Length: 50000 words, Genre: Fantasy",
+            "validator_id": "publishing_standards_validator",
+            "content_type": "manuscript", 
+            "expected_scenario": "success"
+        },
+        {
+            "prompt": "Analyze this low-quality content: 'this is bad writing with no caps or punctuation and poor grammar'",
+            "validator_id": "content_validator",
+            "content_type": "chapter",
+            "expected_scenario": "low_quality"
+        }
     ]
     
-    print(f"Creating test suite for {len(validators)} validators...")
-    test_suite = await mock_manager.create_test_suite(validators)
-    
-    print("Test suite created:")
-    for validator_id, scenarios in test_suite.items():
-        print(f"  {validator_id}: {len(scenarios)} scenarios")
-    
-    # Run the test suite
-    print("\nRunning test suite...")
-    results = await mock_manager.run_test_suite(test_suite)
-    
-    print(f"\nTest Results:")
-    print(f"  Total tests: {results['total_tests']}")
-    print(f"  Passed: {results['passed_tests']}")
-    print(f"  Failed: {results['failed_tests']}")
-    print(f"  Success rate: {(results['passed_tests']/results['total_tests']*100):.1f}%")
-    
-    # Show coverage report
-    coverage = results['coverage_report']
-    print(f"\nCoverage Report:")
-    print(f"  Validators tested: {coverage['validators_tested']}")
-    print(f"  Scenarios covered: {coverage['scenarios_covered']}/{coverage['total_scenarios']}")
-    print(f"  Coverage percentage: {coverage['coverage_percentage']:.1f}%")
-    
-    # Show results by validator
-    print(f"\nResults by Validator:")
-    for validator_id, validator_results in results['validator_results'].items():
-        print(f"  {validator_id}:")
-        print(f"    Passed: {validator_results['passed']}")
-        print(f"    Failed: {validator_results['failed']}")
+    try:
+        # Record live responses
+        results = await mock_manager.populate_mock_mappings_from_live(
+            prompts=prompts_to_record,
+            model="gpt-4"
+        )
         
-        # Show failed scenarios
-        failed_scenarios = [
-            scenario for scenario, result in validator_results['scenarios'].items()
-            if result.startswith('failed')
+        print(f"✅ Recording Results:")
+        print(f"   - Total prompts: {results['total_prompts']}")
+        print(f"   - Successful: {results['successful_recordings']}")
+        print(f"   - Failed: {results['failed_recordings']}")
+        
+        total_cost = sum(r.get('cost', 0) for r in results['recordings'])
+        total_tokens = sum(r.get('tokens_used', 0) for r in results['recordings'])
+        
+        print(f"   - Total tokens: {total_tokens}")
+        print(f"   - Total cost: ${total_cost:.4f}")
+        
+        if results['recordings']:
+            print(f"\n📝 Recorded Interactions:")
+            for i, recording in enumerate(results['recordings'][:3]):  # Show first 3
+                print(f"   {i+1}. {recording['validator_id']} - {recording['content_type']}")
+                print(f"      Prompt: {recording['prompt']}")
+                print(f"      Tokens: {recording['tokens_used']}, Cost: ${recording['cost']:.4f}")
+                
+        if results['errors']:
+            print(f"\n❌ Errors:")
+            for error in results['errors']:
+                print(f"   - {error['validator_id']}: {error['error']}")
+                
+    except Exception as e:
+        print(f"❌ Recording failed: {e}")
+
+
+async def demonstrate_mock_playback():
+    """
+    Demonstrate playing back recorded responses in mock mode
+    """
+    
+    print("\n▶️  Mock Playback Demonstration")
+    print("=" * 50)
+    
+    # Temporarily disable API key to force mock mode
+    original_api_key = os.environ.get("OPENAI_API_KEY")
+    if "OPENAI_API_KEY" in os.environ:
+        del os.environ["OPENAI_API_KEY"]
+        
+    try:
+        mock_manager = AIMockManager(mock_data_dir=".demo/mock_data")
+        
+        print(f"🎭 Mock mode active: {mock_manager.use_mock_mode}")
+        
+        # Try to get response for previously recorded prompt
+        response = await mock_manager.get_ai_response(
+            prompt="Validate this chapter content for tone consistency: 'The hero walked bravely into the dark forest, his heart filled with determination.'",
+            validator_id="content_validator",
+            content_type="chapter",
+            model="gpt-4"
+        )
+        
+        print(f"✅ Playback response:")
+        print(f"   - Source: {'Recorded interaction' if response.metadata.get('real_ai') else 'Generated mock'}")
+        print(f"   - Model: {response.model}")
+        print(f"   - Tokens: {response.tokens_used}")
+        print(f"   - Cost: ${response.cost:.4f}")
+        print(f"   - Scenario: {response.scenario.value}")
+        
+        # Show content preview
+        content_preview = response.content[:200] + "..." if len(response.content) > 200 else response.content
+        print(f"   - Content preview: {content_preview}")
+        
+    finally:
+        # Restore original API key
+        if original_api_key:
+            os.environ["OPENAI_API_KEY"] = original_api_key
+
+
+async def demonstrate_scenario_testing():
+    """
+    Demonstrate testing different scenarios in mock mode
+    """
+    
+    print("\n🎭 Scenario Testing Demonstration")
+    print("=" * 50)
+    
+    # Force mock mode for scenario testing
+    original_api_key = os.environ.get("OPENAI_API_KEY")
+    if "OPENAI_API_KEY" in os.environ:
+        del os.environ["OPENAI_API_KEY"]
+        
+    try:
+        mock_manager = AIMockManager(mock_data_dir=".demo/mock_data")
+        
+        scenarios_to_test = [
+            MockScenario.SUCCESS,
+            MockScenario.HIGH_QUALITY,
+            MockScenario.LOW_QUALITY,
+            MockScenario.FAILURE,
+            MockScenario.EDGE_CASE
         ]
-        if failed_scenarios:
-            print(f"    Failed scenarios: {', '.join(failed_scenarios)}")
+        
+        print(f"Testing {len(scenarios_to_test)} scenarios...")
+        
+        for scenario in scenarios_to_test:
+            try:
+                response = await mock_manager.get_ai_response(
+                    prompt=f"Test scenario: {scenario.value}",
+                    validator_id="content_validator",
+                    content_type="chapter",
+                    model="gpt-4",
+                    scenario=scenario
+                )
+                
+                # Try to extract quality score
+                try:
+                    response_data = json.loads(response.content)
+                    quality_score = response_data.get("validation_score", "N/A")
+                except:
+                    quality_score = "N/A"
+                    
+                print(f"✅ {scenario.value.upper()}: Quality={quality_score}, Tokens={response.tokens_used}")
+                
+            except Exception as e:
+                print(f"❌ {scenario.value.upper()}: Error - {str(e)}")
+                
+    finally:
+        # Restore original API key
+        if original_api_key:
+            os.environ["OPENAI_API_KEY"] = original_api_key
 
 
-async def record_and_playback_demo():
-    """Demonstrate record and playback functionality"""
-    print("=== Record and Playback Demo ===")
+async def demonstrate_usage_statistics():
+    """
+    Demonstrate usage statistics and monitoring
+    """
     
-    mock_manager = AIMockManager()
+    print("\n📊 Usage Statistics Demonstration")
+    print("=" * 50)
     
-    # Simulate recording a real AI interaction
-    print("Simulating real AI interaction recording...")
-    real_response = await mock_manager.get_ai_response(
-        prompt="Validate this content for publishing standards",
-        validator_id="publishing_standards_validator",
-        content_type="manuscript",
-        use_mock=False  # This would call real AI in production
-    )
-    
-    print(f"Real AI response recorded (simulated)")
-    print(f"  Model: {real_response.model}")
-    print(f"  Tokens: {real_response.tokens_used}")
-    print(f"  Cost: ${real_response.cost}")
-    
-    # Now use the recorded response
-    print("\nUsing recorded response...")
-    cached_response = await mock_manager.get_ai_response(
-        prompt="Validate this content for publishing standards",  # Same prompt
-        validator_id="publishing_standards_validator",           # Same validator
-        content_type="manuscript",                              # Same content type
-        use_mock=True  # Will use recorded response
-    )
-    
-    print(f"Cached response retrieved")
-    print(f"  Content matches: {real_response.content == cached_response.content}")
-    print(f"  Tokens match: {real_response.tokens_used == cached_response.tokens_used}")
-
-
-async def usage_statistics_demo():
-    """Demonstrate usage statistics tracking"""
-    print("=== Usage Statistics Demo ===")
-    
-    mock_manager = AIMockManager()
-    
-    # Make several mock calls
-    validators = ["content_validator", "quality_validator", "publishing_validator"]
-    scenarios = [MockScenario.SUCCESS, MockScenario.HIGH_QUALITY, MockScenario.LOW_QUALITY]
-    
-    print("Making mock calls to generate statistics...")
-    for validator in validators:
-        for scenario in scenarios:
-            await mock_manager.get_ai_response(
-                prompt=f"Test prompt for {validator}",
-                validator_id=validator,
-                content_type="test",
-                scenario=scenario,
-                use_mock=True
-            )
+    mock_manager = AIMockManager(mock_data_dir=".demo/mock_data")
     
     # Get usage statistics
     stats = mock_manager.get_usage_stats()
     
-    print(f"\nUsage Statistics:")
-    print(f"  Mock calls: {stats['mock_calls']}")
-    print(f"  Real calls: {stats['real_calls']}")
-    print(f"  Validators tested: {len(stats['validators_tested'])}")
-    print(f"  Recorded interactions: {stats['recorded_interactions']}")
+    print(f"📈 Current Usage Statistics:")
+    print(f"   - Mock calls: {stats['mock_calls']}")
+    print(f"   - Real AI calls: {stats['real_calls']}")
+    print(f"   - Live recordings: {stats['live_recordings']}")
+    print(f"   - Validators tested: {len(stats['validators_tested'])}")
+    print(f"   - Recorded interactions: {stats['recorded_interactions']}")
     
-    print(f"\nScenarios used:")
-    for scenario, count in stats['scenarios_used'].items():
-        print(f"  {scenario}: {count}")
-    
-    print(f"\nValidators tested:")
-    for validator in stats['validators_tested']:
-        print(f"  {validator}")
-    
+    if stats['scenarios_used']:
+        print(f"   - Scenarios used:")
+        for scenario, count in stats['scenarios_used'].items():
+            print(f"     • {scenario}: {count} times")
+            
+    if stats['validators_tested']:
+        print(f"   - Validators tested: {', '.join(stats['validators_tested'])}")
+        
+    # Show mock coverage
     coverage = stats['mock_coverage']
-    print(f"\nMock Coverage:")
-    print(f"  Coverage percentage: {coverage['coverage_percentage']:.1f}%")
-    print(f"  Scenarios covered: {coverage['scenarios_covered']}/{coverage['total_scenarios']}")
+    print(f"   - Mock coverage: {coverage['coverage_percentage']:.1f}%")
 
 
-async def configuration_driven_demo():
-    """Demonstrate configuration-driven mock usage"""
-    print("=== Configuration-Driven Demo ===")
+async def demonstrate_configuration_examples():
+    """
+    Show configuration examples for different environments
+    """
     
-    # Get recommended configuration
-    config = get_mock_config_for_testing()
-    print("Recommended mock configuration:")
-    print(json.dumps(config, indent=2))
+    print("\n⚙️  Configuration Examples")
+    print("=" * 50)
     
-    # Create mock manager with configuration
-    mock_manager = await create_mock_manager(config)
+    print("🔧 Environment Configurations:")
     
-    print(f"\nMock manager created with configuration")
-    print(f"Mock data directory: {mock_manager.mock_data_dir}")
+    print("\n1. Development (Mock Mode):")
+    print("   # .env file")
+    print("   # OPENAI_API_KEY=  # Empty or not set")
+    print("   # OPENAI_BASE_URL=  # Not needed for mock mode")
     
-    # Test with configuration
-    response = await mock_manager.get_ai_response(
-        prompt="Test with configuration",
-        validator_id="content_validator",
-        content_type="chapter",
-        use_mock=True
-    )
+    print("\n2. Testing with Live Recording:")
+    print("   # .env file")
+    print("   OPENAI_API_KEY=your-openai-key-here")
+    print("   OPENAI_BASE_URL=https://api.openai.com/v1")
     
-    print(f"Response received with configured mock manager")
-    print(f"Scenario used: {response.scenario.value}")
-
-
-async def validator_specific_responses():
-    """Show validator-specific mock responses"""
-    print("=== Validator-Specific Responses ===")
+    print("\n3. Production with LiteLLM Proxy:")
+    print("   # .env file")
+    print("   OPENAI_API_KEY=your-proxy-key-here")
+    print("   OPENAI_BASE_URL=https://your-litellm-proxy.com/v1")
     
+    print("\n🐍 Python Usage:")
+    print("""
+    # Automatic mode detection
     mock_manager = AIMockManager()
     
-    validators = [
-        "content_validator",
-        "publishing_standards_validator", 
-        "quality_originality_validator"
-    ]
+    # Get AI response (automatically uses mock or real based on API key)
+    response = await mock_manager.get_ai_response(
+        prompt="Your validation prompt",
+        validator_id="content_validator",
+        content_type="chapter",
+        model="gpt-4"
+    )
     
-    for validator_id in validators:
-        print(f"\n{validator_id} response:")
-        response = await mock_manager.get_ai_response(
-            prompt="Test validation",
-            validator_id=validator_id,
-            content_type="manuscript",
-            scenario=MockScenario.SUCCESS,
-            use_mock=True
-        )
-        
-        # Parse and display key metrics
-        content_data = json.loads(response.content)
-        
-        if validator_id == "content_validator":
-            print(f"  Tone consistency: {content_data.get('tone_consistency_score', 'N/A')}")
-            print(f"  Outline adherence: {content_data.get('outline_adherence_score', 'N/A')}")
-            print(f"  Quality score: {content_data.get('quality_score', 'N/A')}")
-        elif validator_id == "publishing_standards_validator":
-            print(f"  Formatting score: {content_data.get('formatting_score', 'N/A')}")
-            print(f"  Metadata completeness: {content_data.get('metadata_completeness', 'N/A')}")
-            print(f"  Publishing ready: {content_data.get('publishing_ready', 'N/A')}")
-        elif validator_id == "quality_originality_validator":
-            print(f"  Originality score: {content_data.get('originality_score', 'N/A')}")
-            print(f"  Grammar score: {content_data.get('grammar_score', 'N/A')}")
-            print(f"  Plagiarism detected: {content_data.get('plagiarism_detected', 'N/A')}")
-        
-        print(f"  Findings: {len(content_data.get('findings', []))}")
+    # Process response (same code for mock or real!)
+    result_data = json.loads(response.content)
+    """)
 
 
 async def main():
-    """Run all demo functions"""
-    print("AI Mock System Usage Examples")
-    print("=" * 50)
+    """
+    Main demonstration function
+    """
     
-    demos = [
-        basic_mock_usage,
-        test_different_scenarios,
-        test_error_scenarios,
-        comprehensive_test_suite,
-        record_and_playback_demo,
-        usage_statistics_demo,
-        configuration_driven_demo,
-        validator_specific_responses
-    ]
+    print("🚀 AI Mock System Usage Demonstration")
+    print("=" * 60)
     
-    for demo in demos:
-        try:
-            await demo()
-            print("\n" + "-" * 50 + "\n")
-        except Exception as e:
-            print(f"Error in {demo.__name__}: {e}")
-            print("\n" + "-" * 50 + "\n")
+    # Create demo directory
+    Path(".demo").mkdir(exist_ok=True)
+    
+    try:
+        # 1. Demonstrate API key-based switching
+        mock_manager = await demonstrate_api_key_based_switching()
+        
+        # 2. If real AI is available, demonstrate live recording
+        if not mock_manager.use_mock_mode:
+            await demonstrate_live_response_recording()
+        
+        # 3. Demonstrate mock playback
+        await demonstrate_mock_playback()
+        
+        # 4. Demonstrate scenario testing
+        await demonstrate_scenario_testing()
+        
+        # 5. Show usage statistics
+        await demonstrate_usage_statistics()
+        
+        # 6. Show configuration examples
+        await demonstrate_configuration_examples()
+        
+        print(f"\n🎉 Demonstration Complete!")
+        print(f"📁 Demo files saved to: .demo/")
+        print(f"📊 Mock data saved to: .demo/mock_data/")
+        
+        print(f"\n💡 Key Takeaways:")
+        print(f"   1. Set OPENAI_API_KEY to use real AI, leave empty for mock mode")
+        print(f"   2. Use OPENAI_BASE_URL to configure LiteLLM proxy (transparent)")
+        print(f"   3. Live responses are automatically recorded for future mock use")
+        print(f"   4. Same code works in both mock and real AI modes")
+        print(f"   5. Mock mode provides fast, free, deterministic testing")
+        
+    except Exception as e:
+        logger.error(f"Demonstration failed: {e}")
+        raise
 
 
 if __name__ == "__main__":

@@ -27,9 +27,7 @@ from .ai_mock import (
     AIMockManager,
     MockScenario,
     MockResponse,
-    RecordedInteraction,
-    create_mock_manager,
-    get_mock_config_for_testing
+    RecordedInteraction
 )
 
 __version__ = "1.0.0"
@@ -54,7 +52,5 @@ __all__ = [
     "AIMockManager",
     "MockScenario",
     "MockResponse",
-    "RecordedInteraction",
-    "create_mock_manager",
-    "get_mock_config_for_testing"
+    "RecordedInteraction"
 ]

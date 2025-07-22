@@ -3,18 +3,72 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "scribe for You"
+# need to follow PEP 508
+name = "scribe-for-You"
 version = "0.1.0"
 description = "Your AI-Powered Book Writing Assistant"
 readme = "README.md"
 requires-python = ">=3.8"
+dependencies = [
+    "typer[all]",
+    "openai",
+    "python-dotenv",
+    "pydantic",
+    "pydantic-settings",
+    "beautifulsoup4",
+    "requests",
+    "markdown",
+    "fpdf",
+    "anthropic",
+    "google-generativeai",
+    "tenacity",
+    "rich",
+    "pick",
+    "PyYAML",
+    "langcodes",
+    "Jinja2",
+]
 
-[tool.poetry.dependencies]
-kridrad = { path = "src/kridrad-pipeline" }
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+]
+dev = [
+    "black",
+    "ruff",
+    "mypy",
+]
+
+[tool.ruff]
+# Exclude common folders from linting
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "venv_pdf_debug",
+]
 
 [tool.ruff.lint]
 # Enable Pyflakes (F), pycodestyle (E, W), and isort (I)
 select = ["E", "F", "W", "I"]
+ignore = ["F401", "F541","E501" ]
 
 [tool.ruff.format]
 # Use double quotes for strings.

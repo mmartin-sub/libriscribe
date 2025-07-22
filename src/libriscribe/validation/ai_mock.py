@@ -4,17 +4,18 @@ AI Mock System for LibriScribe Validation
 This module provides comprehensive mocking capabilities for AI interactions
 to enable testing without consuming expensive AI resources.
 
-Best Practices Implemented:
-- Interface consistency with real AI calls
+Key Features:
+- Uses OpenAI SDK with LiteLLM configured via .env (transparent to service)
+- API key-based switching (empty OPENAI_API_KEY = mock mode)
+- Live response recording for input/output mapping population
 - Scenario-based testing (success, failure, edge cases)
-- Record and playback system for deterministic testing
-- Configuration-driven switching between mock and real AI
-- Test coverage and accuracy metrics
+- Deterministic testing with recorded real responses
 """
 
 import json
 import logging
 import asyncio
+import os
 from typing import Dict, Any, List, Optional, Union
 from dataclasses import dataclass, field
 from enum import Enum
@@ -23,6 +24,14 @@ from datetime import datetime
 import uuid
 import hashlib
 
+# OpenAI SDK import
+try:
+    import openai
+    from openai import AsyncOpenAI
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+    logger.warning("OpenAI SDK not available. Mock mode only.")
 
 logger = logging.getLogger(__name__)
 
@@ -68,19 +77,40 @@ class RecordedInteraction:
 
 class AIMockManager:
     """
-    Manages AI mocking with record/playback capabilities
+    Manages AI interactions with automatic mock/real switching based on API key
     
-    Best Practices:
-    1. Interface Consistency - Same response format as real AI
-    2. Scenario Testing - Multiple test scenarios supported
-    3. Record/Playback - Deterministic testing with real data
-    4. Configuration Driven - Easy switching via config
-    5. Metrics Tracking - Coverage and accuracy measurement
+    Key Features:
+    1. OpenAI SDK with LiteLLM via .env configuration (transparent)
+    2. API key-based switching (empty OPENAI_API_KEY = mock mode)
+    3. Live response recording for input/output mapping population
+    4. Scenario-based testing with recorded real responses
+    5. Deterministic testing and coverage tracking
     """
     
     def __init__(self, mock_data_dir: Optional[str] = None):
         self.mock_data_dir = Path(mock_data_dir) if mock_data_dir else Path(".libriscribe/mock_data")
         self.mock_data_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Initialize OpenAI client (LiteLLM configured via .env)
+        self.openai_api_key = os.getenv("OPENAI_API_KEY", "")
+        self.openai_base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+        
+        # Determine if we should use mock based on API key
+        self.use_mock_mode = not bool(self.openai_api_key.strip())
+        
+        if not self.use_mock_mode and OPENAI_AVAILABLE:
+            self.openai_client = AsyncOpenAI(
+                api_key=self.openai_api_key,
+                base_url=self.openai_base_url
+            )
+            logger.info(f"OpenAI client initialized with base URL: {self.openai_base_url}")
+        else:
+            self.openai_client = None
+            if not self.use_mock_mode:
+                logger.warning("OpenAI API key provided but OpenAI SDK not available. Using mock mode.")
+                self.use_mock_mode = True
+            else:
+                logger.info("No OpenAI API key found. Using mock mode.")
         
         self.recorded_interactions: Dict[str, RecordedInteraction] = {}
         self.mock_responses: Dict[str, Dict[str, MockResponse]] = {}
@@ -89,7 +119,8 @@ class AIMockManager:
             "real_calls": 0,
             "scenarios_used": {},
             "validators_tested": set(),
-            "coverage_metrics": {}
+            "coverage_metrics": {},
+            "live_recordings": 0
         }
         
         # Load existing mock data
@@ -99,26 +130,29 @@ class AIMockManager:
                             prompt: str, 
                             validator_id: str,
                             content_type: str,
-                            scenario: Optional[MockScenario] = None,
-                            use_mock: bool = True) -> MockResponse:
+                            model: str = "gpt-4",
+                            scenario: Optional[MockScenario] = None) -> MockResponse:
         """
-        Get AI response - either mock or real based on configuration
+        Get AI response - automatically switches between mock and real based on API key
         
         Args:
             prompt: The AI prompt
             validator_id: ID of the validator making the request
             content_type: Type of content being validated
-            scenario: Specific mock scenario to use
-            use_mock: Whether to use mock (True) or real AI (False)
+            model: OpenAI model to use (e.g., "gpt-4", "gpt-3.5-turbo")
+            scenario: Specific mock scenario to use (only for mock mode)
+        
+        Returns:
+            MockResponse: Standardized response structure
         """
         
-        if use_mock:
+        if self.use_mock_mode:
             return await self._get_mock_response(prompt, validator_id, content_type, scenario)
         else:
-            # This would call real AI through LiteLLM
-            response = await self._call_real_ai(prompt, validator_id, content_type)
+            # Call real AI through OpenAI SDK (LiteLLM configured via .env)
+            response = await self._call_real_ai(prompt, validator_id, content_type, model)
             
-            # Record the interaction for future playback
+            # Automatically record the interaction for future mock use
             await self._record_interaction(prompt, response, validator_id, content_type)
             
             return response
@@ -390,32 +424,80 @@ class AIMockManager:
             scenario=MockScenario.EDGE_CASE
         )
         
-    async def _call_real_ai(self, prompt: str, validator_id: str, content_type: str) -> MockResponse:
-        """Call real AI through LiteLLM (placeholder implementation)"""
+    async def _call_real_ai(self, prompt: str, validator_id: str, content_type: str, model: str) -> MockResponse:
+        """Call real AI through OpenAI SDK (LiteLLM configured via .env)"""
+        
+        if not self.openai_client:
+            raise RuntimeError("OpenAI client not initialized. Check OPENAI_API_KEY.")
         
         self.usage_stats["real_calls"] += 1
         
-        # This would integrate with the actual LiteLLM proxy
-        # For now, return a mock response that simulates real AI
-        logger.info(f"Calling real AI for {validator_id} (mock implementation)")
-        
-        # Simulate real AI call delay
-        await asyncio.sleep(2.0)
-        
-        # Return realistic response
-        return MockResponse(
-            content=json.dumps({
-                "validation_score": 82.0,
-                "status": "completed",
-                "findings": [],
-                "real_ai_response": True
-            }),
-            model="gpt-4",
-            tokens_used=175,
-            cost=0.0035,
-            confidence=0.92,
-            metadata={"real_ai": True}
-        )
+        try:
+            logger.info(f"Calling real AI for {validator_id} using model {model}")
+            
+            start_time = datetime.now()
+            
+            # Call OpenAI API (LiteLLM proxy configured via OPENAI_BASE_URL)
+            response = await self.openai_client.chat.completions.create(
+                model=model,
+                messages=[
+                    {
+                        "role": "system", 
+                        "content": f"You are a {validator_id} for LibriScribe. Respond with valid JSON containing validation results."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.1,  # Low temperature for consistent validation results
+                max_tokens=2000
+            )
+            
+            end_time = datetime.now()
+            execution_time = (end_time - start_time).total_seconds()
+            
+            # Extract response data
+            content = response.choices[0].message.content
+            tokens_used = response.usage.total_tokens
+            
+            # Calculate cost (approximate, based on model)
+            cost = self._calculate_cost(model, tokens_used)
+            
+            logger.info(f"Real AI response received: {tokens_used} tokens, ${cost:.4f}, {execution_time:.2f}s")
+            
+            return MockResponse(
+                content=content,
+                model=model,
+                tokens_used=tokens_used,
+                cost=cost,
+                confidence=1.0,  # Real AI responses have full confidence
+                metadata={
+                    "real_ai": True,
+                    "execution_time": execution_time,
+                    "response_id": response.id,
+                    "created": response.created
+                },
+                scenario=MockScenario.SUCCESS  # Real responses are considered "success"
+            )
+            
+        except Exception as e:
+            logger.error(f"Real AI call failed for {validator_id}: {e}")
+            
+            # Return error response in same format
+            return MockResponse(
+                content=json.dumps({
+                    "error": str(e),
+                    "status": "failed",
+                    "validator_id": validator_id
+                }),
+                model=model,
+                tokens_used=0,
+                cost=0.0,
+                confidence=0.0,
+                metadata={"real_ai": True, "error": True},
+                scenario=MockScenario.FAILURE
+            )
         
     async def _record_interaction(self, 
                                 prompt: str, 
@@ -616,6 +698,137 @@ class AIMockManager:
         results["coverage_report"] = self._calculate_mock_coverage()
         
         return results
+        
+    def _calculate_cost(self, model: str, tokens_used: int) -> float:
+        """Calculate approximate cost based on model and token usage"""
+        
+        # Pricing per 1K tokens (approximate, as of 2024)
+        pricing = {
+            "gpt-4": 0.03,
+            "gpt-4-turbo": 0.01,
+            "gpt-3.5-turbo": 0.002,
+            "gpt-3.5-turbo-16k": 0.004
+        }
+        
+        # Default pricing if model not found
+        price_per_1k = pricing.get(model, 0.01)
+        
+        return (tokens_used / 1000) * price_per_1k
+        
+    async def populate_mock_mappings_from_live(self, 
+                                             prompts: List[Dict[str, Any]],
+                                             model: str = "gpt-4") -> Dict[str, Any]:
+        """
+        Populate mock input/output mappings from live AI responses
+        
+        Args:
+            prompts: List of prompt configurations with keys:
+                    - prompt: The actual prompt text
+                    - validator_id: Validator making the request
+                    - content_type: Type of content being validated
+                    - expected_scenario: Expected mock scenario for this prompt
+            model: OpenAI model to use for live calls
+            
+        Returns:
+            Dict with results of the mapping population process
+        """
+        
+        if self.use_mock_mode:
+            logger.warning("Cannot populate from live responses in mock mode. Set OPENAI_API_KEY.")
+            return {"error": "Mock mode active - no API key available"}
+            
+        results = {
+            "total_prompts": len(prompts),
+            "successful_recordings": 0,
+            "failed_recordings": 0,
+            "recordings": [],
+            "errors": []
+        }
+        
+        logger.info(f"Populating mock mappings from {len(prompts)} live AI responses...")
+        
+        for i, prompt_config in enumerate(prompts):
+            try:
+                prompt_text = prompt_config["prompt"]
+                validator_id = prompt_config["validator_id"]
+                content_type = prompt_config["content_type"]
+                expected_scenario = prompt_config.get("expected_scenario", "success")
+                
+                logger.info(f"Recording {i+1}/{len(prompts)}: {validator_id} - {content_type}")
+                
+                # Call real AI
+                response = await self._call_real_ai(prompt_text, validator_id, content_type, model)
+                
+                # Record the interaction
+                await self._record_interaction(prompt_text, response, validator_id, content_type)
+                
+                results["successful_recordings"] += 1
+                results["recordings"].append({
+                    "prompt": prompt_text[:100] + "..." if len(prompt_text) > 100 else prompt_text,
+                    "validator_id": validator_id,
+                    "content_type": content_type,
+                    "tokens_used": response.tokens_used,
+                    "cost": response.cost,
+                    "expected_scenario": expected_scenario,
+                    "recorded_at": datetime.now().isoformat()
+                })
+                
+                self.usage_stats["live_recordings"] += 1
+                
+                # Small delay to avoid rate limiting
+                await asyncio.sleep(0.5)
+                
+            except Exception as e:
+                logger.error(f"Failed to record prompt {i+1}: {e}")
+                results["failed_recordings"] += 1
+                results["errors"].append({
+                    "prompt_index": i,
+                    "error": str(e),
+                    "validator_id": prompt_config.get("validator_id", "unknown")
+                })
+                
+        # Save updated recordings
+        await self._save_all_recordings()
+        
+        logger.info(f"Mock mapping population complete: {results['successful_recordings']} successful, {results['failed_recordings']} failed")
+        
+        return results
+        
+    async def _save_all_recordings(self) -> None:
+        """Save all recorded interactions to disk"""
+        
+        interactions_file = self.mock_data_dir / "recorded_interactions.json"
+        
+        # Convert all interactions to serializable format
+        interactions_data = []
+        for interaction in self.recorded_interactions.values():
+            interaction_data = {
+                "interaction_id": interaction.interaction_id,
+                "request_hash": interaction.request_hash,
+                "prompt": interaction.prompt,
+                "response": {
+                    "content": interaction.response.content,
+                    "model": interaction.response.model,
+                    "tokens_used": interaction.response.tokens_used,
+                    "cost": interaction.response.cost,
+                    "confidence": interaction.response.confidence,
+                    "metadata": interaction.response.metadata,
+                    "timestamp": interaction.response.timestamp.isoformat(),
+                    "scenario": interaction.response.scenario.value
+                },
+                "validator_id": interaction.validator_id,
+                "content_type": interaction.content_type,
+                "timestamp": interaction.timestamp.isoformat(),
+                "real_ai_used": interaction.real_ai_used
+            }
+            interactions_data.append(interaction_data)
+            
+        try:
+            with open(interactions_file, 'w') as f:
+                json.dump(interactions_data, f, indent=2)
+            logger.info(f"Saved {len(interactions_data)} recorded interactions")
+        except Exception as e:
+            logger.error(f"Failed to save recorded interactions: {e}")
 
 
 # Utility functions for easy integration
@@ -633,10 +846,9 @@ def get_mock_config_for_testing() -> Dict[str, Any]:
     """Get recommended mock configuration for testing"""
     
     return {
-        "ai_mock_enabled": True,
         "mock_data_dir": ".libriscribe/mock_data",
         "default_scenario": "success",
-        "record_real_interactions": True,
+        "openai_model": "gpt-4",
         "test_coverage_required": 80.0,
         "scenarios_to_test": [
             "success",
@@ -645,5 +857,37 @@ def get_mock_config_for_testing() -> Dict[str, Any]:
             "failure",
             "partial_failure",
             "edge_case"
+        ],
+        "live_recording_prompts": [
+            {
+                "prompt": "Analyze this chapter for tone consistency and quality",
+                "validator_id": "content_validator",
+                "content_type": "chapter",
+                "expected_scenario": "success"
+            },
+            {
+                "prompt": "Check if this manuscript meets publishing standards",
+                "validator_id": "publishing_standards_validator", 
+                "content_type": "manuscript",
+                "expected_scenario": "success"
+            }
         ]
     }
+
+
+async def populate_mock_data_from_live_responses(mock_manager: AIMockManager,
+                                               config: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Utility function to populate mock data from live AI responses
+    
+    Usage:
+        # Set OPENAI_API_KEY in environment
+        mock_manager = AIMockManager()
+        config = get_mock_config_for_testing()
+        results = await populate_mock_data_from_live_responses(mock_manager, config)
+    """
+    
+    prompts = config.get("live_recording_prompts", [])
+    model = config.get("openai_model", "gpt-4")
+    
+    return await mock_manager.populate_mock_mappings_from_live(prompts, model)

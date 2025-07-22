@@ -1,3 +1,36 @@
+Metadata-Version: 2.4
+Name: scribe-for-You
+Version: 0.1.0
+Summary: Your AI-Powered Book Writing Assistant
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: typer[all]
+Requires-Dist: openai
+Requires-Dist: python-dotenv
+Requires-Dist: pydantic
+Requires-Dist: pydantic-settings
+Requires-Dist: beautifulsoup4
+Requires-Dist: requests
+Requires-Dist: markdown
+Requires-Dist: fpdf
+Requires-Dist: anthropic
+Requires-Dist: google-generativeai
+Requires-Dist: tenacity
+Requires-Dist: rich
+Requires-Dist: pick
+Requires-Dist: PyYAML
+Requires-Dist: langcodes
+Requires-Dist: Jinja2
+Provides-Extra: test
+Requires-Dist: pytest; extra == "test"
+Requires-Dist: pytest-cov; extra == "test"
+Provides-Extra: dev
+Requires-Dist: black; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+Requires-Dist: mypy; extra == "dev"
+Dynamic: license-file
+
 # LibriScribe 📚✨
 
 <div align="center">
@@ -61,9 +94,6 @@ luaotfload-tool -f -u
 For development work, install with additional development and testing dependencies:
 
 ```bash
-# Make sure virtual environment is activated
-source .venv/bin/activate
-
 # Install with development tools (black, ruff, mypy)
 pip install -e ".[dev]"
 
