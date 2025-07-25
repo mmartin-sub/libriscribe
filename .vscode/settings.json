@@ -41,5 +41,17 @@
     "bibtex",
     "biber",
     "texlive"
+  ],
+  "spellright.language": [
+    "en"
+  ],
+  "spellright.documentTypes": [
+    "md",
+    "restructuredtext",
+    "html",
+    "markdown",
+    "latex",
+    "plaintext",
+    "python"
   ]
 }

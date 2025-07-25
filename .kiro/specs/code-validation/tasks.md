@@ -6,12 +6,12 @@
   - _Requirements: 6.1, 6.2, 7.1_
 
 - [ ] 2. Implement Validation Engine
-  - [ ] 2.1 Create ValidationEngine interface and base implementation
+  - [x] 2.1 Create ValidationEngine interface and base implementation
     - Implement initialization logic and configuration loading
     - Create plugin registration mechanism
     - _Requirements: 6.1, 6.2, 7.1, 7.2_
   
-  - [ ] 2.2 Implement Validator interface and abstract base class
+  - [x] 2.2 Implement Validator interface and abstract base class
     - Define common validator functionality
     - Create validation lifecycle hooks
     - _Requirements: 6.1, 6.2, 7.1, 7.2_
@@ -267,3 +267,24 @@
     - Create starter templates for different project types
     - Implement best practice configurations
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
+- [ ] 
+17. Implement LiteLLM Integration with Request ID Tracking
+  - [ ] 17.1 Create request ID generation system
+    - Implement request ID generation using initial request ID and timestamp
+    - Create storage mechanism in book JSON for tracking and mapping
+    - _Requirements: 17.1, 17.2_
+  
+  - [ ] 17.2 Implement "user" field in LLM API calls
+    - Add "user" field to OpenAI SDK calls containing the book request ID
+    - Ensure consistent request ID usage across all LLM interactions
+    - _Requirements: 17.1, 17.4_
+  
+  - [ ] 17.3 Implement AI usage tracking with request ID correlation
+    - Track token usage, API calls, and costs per book project with request ID correlation
+    - Create reporting system for AI consumption patterns by request ID
+    - _Requirements: 17.2, 17.4, 17.6_
+  
+  - [ ] 17.4 Update LiteLLM integration to support request ID tracking
+    - Modify LiteLLMIntegration class to include request ID in all API calls
+    - Ensure proper error handling and retry mechanisms maintain request ID consistency
+    - _Requirements: 17.1, 8.1, 8.4_

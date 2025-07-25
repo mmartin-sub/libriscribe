@@ -44,34 +44,85 @@ LibriScribe harnesses the power of AI to revolutionize your book writing journey
 
 ## 🚀 Quickstart
 
-### 1. Installation
+> 📖 **Need detailed installation instructions?** See our comprehensive [Installation Guide](docs/INSTALLATION.md)
+
+### Prerequisites
+
+LibriScribe uses modern Python tooling for development and dependency management. You'll need:
+
+- **Python 3.9+**
+- **uv** (fast Python package installer)
+- **hatch** (modern Python project manager)
+
+### 1. Install Required Tools
+
+#### Install uv (Fast Python Package Manager)
 
 ```bash
-git clone ...
+# On macOS and Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# On Windows
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Alternative: using pip
+pip install uv
+```
+
+#### Install hatch (Python Project Manager)
+
+```bash
+# Using uv (recommended)
+uv tool install hatch
+
+# Alternative: using pip
+pip install hatch
+```
+
+### 2. Project Installation
+
+#### Quick Installation (End Users)
+
+```bash
+git clone https://github.com/guerra2fernando/libriscribe.git
 cd libriscribe
-python3.12 -m venv .venv
-source .venv/bin/activate
+
+# Install with uv (fastest)
+uv pip install -e .
+
+# Or install with pip
 pip install -e .
-sudo apt install fonts-firacode fonts-ebgaramond fonts-noto fonts-texgyre fonts-noto-color-emoji texlive-luatex texlive-lang-french
-luaotfload-tool -f -u
 ```
 
 #### Development Installation
 
-For development work, install with additional development and testing dependencies:
+For contributors and developers:
 
 ```bash
-# Make sure virtual environment is activated
-source .venv/bin/activate
+git clone https://github.com/guerra2fernando/libriscribe.git
+cd libriscribe
 
-# Install with development tools (black, ruff, mypy)
-pip install -e ".[dev]"
+# Install all development dependencies using hatch
+hatch env create
 
-# Install with testing tools (pytest, pytest-cov)
-pip install -e ".[test]"
+# Or manually with uv
+uv pip install -e ".[all]"
+```
 
-# Install with both development and testing tools
-pip install -e ".[dev,test]"
+#### Font Dependencies (Optional)
+
+For enhanced PDF generation:
+
+```bash
+# Ubuntu/Debian
+sudo apt install fonts-firacode fonts-ebgaramond fonts-noto fonts-texgyre fonts-noto-color-emoji texlive-luatex texlive-lang-french
+luaotfload-tool -f -u
+
+# macOS
+brew install font-fira-code font-eb-garamond
+
+# Windows
+# Download and install fonts manually from Google Fonts
 ```
 
 ### 2. Configuration
@@ -92,25 +143,117 @@ OPENAI_API_KEY=your_api_key_here
 
 ### 3. Launch LibriScribe
 
+#### Using the CLI Command
+
 ```bash
-source .venv/bin/activate
 libriscribe start
 ```
 
+#### Direct Python Execution
+
 ```bash
-source .venv/bin/activate
 python src/libriscribe/main.py
-concept --project-name my_book
-characters --project-name my_book
-worldbuilding  --project-name my_book
-write --project-name my_book --chapter-number 1
-edit --project-name my_book --chapter-number 1
-resume --project-name my_book
+```
+
+#### Quick Commands
+
+```bash
+# Generate concept
+libriscribe concept --project-name my_book
+
+# Create characters
+libriscribe characters --project-name my_book
+
+# Build world
+libriscribe worldbuilding --project-name my_book
+
+# Write chapter
+libriscribe write --project-name my_book --chapter-number 1
+
+# Edit chapter
+libriscribe edit --project-name my_book --chapter-number 1
+
+# Resume project
+libriscribe resume --project-name my_book
 ```
 
 Choose between:
 - 🎯 **Simple Mode:** Quick, streamlined book creation
 - 🎛️ **Advanced Mode:** Fine-grained control over each step
+
+## 🛠️ Development Workflow
+
+LibriScribe uses **hatch** for modern Python project management. Here are the key commands:
+
+### Environment Management
+
+```bash
+# Create development environment
+hatch env create
+
+# Show available environments
+hatch env show
+
+# Remove environment
+hatch env remove default
+```
+
+### Testing
+
+```bash
+# Run tests
+hatch run test
+
+# Run tests with coverage
+hatch run test-cov
+
+# Run specific test file
+hatch run test tests/test_validation_engine.py
+```
+
+### Code Quality
+
+```bash
+# Check code style
+hatch run lint:style
+
+# Run linting
+hatch run lint:lint
+
+# Run type checking
+hatch run lint:typing
+
+# Auto-format code
+hatch run black .
+
+# Auto-fix linting issues
+hatch run ruff check --fix .
+```
+
+### Building and Publishing
+
+```bash
+# Build the package
+hatch build
+
+# Publish to PyPI (maintainers only)
+hatch publish
+```
+
+### Alternative: Using uv directly
+
+If you prefer using uv directly:
+
+```bash
+# Install dependencies
+uv pip install -e ".[all]"
+
+# Run tests
+uv run pytest
+
+# Run with coverage
+uv run pytest --cov=src --cov-report=term-missing
+```
 
 ## 💻 Advanced Usage
 
@@ -127,30 +270,40 @@ python src/libriscribe/main.py start \
 ```
 
 ### Core Commands
+
 ```bash
 # Generate book concept
-python src/libriscribe/main.py concept
+libriscribe concept --project-name my_book
 
 # Create outline
-python src/libriscribe/main.py outline
+libriscribe outline --project-name my_book
 
 # Generate characters
-python src/libriscribe/main.py characters
+libriscribe characters --project-name my_book
 
 # Build world
-python src/libriscribe/main.py worldbuilding
+libriscribe worldbuilding --project-name my_book
 
 # Write chapter
-python src/libriscribe/main.py write-chapter --chapter-number 1
+libriscribe write-chapter --project-name my_book --chapter-number 1
 
 # Edit chapter
-python src/libriscribe/main.py edit-chapter --chapter-number 1
+libriscribe edit-chapter --project-name my_book --chapter-number 1
 
 # Format book
-python src/libriscribe/main.py format
+libriscribe format --project-name my_book
 
 # Validate project
-python src/libriscribe/main.py validate --project-name my_book
+libriscribe validate --project-name my_book
+```
+
+### Alternative: Direct Python Execution
+
+```bash
+# If you prefer using Python directly
+python -m libriscribe.main concept --project-name my_book
+python -m libriscribe.main outline --project-name my_book
+# ... etc
 ```
 
 ## 📁 Project Structure
@@ -166,16 +319,80 @@ your_project/
 └── research_results.md # Research findings
 ```
 
+## 🔧 Troubleshooting
+
+### Installation Issues
+
+#### uv not found
+```bash
+# Make sure uv is in your PATH
+echo $PATH
+
+# Restart your terminal or source your shell profile
+source ~/.bashrc  # or ~/.zshrc
+```
+
+#### hatch not found
+```bash
+# Install hatch globally
+uv tool install hatch
+
+# Or add to PATH if installed locally
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+#### Python version issues
+```bash
+# Check Python version
+python --version
+
+# Use specific Python version with uv
+uv python install 3.11
+uv venv --python 3.11
+```
+
+#### Permission errors
+```bash
+# On Linux/macOS, you might need to make scripts executable
+chmod +x ~/.local/bin/hatch
+chmod +x ~/.local/bin/uv
+```
+
+### Development Issues
+
+#### Tests failing
+```bash
+# Clean environment and reinstall
+hatch env remove default
+hatch env create
+hatch run test
+```
+
+#### Import errors
+```bash
+# Make sure you're in the project root and installed in editable mode
+pip install -e .
+# or
+uv pip install -e .
+```
+
 ## ⚠️ Important Notes
 
 - **API Costs:** Monitor your LLM API usage and spending limits
 - **Content Quality:** Generated content serves as a starting point, not final copy
 - **Review Process:** Always review and edit the AI-generated content
+- **Python Version:** Requires Python 3.9 or higher
+- **Dependencies:** Some features require additional system fonts for PDF generation
 
 
 ## 🔗 Quick Links
 
 - [📚 Documentation](https://guerra2fernando.github.io/libriscribe/)
+- [🚀 Installation Guide](docs/INSTALLATION.md)
+- [🔍 Validation System](docs/validation_system.md)
+- [⚙️ Validation Interfaces API](docs/validation_interfaces_api.md)
+- [🧪 AI Mock System](docs/ai_mock_system.md)
+- [✅ AI Testing Best Practices](docs/ai_testing_best_practices.md)
 - [🐛 Issue Tracker](https://github.com/guerra2fernando/libriscribe/issues)
 - [💡 Feature Requests](https://github.com/guerra2fernando/libriscribe/issues/new)
 - [📖 Wiki](https://github.com/guerra2fernando/libriscribe/wiki)

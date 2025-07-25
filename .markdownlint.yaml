@@ -1,0 +1,24 @@
+# Markdownlint configuration
+# See: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+
+# Disable line length rule for flexibility
+MD013: false
+
+# Allow duplicate headings in different sections
+MD024:
+  siblings_only: true
+
+# Allow inline HTML for complex formatting
+MD033: false
+
+# Allow bare URLs
+MD034: false
+
+# Disable emphasis used instead of header rule
+MD036: false
+
+# Allow multiple spaces after list marker
+MD030: false
+
+# Allow trailing punctuation in headers
+MD026: false

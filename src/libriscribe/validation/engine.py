@@ -3,12 +3,44 @@ Core validation engine implementation.
 
 This module provides the main ValidationEngine implementation that orchestrates
 validation processes and manages validator lifecycle.
+
+The ValidationEngineImpl class is responsible for:
+1. Managing validator registration and lifecycle
+2. Orchestrating validation processes
+3. Aggregating validation results
+4. Handling configuration loading and saving
+5. Auto-discovering validators from the validators package
+
+Example usage:
+    ```python
+    from libriscribe.validation import ValidationEngineImpl, ValidationConfig
+    
+    # Create configuration
+    config = ValidationConfig(project_id="my_book")
+    
+    # Initialize engine
+    engine = ValidationEngineImpl()
+    await engine.initialize(config)
+    
+    # Register validators
+    from libriscribe.validation.validators import ContentValidator
+    content_validator = ContentValidator()
+    await engine.register_validator(content_validator)
+    
+    # Validate project
+    result = await engine.validate_project(project_data, "my_book")
+    ```
 """
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any
+import importlib
+import inspect
+import pkgutil
+from typing import Dict, List, Optional, Any, Type
 from datetime import datetime
+import os
+import yaml
 
 from .interfaces import (
     ValidationEngine,
@@ -21,24 +53,53 @@ from .interfaces import (
     FindingType,
     Severity,
     ValidationError,
-    ValidatorNotFoundError
+    ValidatorNotFoundError,
+    ConfigurationError
 )
+
+from .config import ValidationConfigManager
 
 
 logger = logging.getLogger(__name__)
 
 
 class ValidationEngineImpl(ValidationEngine):
-    """Implementation of the core validation engine"""
+    """
+    Implementation of the core validation engine.
+    
+    This class implements the ValidationEngine interface and provides comprehensive
+    validation capabilities for both book content and system code. It manages validator
+    lifecycle, orchestrates validation processes, and aggregates results.
+    
+    Attributes:
+        config (ValidationConfig): Configuration for the validation engine
+        validators (Dict[str, ValidatorBase]): Dictionary of registered validators
+        active_validations (Dict[str, ValidationResult]): Currently active validation processes
+        _initialized (bool): Whether the engine has been initialized
+        config_manager (ValidationConfigManager): Manager for configuration loading/saving
+    """
     
     def __init__(self):
         self.config: Optional[ValidationConfig] = None
         self.validators: Dict[str, ValidatorBase] = {}
         self.active_validations: Dict[str, ValidationResult] = {}
         self._initialized = False
+        self.config_manager = ValidationConfigManager()
         
     async def initialize(self, config: ValidationConfig) -> None:
-        """Initialize the validation engine with configuration"""
+        """
+        Initialize the validation engine with configuration.
+        
+        This method must be called before using any other methods. It validates
+        the configuration, initializes internal components, and optionally
+        auto-discovers validators.
+        
+        Args:
+            config: Configuration object for the validation engine
+            
+        Raises:
+            ValidationError: If initialization fails
+        """
         try:
             self.config = config
             logger.info(f"Initializing validation engine for project: {config.project_id}")
@@ -49,6 +110,10 @@ class ValidationEngineImpl(ValidationEngine):
             # Initialize internal components
             await self._initialize_components()
             
+            # Auto-discover and register validators if enabled
+            if getattr(config, 'auto_discover_validators', True):
+                await self._discover_validators()
+            
             self._initialized = True
             logger.info("Validation engine initialized successfully")
             
@@ -57,7 +122,15 @@ class ValidationEngineImpl(ValidationEngine):
             raise ValidationError(f"Engine initialization failed: {e}") from e
             
     async def register_validator(self, validator: ValidatorBase) -> None:
-        """Register a validator with the engine"""
+        """
+        Register a validator with the engine.
+        
+        Args:
+            validator: Validator instance to register
+            
+        Raises:
+            ValidationError: If registration fails or engine is not initialized
+        """
         if not self._initialized:
             raise ValidationError("Engine not initialized")
             
@@ -73,9 +146,53 @@ class ValidationEngineImpl(ValidationEngine):
         except Exception as e:
             logger.error(f"Failed to register validator {validator.validator_id}: {e}")
             raise ValidationError(f"Validator registration failed: {e}") from e
+    
+    async def register_validator_class(self, validator_class: Type[ValidatorBase], **kwargs) -> None:
+        """
+        Register a validator class with the engine.
+        
+        Creates an instance of the specified validator class with the provided arguments
+        and registers it with the engine.
+        
+        Args:
+            validator_class: Validator class to instantiate and register
+            **kwargs: Additional keyword arguments to pass to the validator constructor
+            
+        Raises:
+            ValidationError: If registration fails or engine is not initialized
+        """
+        if not self._initialized:
+            raise ValidationError("Engine not initialized")
+            
+        try:
+            # Create validator instance
+            validator = validator_class(**kwargs)
+            
+            # Register the validator
+            await self.register_validator(validator)
+            
+        except Exception as e:
+            logger.error(f"Failed to register validator class {validator_class.__name__}: {e}")
+            raise ValidationError(f"Validator class registration failed: {e}") from e
             
     async def validate_project(self, project_data: Any, project_id: str) -> ValidationResult:
-        """Validate a complete project"""
+        """
+        Validate a complete project.
+        
+        Validates a complete project using all enabled validators. The method runs validators
+        either in parallel or sequentially based on configuration, aggregates results, and
+        determines the final validation status.
+        
+        Args:
+            project_data: Project data to validate (typically a ProjectKnowledgeBase instance)
+            project_id: Unique identifier for the project
+            
+        Returns:
+            ValidationResult: Complete validation result with findings and metrics
+            
+        Raises:
+            ValidationError: If validation fails or engine is not initialized
+        """
         if not self._initialized:
             raise ValidationError("Engine not initialized")
             
@@ -192,6 +309,106 @@ class ValidationEngineImpl(ValidationEngine):
     async def get_registered_validators(self) -> List[Dict[str, str]]:
         """Get list of registered validators"""
         return [validator.get_validator_info() for validator in self.validators.values()]
+    
+    async def load_config_from_file(self, config_path: str) -> ValidationConfig:
+        """
+        Load configuration from a file.
+        
+        Args:
+            config_path: Path to the configuration file (YAML or JSON)
+            
+        Returns:
+            ValidationConfig: Loaded configuration object
+            
+        Raises:
+            ConfigurationError: If the configuration file is not found or invalid
+        """
+        if not os.path.exists(config_path):
+            raise ConfigurationError(f"Configuration file not found: {config_path}")
+            
+        try:
+            with open(config_path, 'r') as f:
+                if config_path.endswith('.json'):
+                    import json
+                    config_dict = json.load(f)
+                else:
+                    config_dict = yaml.safe_load(f)
+                    
+            # Convert dictionary to ValidationConfig
+            config = self.config_manager._dict_to_validation_config(
+                config_dict, 
+                config_dict.get('project_id', '')
+            )
+            
+            return config
+            
+        except Exception as e:
+            logger.error(f"Failed to load configuration from {config_path}: {e}")
+            raise ConfigurationError(f"Configuration loading failed: {e}") from e
+    
+    async def save_config_to_file(self, config: ValidationConfig, config_path: str) -> None:
+        """
+        Save configuration to a file.
+        
+        Args:
+            config: Configuration object to save
+            config_path: Path where the configuration file should be saved
+            
+        Raises:
+            ConfigurationError: If saving the configuration fails
+        """
+        try:
+            # Convert ValidationConfig to dictionary
+            config_dict = {
+                'project_id': config.project_id,
+                'validation_rules': config.validation_rules,
+                'quality_thresholds': config.quality_thresholds,
+                'human_review_threshold': config.human_review_threshold,
+                'enabled_validators': config.enabled_validators,
+                'validator_configs': config.validator_configs,
+                'ai_settings': {
+                    'mock_enabled': config.ai_mock_enabled,
+                    'usage_tracking': config.ai_usage_tracking,
+                    'litellm_config': config.litellm_config
+                },
+                'processing': {
+                    'parallel_processing': config.parallel_processing,
+                    'max_parallel_requests': config.max_parallel_requests,
+                    'request_timeout': config.request_timeout,
+                    'chunk_size_tokens': config.chunk_size_tokens
+                },
+                'output': {
+                    'formats': config.output_formats,
+                    'report_template': config.report_template
+                },
+                'workflow': {
+                    'auto_validate_chapters': config.auto_validate_chapters,
+                    'auto_validate_manuscript': config.auto_validate_manuscript,
+                    'fail_fast': config.fail_fast
+                },
+                'resources': {
+                    'temp_directory': config.temp_directory,
+                    'cleanup_on_completion': config.cleanup_on_completion
+                },
+                'monitoring': {
+                    'health_check_enabled': config.health_check_enabled,
+                    'metrics_collection': config.metrics_collection
+                }
+            }
+            
+            # Write to file
+            with open(config_path, 'w') as f:
+                if config_path.endswith('.json'):
+                    import json
+                    json.dump(config_dict, f, indent=2)
+                else:
+                    yaml.dump(config_dict, f, default_flow_style=False, indent=2)
+                    
+            logger.info(f"Configuration saved to {config_path}")
+            
+        except Exception as e:
+            logger.error(f"Failed to save configuration to {config_path}: {e}")
+            raise ConfigurationError(f"Configuration save failed: {e}") from e
         
     # Private methods
     
@@ -216,6 +433,51 @@ class ValidationEngineImpl(ValidationEngine):
         
         # Initialize other components as needed
         pass
+    
+    async def _discover_validators(self) -> None:
+        """
+        Auto-discover validators in the validators package.
+        
+        This method automatically discovers and registers validator classes from the
+        validators package. It uses reflection to find classes that inherit from
+        ValidatorBase and are not abstract.
+        """
+        try:
+            from . import validators
+            
+            # Get the package path
+            package_path = validators.__path__
+            prefix = validators.__name__ + '.'
+            
+            for _, name, is_pkg in pkgutil.iter_modules(package_path, prefix):
+                if not is_pkg:
+                    try:
+                        # Import the module
+                        module = importlib.import_module(name)
+                        
+                        # Find validator classes in the module
+                        for _, obj in inspect.getmembers(module, inspect.isclass):
+                            if (issubclass(obj, ValidatorBase) and 
+                                obj is not ValidatorBase and 
+                                not inspect.isabstract(obj)):
+                                
+                                # Create and register validator instance
+                                try:
+                                    validator = obj()
+                                    await self.register_validator(validator)
+                                    logger.info(f"Auto-discovered validator: {validator.validator_id}")
+                                except Exception as e:
+                                    logger.warning(f"Failed to register discovered validator {obj.__name__}: {e}")
+                                    
+                    except Exception as e:
+                        logger.warning(f"Error importing validator module {name}: {e}")
+                        
+            logger.info("Validator auto-discovery completed")
+            
+        except ImportError:
+            logger.warning("Validators package not found, skipping auto-discovery")
+        except Exception as e:
+            logger.warning(f"Error during validator auto-discovery: {e}")
         
     def _get_enabled_validators(self) -> List[ValidatorBase]:
         """Get list of enabled validators"""

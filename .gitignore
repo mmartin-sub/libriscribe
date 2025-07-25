@@ -18,3 +18,4 @@ copy_log.txt
 .trunk/
 .trunk/logs/
 test.tex
+.ruff_cache/

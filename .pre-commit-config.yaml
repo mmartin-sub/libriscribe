@@ -1,0 +1,71 @@
+repos:
+  # Basic file quality checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^(projects/|templates/|\.history/)
+      - id: end-of-file-fixer
+        exclude: ^(projects/|templates/|\.history/)
+      - id: check-yaml
+        exclude: ^(projects/|templates/|\.history/)
+      - id: check-toml
+      - id: check-json
+        exclude: ^(projects/|templates/|\.history/)
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: debug-statements
+        exclude: ^(projects/|templates/|\.history/)
+      - id: check-docstring-first
+        exclude: ^(projects/|templates/|\.history/)
+
+  # Python code formatting and linting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4  # Updated to latest version
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        exclude: ^(projects/|templates/|\.history/)
+      - id: ruff-format
+        exclude: ^(projects/|templates/|\.history/)
+
+  # Type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0  # Updated to latest version
+    hooks:
+      - id: mypy
+        exclude: ^(projects/|templates/|\.history/|\.venv/)
+        additional_dependencies: [
+          types-PyYAML,
+          types-requests,
+          types-beautifulsoup4,
+          types-markdown
+        ]
+
+  # Security checks
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.10
+    hooks:
+      - id: bandit
+        args: ['-r', 'src/', '-f', 'json']
+        exclude: ^(projects/|templates/|\.history/|tests/)
+
+  # Documentation checks
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.42.0
+    hooks:
+      - id: markdownlint
+        exclude: ^(projects/|templates/|\.history/)
+        args: ['--fix']
+
+  # Fast tests (optional - uncomment if you want tests to run on commit)
+#  - repo: local
+#    hooks:
+#      - id: pytest-fast
+#        name: pytest-fast
+#       entry: pytest
+#       language: system
+#       args: ['-x', '--tb=short', 'tests/']
+#       pass_filenames: false
+#       always_run: true
