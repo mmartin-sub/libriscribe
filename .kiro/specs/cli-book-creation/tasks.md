@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [ ] 1. Extend existing CLI structure for non-interactive book creation
+- [x] 1. Extend existing CLI structure for non-interactive book creation
 - [x] 1.1 Create new CLI command for non-interactive book creation
   - Add `create-book` command to the existing Typer app
   - Implement all required parameters with proper help text
@@ -12,7 +12,7 @@
   - _Requirements: 1.2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8_
 
 - [ ] 2. Enhance environment configuration
-- [ ] 2.1 Extend environment loading mechanism
+- [-] 2.1 Extend environment loading mechanism
   - Add support for custom .env files via command line
   - Implement additional configuration file support (JSON/YAML)
   - Add support for model configuration in config files
@@ -23,18 +23,18 @@
   - Add configuration for mock mode
   - _Requirements: 5.2, 5.3, 5.4_
 
-- [ ] 3. Create BookCreatorService
-- [ ] 3.1 Implement BookCreatorService class
+- [x] 3. Create BookCreatorService
+- [x] 3.1 Implement BookCreatorService class
   - Create service to handle non-interactive book creation
   - Reuse existing ProjectManagerAgent functionality
   - _Requirements: 1.1, 3.1, 3.2_
 
-- [ ] 3.2 Implement unique folder name generation
+- [x] 3.2 Implement unique folder name generation
   - Create algorithm for generating unique folder names based on title, timestamp, and hash
   - Add support for custom output directories
   - _Requirements: 1.1, 1.4_
 
-- [ ] 3.3 Implement non-interactive book creation workflow
+- [x] 3.3 Implement non-interactive book creation workflow
   - Create ProjectKnowledgeBase from CLI arguments
   - Execute requested book generation steps without user interaction
   - _Requirements: 1.1, 1.4, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7_

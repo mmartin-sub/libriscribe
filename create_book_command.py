@@ -336,7 +336,14 @@ def create_book(
         
         # Load environment configuration
         try:
-            settings = Settings(env_file=env_file)
+            settings = Settings(env_file=env_file, config_file=config_file)
+            
+            # Load model configuration
+            model_config_dict = settings.get_model_config(model_config)
+            if model_config_dict:
+                console.print(f"[cyan]📋 Loaded model configuration with {len(model_config_dict)} entries[/cyan]")
+                logger.info(f"Model configuration: {model_config_dict}")
+            
         except Exception as e:
             console.print(f"[red]Error loading environment configuration: {str(e)}[/red]")
             return EXIT_ENV_CONFIG_ERROR
