@@ -1,0 +1,22 @@
+{
+   "version": "0.2.0",
+       "inputs": [
+        {
+            "id": "programArgs",
+            "type": "promptString",
+            "description": "Enter command-line arguments (e.g., --param value --flag):",
+            "default": ""
+        }
+    ],
+   "configurations": [
+      {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": ["${input:programArgs}"]
+        }
+   ]
+}

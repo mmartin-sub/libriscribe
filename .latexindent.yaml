@@ -1,0 +1,24 @@
+# .latexindent.yaml
+#
+# This file contains configuration for latexindent.pl.
+# For full documentation, see: https://latexindent.com/
+
+# Use 2 spaces for indentation.
+defaultIndent: "  "
+
+# How to indent specific environments.
+indentation:
+  environments:
+    align*: 1
+    document: 1
+
+# Add blank lines before/after sectioning commands for readability.
+modifyLineBreaks:
+  blankLinesBefore:
+    environments:
+      section: 1
+      subsection: 1
+  blankLinesAfter:
+    environments:
+      section: 1
+      subsection: 1

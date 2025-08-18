@@ -1,0 +1,60 @@
+# defaults.yml.j2
+#
+# JINJA2 TEMPLATE for the build configuration.
+# Generates the final defaults.yaml file.
+
+# --- Input/Output & Core Engine ---
+from: markdown+smart
+to: latex
+standalone: true
+pdf-engine: lualatex # Hardcoded for consistency in this template
+pdfa: {{ pdfa | default(true) }}
+
+# --- Document Structure & Class ---
+documentclass: scrbook
+classoption: {{ classoption | default(['twoside', 'open=right']) }}
+koma-options: "{{ koma-options | default('open=right, toc=graduated, numbers=auto, chapterprefix=true') }}"
+
+book: {{ book | default(true) }}
+titlepage: {{ titlepage | default(true) }}
+
+# --- Language Configuration ---
+lang: "{{ lang | default('en') }}"
+dir: "{{ dir | default('ltr') }}"
+
+# --- Font & Typography Configuration ---
+mainfont: "{{ mainfont | default('Noto Serif') }}"
+sansfont: "{{ sansfont | default('Noto Sans') }}"
+monofont: "{{ monofont | default('Noto Sans Mono') }}"
+mathfont: "{{ mathfont | default('Latin Modern Math') }}"
+
+# --- Page Layout & Dimensions ---
+book-width-core: "{{ book-width-core | default('6in') }}"
+book-height-core: "{{ book-height-core | default('9in') }}"
+bleed-amount: "{{ bleed-amount | default('0.125in') }}"
+
+# --- Navigation (TOC, Links) ---
+toc: {{ toc | default(true) }}
+toc-depth: {{ toc-depth | default(3) }}
+colorlinks: {{ colorlinks | default(true) }}
+linkcolor: "{{ linkcolor | default('blue') }}"
+header-left: "{{ title }}" # Pulls title directly for the header
+
+# --- Custom Pages ---
+{% if custom-coverpage is defined and custom-coverpage %}
+custom-coverpage: true
+cover-background-color: "{{ cover-background-color | default('C0C0C0') }}"
+cover-image-path: "{{ cover-image-path }}"
+{% endif %}
+
+{% if custom-lastpage is defined and custom-lastpage %}
+custom-lastpage: true
+lastpage-background-color: "{{ lastpage-background-color | default('EEEEEE') }}"
+lastpage-image-path: "{{ lastpage-image-path }}"
+lastpage-tex-path: "{{ lastpage-tex-path }}"
+{% endif %}
+
+# --- LaTeX header-includes ---
+header-includes:
+  - |
+    \usepackage[final]{microtype}

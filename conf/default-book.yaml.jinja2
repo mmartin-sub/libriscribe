@@ -1,0 +1,154 @@
+---
+# Input format with recommended extensions
+from: markdown+emoji+tex_math_gfm+yaml_metadata_block+latex_macros+smart+auto_identifiers+implicit_figures+table_captions+raw_tex
+
+# Document Metadata
+# Essential information about the book for title pages, PDF properties, and indexing.
+title: "{{ title | default('Titre par défaut') }}"              # Main title of the book (used in PDF title page and headers).
+subtitle: "{{ subtitle | default('Sous-titre par défaut') }}"      # Subtitle (shown under the title).
+author: # Author name(s). Use a list for multiple authors.
+{%- if author is defined and author %}
+{%- for item in author %}
+  - "{{ item }}"
+{%- endfor %}
+{%- else %}
+  - "Auteur inconnu"
+{% endif %}
+date: "{{ date | default('\\today') }}"                   # Publication date. Defaults to the LaTeX command for the current date.
+
+abstract: |
+{% if abstract is defined and abstract %}
+  {{ abstract | indent(2) }}
+{% else %}
+  Résumé par défaut du livre. Ce document est configuré pour une publication professionnelle,
+  prenant en charge le contenu multilingue, les caractères Unicode et les emojis,
+  ainsi que la conformité PDF/A pour l'archivage.
+{% endif %} # Short summary, used in PDF metadata. Use '|' for multi-line strings.
+
+keywords: # List of relevant keywords for indexing and PDF metadata.
+{%- if keywords is defined and keywords %}
+{%- for item in keywords %}
+  - "{{ item }}"
+{%- endfor %}
+{%- else %}
+  - hero
+  - fantasy
+  - imaginaire
+  - multilingual
+  - emoji
+  - PDF/X
+{% endif %}
+subject: "{{ subject | default('PSubject of the book') }}" # Document subject for PDF metadata.
+description: |
+{% if description is defined and description %}
+  {{ description | indent(2) }}
+{% else %}
+  Personalized book
+{% endif %} # Longer description for PDF metadata.
+
+category: "{{ category | default('Non-Fiction') }}"
+publisher: "{{ publisher | default('Auto-édition') }}"
+isbn: "{{ isbn | default('') }}"
+rights: "{{ rights | default('© 2025 Substantifik. All Rights Reserved.') }}"
+
+outline: |
+{%- if outline is defined and outline %}
+  {{ outline | indent(2) }}
+{%- endif %} # Book outline, populated from project data.
+
+# Language Configuration
+lang: "{{ lang | default('fr') }}" # Primary language (IETF BCP 47 tag). Essential for hyphenation.
+dir: "{{ dir | default('ltr') }}"  # Script direction: 'ltr' or 'rtl'.
+
+# LaTeX Engine and Document Class
+pdf-engine: lualatex                   # Essential for robust Unicode and modern font support.
+documentclass: scrbook
+fontsize: "{{ fontsize | default('11pt') }}"
+classoption: "{{ classoption | default(['twoside', 'open=right']) }}" # Options passed to \documentclass.
+koma-options: "{{ koma-options | default('open=right, toc=graduated, numbers=auto, chapterprefix=true') }}" # KOMA-Script specific options.
+
+# Hyperref Colors (Optional)
+# urlcolor: blue
+# linkcolor: blue
+# citecolor: blue
+
+# Core Book Dimensions (defaults to US Trade 6x9 inches with bleed)
+book-width-core: "{{ book-width-core | default('6in') }}"
+book-height-core: "{{ book-height-core | default('9in') }}"
+bleed-amount: "{{ bleed-amount | default('0.125in') }}"
+
+# Bibliography
+bibliography: "{{ bibliography | default('') }}" # Path to your .bib file.
+
+# Chapter Start Control
+chapter-starts-on-right: {{ chapter-starts-on-right | default(true) }} # Ensures chapters start on a recto page.
+
+# PDF/A Compliance
+pdfa: {{ pdfa | default(true) }} # Enable PDF/A-3u for archiving.
+
+# Smart Punctuation
+smart: true # Enables automatic conversion of quotes, dashes, and ellipses.
+
+# Font Configuration (Requires LuaLaTeX and fontspec)
+mainfont: "{{ mainfont | default('Noto Serif') }}"
+#mainfontoptions:
+#  - Ligatures=TeX
+#  - SmallCaps=On
+sansfont: "{{ sansfont | default('Noto Sans') }}"
+monofont: "{{ monofont | default('Noto Sans Mono') }}"
+mathfont: "{{ mathfont | default('Latin Modern Math') }}"
+
+# Table of Contents and Book Structure
+toc: {{ toc | default(true) }}
+toc-title: "{{ toc-title | default('Table des Matières') }}"
+toc-depth: {{ toc-depth | default(1) }}
+toc-own-page: {{ toc-own-page | default(true) }}
+titlepage: {{ titlepage | default(true) }}
+book: {{ book | default(true) }}
+first-chapter: {{ first-chapter | default(1) }}
+
+# Lists of Figures and Tables
+lof: {{ lof | default(false) }}
+lot: {{ lot | default(false) }}
+
+# PDF Link Styling
+colorlinks: {{ colorlinks | default(true) }}
+linkcolor: "{{ linkcolor | default('blue') }}"
+
+# Header and Footer Content
+header-left: "{{ header-left | default('A Book for You') }}"
+footer-right: "{{ footer-right | default('\\\\thepage') }}" # Use '\\thepage' for page number.
+
+# --- Custom Cover Page ---
+{% if custom-coverpage is defined and custom-coverpage %}
+custom-coverpage: true
+cover-background-color: "{{ cover-background-color | default('C0C0C0') }}"
+cover-image-path: "{{ cover-image-path | default('images/my_book_cover.jpg') }}"
+{% else %}
+# To enable a custom cover, set custom-coverpage: true and define other variables.
+{% endif %}
+
+# --- Custom Last Page (Colophon) ---
+{% if custom-lastpage is defined and custom-lastpage %}
+custom-lastpage: true
+lastpage-background-color: "{{ lastpage-background-color | default('EEEEEE') }}"
+lastpage-image-path: "{{ lastpage-image-path | default('images/my_colophon_image.png') }}"
+lastpage-tex-path: "{{ lastpage-tex-path | default('99_backmatter/last_page_colophon.tex') }}"
+{% else %}
+# To enable a custom last page, set custom-lastpage: true and define other variables.
+{% endif %}
+
+# --- LaTeX header-includes ---
+# Inject raw LaTeX into the preamble. This section is intentionally minimal.
+# Complex logic (e.g., geometry, font fallbacks) is best handled directly in the .tex template
+# for better separation of concerns, as reflected in your working version.
+header-includes:
+  - |
+  ```{=latex}
+    \usepackage[final]{microtype} % For improved typography
+  ```
+  # - |
+  #   \usepackage{...} % Add other necessary packages here.
+  #   \newcommand{\mycommand}{...} % Add custom commands here.
+
+---

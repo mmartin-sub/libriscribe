@@ -1,0 +1,38 @@
+{
+    "name": "Project Custom CSpell Settings",
+    "version": "0.2",
+    "language": "en",
+    "dictionaries": [
+        "python",
+        "python-common",
+        "project-words"
+    ],
+    "dictionaryDefinitions": [
+        {
+            "name": "project-words",
+            "path": "./.trunk/custom-dictionary.txt",
+            "addWords": true
+        }
+    ],
+    "languageSettings": [
+        {
+            "languageId": "python",
+            "includeRegExpList": [
+                "CStyleComment",
+                "strings"
+            ]
+        }
+    ],
+    "ignorePaths": [
+        "venv",
+        "build",
+        "dist",
+        "**/*.pyc",
+        "**/__pycache__",
+        "stubs"
+    ],
+    "ignoreRegExpList": [
+        "/https?://[^\\s]+/",
+        "/[0-9a-f]{8,}/"
+    ]
+}

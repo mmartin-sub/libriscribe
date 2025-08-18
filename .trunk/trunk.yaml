@@ -1,0 +1,82 @@
+# This file controls the behavior of Trunk: https://docs.trunk.io/cli
+version: 0.1
+cli:
+  version: 1.24.0
+plugins:
+  sources:
+    - id: trunk
+      ref: v1.7.1
+      uri: https://github.com/trunk-io/plugins
+runtimes:
+  enabled:
+    - node@22
+    - python@3.12
+lint:
+  # Ruff now handles the jobs of black and isort.
+  enabled:
+    - actionlint@1.7.7
+    - bandit@1.8.6
+    # - black@25.1.0  (REMOVED - Replaced by `ruff format`)
+    - checkov@3.2.451
+    - git-diff-check
+    # - isort@6.0.1   (REMOVED - Replaced by `ruff check --fix`)
+    - markdownlint@0.45.0
+    - osv-scanner@2.0.3
+    - oxipng@9.1.5
+    - prettier@3.6.2
+    - ruff@0.12.4
+    - svgo@4.0.0
+    - taplo@0.9.3
+    - trufflehog@3.90.1
+    - yamllint@1.37.1
+
+  # Use `definitions` to configure specific linters. This is cleaner.
+  definitions:
+    - name: ruff
+      # All your custom ruff configuration goes here.
+      ignore:
+        - F401 # 'module' imported but unused
+        - F541 # f-string is missing placeholders
+        # You can add more global ignores here if needed.
+
+    - name: cspell
+      # Add these dictionaries. They are built-in to the cspell plugin.
+      dictionaries:
+        - en_us          # Standard American English
+        - python         # Python keywords and standard library names
+        - softwareTerms  # Terms like 'repo', 'k-v', 'auth', 'dev'
+        - technicalTerms # Terms like 'http', 'api', 'json', 'yaml'
+        - custom-words # Add the name of your custom dictionary here
+      dictionaryDefinitions:
+        - name: custom-words # Define your custom dictionary
+          path: .trunk/custom-dictionary.txt # Path to your dictionary file
+          addWords: true # Allows adding words to this dictionary
+
+      ignorePaths:
+        - "**/poetry.lock"
+        - "**/package-lock.json"
+        - "**/yarn.lock"
+
+# Enable formatters to run on `trunk fmt`.
+fmt:
+  enabled:
+    # Ruff's formatter will handle all Python files.
+    - ruff@0.12.4
+    # Prettier handles most other file types.
+    - prettier@3.6.2
+    - taplo@0.9.3
+
+# It's highly recommended to enable the git hooks for an automated workflow.
+actions:
+  enabled:
+    # Run all linters on changed files before you commit.
+    - trunk-check-pre-commit
+    # Auto-format changed files before you commit.
+    - trunk-fmt-pre-commit
+    # Let Trunk notify you when a new version of a tool is available.
+    - trunk-upgrade-available
+  disabled:
+    - trunk-announce
+    # You can keep pre-push disabled if you prefer faster commits,
+    # but enabling it provides a stronger guarantee before you push code.
+    - trunk-check-pre-push

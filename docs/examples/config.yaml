@@ -1,0 +1,23 @@
+# LibriScribe Configuration File
+# This file contains configuration settings for LibriScribe
+
+# OpenAI Configuration
+openai_api_key: "your-openai-api-key-here"
+openai_base_url: "https://api.openai.com/v1"
+openai_default_model: "gpt-4o-mini"
+
+# General Settings
+default_llm: "openai"
+llm_timeout: 360
+projects_dir: "./projects"
+
+# Model Configuration
+# Specify which model to use for different types of content generation
+models:
+  default: "gpt-4o-mini"      # Default model when none specified
+  outline: "gpt-4o"          # For generating book outlines
+  worldbuilding: "gpt-4o"    # For worldbuilding content
+  chapter: "gpt-4o-mini"     # For writing chapters
+  formatting: "gpt-4o"       # For formatting tasks
+  concept: "gpt-4o-mini"     # For generating book concepts
+  character: "gpt-4o"        # For character generation

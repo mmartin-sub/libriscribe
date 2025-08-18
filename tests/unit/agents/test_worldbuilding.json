@@ -1,0 +1,33 @@
+{
+    "setting": "The International Space Station (ISS) - 2150",
+    "physical_environment": {
+        "location": "Low Earth Orbit, approximately 400 kilometers above Earth's surface",
+        "size": "Massive modular structure spanning over 100 meters in length",
+        "atmosphere": "Controlled artificial environment with Earth-like conditions",
+        "gravity": "Microgravity environment requiring specialized equipment and procedures",
+        "temperature": "Maintained at comfortable 20-25°C (68-77°F) through advanced climate control systems"
+    },
+    "technology_level": {
+        "ai_systems": "Station-wide artificial intelligence managing life support, navigation, and communication",
+        "communication": "Real-time communication with Earth through advanced satellite networks",
+        "scientific_equipment": "Advanced telescopes capable of detecting signals from deep space"
+    },
+    "social_structure": {
+        "crew_hierarchy": "Commander Rodriguez (military authority), Dr. Sarah Chen (lead scientist)",
+        "decision_making": "Collaborative approach with input from all crew members",
+        "cultural_dynamics": "International crew representing multiple countries and cultures"
+    },
+    "political_context": {
+        "international_cooperation": "Station operated by United Nations Space Agency (UNSA)",
+        "military_involvement": "Military presence justified by national security concerns",
+        "economic_factors": "Massive cost of maintaining space station operations"
+    },
+    "historical_context": {
+        "recent_developments": "Humanity's first successful Mars colony established 10 years ago",
+        "ongoing_challenges": "Climate change on Earth driving interest in space colonization"
+    },
+    "cultural_elements": {
+        "language": "English as primary working language, but crew speaks multiple languages",
+        "beliefs": "Strong emphasis on scientific method and evidence-based decision making"
+    }
+}

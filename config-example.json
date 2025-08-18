@@ -1,0 +1,24 @@
+{
+  "openai_api_key": "your-openai-api-key-here",
+  "openai_base_url": "https://api.openai.com/v1",
+  "openai_default_model": "gpt-4o-mini",
+  "default_llm": "openai",
+  "llm_timeout": 360,
+  "projects_dir": "./projects",
+  "hide_generated_by": true,
+  "models": {
+    "default": "gpt-4o-mini",
+    "outline": "gpt-4o",
+    "worldbuilding": "gpt-4o",
+    "chapter": "gpt-4o-mini",
+    "formatting": "gpt-4o",
+    "concept": "gpt-4o-mini",
+    "character": "gpt-4o",
+    "scene_outline": "gpt-4o-mini",
+    "editor": "gpt-4o",
+    "research": "gpt-4o-mini",
+    "scene": "gpt-4o-mini",
+    "keyword_generation": "gpt-4o-mini",
+    "title_generation": "gpt-4o"
+  }
+}

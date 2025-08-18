@@ -1,0 +1,146 @@
+---
+# Set the default Python version for hooks that need it.
+# This ensures consistency for hooks that don't have a repo-specific version.
+default_language_version:
+    python: python3.12
+
+# Force all Python hooks to use Python 3.12
+# This prevents conflicts with system Python versions
+
+repos:
+# print the node version for better debugging
+    - repo: local
+      hooks:
+        - id: node-version
+          name: Check Node.js version
+          entry: node --version
+          language: node
+          stages: [pre-commit]
+
+    # 1. STANDARD CHECKS (whitespace, file endings, syntax)
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v6.0.0  # Updated version
+      hooks:
+        - id: trailing-whitespace
+          exclude: ^stubs/.*
+        - id: end-of-file-fixer
+        - id: check-yaml
+        - id: check-toml
+        - id: check-json
+          # Add this line to exclude the tsconfig.json file
+          exclude: tsconfig\.json$
+        - id: check-added-large-files
+          args: ['--maxkb=1024'] # 1 MB
+        - id: check-merge-conflict
+        - id: check-docstring-first
+          exclude: service\.py$
+        - id: debug-statements
+
+    - repo: https://github.com/whtsky/pre-commit-pretty-format-json5
+      rev: 1.0.0 # Use a specific version tag
+      hooks:
+        - id: pretty-format-json5
+          # Tell this hook to only run on the files you intend to be JSON5
+          files: ^tsconfig\.json$
+#          args: ["--indent", "2", "--no-sort-keys"] # Optional: configure formatting
+
+    # 2. CODE FORMATTING & LINTING (Ruff) - REORDERED FOR OPTIMAL EXECUTION
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      rev: v0.12.8 # Updated version
+      hooks:
+        - id: ruff-format
+          name: "Format with Ruff"
+          args: [--config=pyproject.toml]
+        - id: ruff
+          name: "Lint with Ruff"
+          args: [--fix, --exit-non-zero-on-fix, --config=pyproject.toml]
+
+    # 3. TYPE CHECKING (Mypy) - FIXED CONFIG REFERENCE
+    # Using the official mirror ensures mypy runs in an isolated environment
+    # with the correct Python version to parse your code.
+    - repo: https://github.com/pre-commit/mirrors-mypy
+      rev: v1.17.1 # Updated version
+
+      hooks:
+        - id: mypy
+          # The `language_version` from the top level is respected here.
+          # Add any libraries with type information your project uses.
+          # This is crucial for mypy to find stubs for third-party packages.
+          language_version: python3.12
+          additional_dependencies:
+            [types-PyYAML, types-requests,  types-markdown, types-beautifulsoup4, typer, aiohttp, openai, pydantic, jinja2, langcodes, dotenv, pydantic_settings, autogen_agentchat]
+          pass_filenames: false
+          exclude: ^(\.history/|\.venv/)
+          args: [src]
+          # Removed --config-file=mypy.ini to use pyproject.toml configuration
+
+    # 4. SECURITY CHECKS (Bandit & Detect-Secrets) - FIXED CONFIG
+    - repo: https://github.com/pycqa/bandit
+      rev: 1.8.6 # Updated version
+
+      hooks:
+        - id: bandit
+          language_version: python3.12
+          args: ["-c", "pyproject.toml"] # Now uses pyproject.toml config
+          exclude: ^(tests/|examples/|scripts/)
+          additional_dependencies:
+            - tomli
+
+    - repo: https://github.com/Yelp/detect-secrets
+      rev: v1.5.0
+      hooks:
+        - id: detect-secrets
+          args: ['--baseline', '.secrets.baseline']
+          exclude: \.secrets\.baseline$ # Simplified exclude regex
+
+    # 5. DEAD CODE DETECTION (Vulture) - RE-ENABLED WITH PYTHON VERSION DETECTION
+    - repo: https://github.com/jendrikseipp/vulture
+      rev: v2.14
+      hooks:
+        - id: vulture
+          language_version: python3.12
+          # args: [src, --min-confidence, "92", --ignore-names, "new_config"]
+          exclude:
+            ^(\.venv/|\.git/|\.kiro/|projects/|templates/|\.history/|downloaded_fonts/|book/|fonts/|images/|input/|output/|custom_images/|custom_output/|dev_output/|tests/|build/|dist/)
+          # Force Python 3.12 environment
+          additional_dependencies: []
+
+    - repo: local
+      hooks:
+        - id: pyright
+          name: pyright
+          # The command that pre-commit will execute
+          entry: hatch run pyright
+          language: system
+          types: [python]
+          # Pass the files to the command
+          # This is important so pyright checks only the files staged for commit
+          files: ^src/
+          pass_filenames: false
+
+    # 6. JUPYTER NOTEBOOK CLEANUP
+    - repo: https://github.com/kynan/nbstripout
+      rev: 0.8.1 # Updated version
+      hooks:
+        - id: nbstripout
+
+    # 7. DOCUMENTATION CHECKS
+    - repo: https://github.com/igorshubovych/markdownlint-cli
+      rev: v0.45.0 # Updated version
+      hooks:
+        - id: markdownlint
+          args: ['--fix']
+          exclude: ^(docs/|tests/test-md-error\.md$) # Exclude entire docs folder if needed
+          language_version: "22.2.0" # "22" should work if proper version of pre-commit installed
+
+    # 8. CUSTOM LOCAL SCRIPTS - RE-ENABLED WITH PYTHON VERSION DETECTION
+    - repo: local
+      hooks:
+        - id: pydantic-v1-check
+          name: Check for Pydantic v1 syntax
+          entry: python scripts/check_pydantic_v1.py
+          language: python
+          language_version: python3.12
+          types: [python]
+          pass_filenames: true
+          description: "Prevent Pydantic v1 syntax from being committed"

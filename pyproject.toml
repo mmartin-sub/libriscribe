@@ -1,0 +1,325 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "libriscribe2"
+# version = "0.0.1"
+dynamic = ["version"]
+description = "Modern book creation CLI with rich output and type safety."
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    {name = "Michel Martin", email = "172776424+mmartin-sub@users.noreply.github.com"},
+    ]
+maintainers = [
+    {name = "Michel Martin", email = "172776424+mmartin-sub@users.noreply.github.com"},
+    ]
+license = {file = "LICENSE"}
+keywords = ["book", "writing", "ai", "llm", "publishing", "cli"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "rich",
+    "pydantic>=2.11.0",
+    "pydantic-settings",
+    "python-dotenv",
+    "langcodes",
+    "tenacity",
+    "openai>=1.97.0",
+    "typer",
+    "fpdf",
+    "pyjson5>=1.6", # for user input
+    "autogen-agentchat>=0.7.2",
+    "autogen-ext[openai]",
+    "pyyaml>=6.0.2",
+    "requests>=2.32.4",
+    "beautifulsoup4>=4.13.4",
+    "aiohttp>=3.12.0",
+    "mistletoe>=1.4.0",
+    "jinja2",
+]
+
+[project.urls]
+Homepage = "https://github.com/mmartin-sub/libriscribe"
+Documentation = "https://github.com/mmartin-sub/libriscribe"
+Repository = "https://github.com/mmartin-sub/libriscribe"
+Issues = "https://github.com/mmartin-sub/libriscribe/issues"
+
+[project.scripts]
+libriscribe2 = "libriscribe2.cli:app"
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "pytest-asyncio>=1.1.0",
+]
+dev = [
+    "libriscribe2[test]",
+    # Core Dev Tools
+    "ruff>=0.5.0",
+    "bandit",
+    "detect-secrets",
+    # Legacy Tools (kept for pre-commit compatibility)
+    "mypy>=1.10.0",
+
+    "toml", # needed to generate the stubs
+    "packaging", # Add this line
+    "requests", # part of the std deps but still needed for dev
+
+    "vulture>=2.11",
+    # Future-facing Type Checker
+    "pyright",
+    "mypy",
+    # Type Stubs
+    "types-PyYAML",
+    "types-requests",
+    "types-beautifulsoup4",
+    "types-fpdf2",
+    "types-jinja2",
+    "types-toml",
+]
+
+all = [
+    "libriscribe2[test,dev]", # even if dev includes test
+]
+# so you can use:
+# hatch env remove/prune
+# hatch env create
+# hatch shell
+# uv sync --extra all
+
+# --- HATCH CONFIGURATION ---
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/libriscribe2"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    ".trunk/", ".git/", ".kiro/", "book/", "*.log", "test_*", "__pycache__/",
+    "*.pyc", ".pytest_cache/", ".mypy_cache/", ".ruff_cache/",
+]
+
+[tool.hatch.envs.default]
+# very important
+dev-mode = true
+
+extras = ["test", "dev"]
+path = ".venv"
+installer = "uv"
+python = "3.12"
+
+# This forces Hatch to use the stable pip-based editable install,
+# which correctly uses your hatchling backend and avoids the uv build conflict.
+dev-mode-builder = "pip"
+
+# This section enables the `hatch fmt` command.
+[tool.hatch.formatting]
+format.dependencies = ["ruff>=0.5.0"]
+format.command = "ruff format {args:.}"
+
+fix.dependencies = ["ruff>=0.5.0"]
+fix.command = "ruff check --fix {args:.}"
+
+[tool.hatch.envs.default.scripts]
+check = [
+    "lint-check",
+    "format-check",
+    "types-pyright", # Using Pyright as the main type checker
+    "security",
+]
+# Run all tests with coverage
+test = "pytest {args:tests/}"
+test-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=src {args:tests/}"
+
+# --- Formatting & Linting (Ruff) ---
+format = "ruff format {args:.}"
+format-check = "ruff format --check {args:.}"
+lint = "ruff check --fix {args:.}"
+lint-check = "ruff check {args:.}"
+fix-imports = "ruff check --select F401 --fix ."
+
+# This script cleans and regenerates all type stubs.
+# Usage: hatch run stubs:update
+# Checks for community-maintained stubs on PyPI
+stubs-check = "python scripts/update-stubs.py check"
+
+# --i.e. hatch run python scripts/update-stubs.py generate --only autogen_agentchat
+# generate is too broad and some libs are causing issues
+stubs-generate = "python scripts/update-stubs.py generate"
+
+# --- Type Checking ---
+types-pyright = "pyright {args:.}"
+types-mypy = "mypy src"
+
+# --- Other Checks ---
+security = "bandit -c pyproject.toml ."
+# Legacy: Vulture (functionality is being integrated into Ruff, kept for pre-commit)
+dead-code = "vulture src tests"
+
+# --- Package Management (uv) ---
+check-updates = "uv pip list --outdated"
+detect-secrets-scan = "detect-secrets scan --baseline .secrets.baseline"
+detect-secrets-audit = "detect-secrets audit .secrets.baseline"
+
+# --- RUFF CONFIGURATION ---
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+extend-exclude = [".history", "stubs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "B", "C4", "UP", "RUF"]
+ignore = ["B008", "B904", "E501", "RUF022"]
+fixable = ["ALL"]
+allowed-confusables = ["ℹ"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["libriscribe2"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["B007", "B017", "F841",  "F401", "E501", "RUF002", "RUF003"]
+"examples/**/*.py" = ["B007", "B017", "F841",  "F401", "E501", "RUF002", "RUF003"]
+"scripts/**/*.py" = ["B007", "B017", "F841",  "F401", "E501"]
+"docs/examples/**/*.py" = ["B007", "B017", "F841",  "F401", "E501", "RUF002", "RUF003"]
+"**/__init__.py" = ["F401"]
+
+"stubs/**/*.py*" = ["B007", "B017", "F841",  "F401", "E501", "RUF002", "RUF003", "F405"] # should not be tested
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+exclude = [".venv", "build", "dist", ".trunk", "docs", "stubs"]
+
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+warn_unused_configs = true
+warn_no_return = true
+warn_unreachable = false
+
+check_untyped_defs = true
+
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_decorators = false
+no_implicit_optional = false
+
+strict_equality = true
+show_error_codes = true
+allow_redefinition = true
+allow_untyped_globals = true
+
+[[tool.mypy.overrides]]
+module = [
+    "fpdf.*", "tenacity.*", "mistletoe.*",
+    "autogen.*",
+    "autogen_ext.*",
+    "autogen_agentchat.*",
+    ## More for other projects we we want to consolidate
+    "fitz.*",
+    "PIL.*",
+    "reportlab.*",
+    "rich.*",
+    "json5.*",
+    "pytest.*",
+    "psd_tools.*",
+    "fontTools.*",
+    "psutil.*",
+    "jsonschema.*",
+    "defusedxml.*",
+    "wand.*",
+    "pytesseract.*",
+    "tomllib.*",
+    "plumbum.*",
+    ]
+ignore_missing_imports = true
+
+# --- PREFERRED: PYRIGHT CONFIGURATION ---
+[tool.pyright]
+pythonVersion = "3.12"
+include = ["src", "tests"]
+exclude = [".venv", "build", "dist", "**/__pycache__", ".trunk", "docs", "stubs"]
+typeCheckingMode = "standard" # Changed from "basic", could be "strict"
+reportMissingImports = true
+reportMissingTypeStubs = false
+reportPossiblyUnboundVariable = false
+reportUnboundVariable = false
+reportCallIssue = false # error: Object of type "object" is not callable - false positive
+
+# Create a directory named "typings" or "stubs" in your project root.
+# This is where your generated stubs will live.
+stubPath = "stubs"
+
+# --- LEGACY: VULTURE CONFIGURATION ---
+[tool.vulture]
+# The higher minimum confidence level from your second hook.
+min_confidence = 92
+
+# Sort unused code by size.
+sort_by_size = true
+
+# Combined and refined list of paths to scan.
+# .vulture_whitelist is included here to be checked by Vulture.
+paths = ["src", "tests", "scripts", "examples", ".vulture_whitelist"]
+
+# A merged list of exclusion patterns for Vulture's analysis.
+exclude = [
+    "*/migrations/*",
+    "*/venv/*",
+    "*/__pycache__/*",
+    "*/.git/*",
+    "*/node_modules/*",
+    "*/.mypy_cache/*",
+    "*/.ruff_cache/*",
+    "*/.pytest_cache/*",
+    "build/",
+    "dist/",
+    # ,"scripts"
+]
+
+# Combined list of names to ignore.
+ignore_names = [
+    "_*",
+    "test_*",
+    "Test*",
+    "setUp*",
+    "tearDown*",
+    "Mock*",
+    "mock_*",
+    "fixture_*",
+    "new_config",
+]
+
+# List of decorators to ignore.
+ignore_decorators = [
+    "@app.route",
+    "@pytest.fixture",
+    "@click.command",
+    "@typer.command",
+    "@contextmanager",
+]
+
+# --- PYTEST CONFIGURATION ---
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -q --strict-markers"
+asyncio_mode = "auto"
+norecursedirs = ["tests/utils"]
+
+# --- BANDIT CONFIGURATION ---
+[tool.bandit]
+exclude_dirs = ["tests", ".venv"]
+skips = ["B101"]

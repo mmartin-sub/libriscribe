@@ -1,0 +1,19 @@
+# Bandit configuration file
+# This file configures Bandit security checks for the project
+
+# Skip specific tests that are false positives or acceptable in this context
+skips: ['B101', 'B404', 'B603']
+
+# Exclude directories and files
+exclude_dirs: ['tests', 'examples', 'docs', '.history', '.git', 'projects', 'examples']
+# Set severity level (low, medium, high)
+severity: medium
+
+# Set confidence level (low, medium, high)
+confidence: medium
+
+# Output format
+output_format: screen
+
+# Number of processes to use
+processes: 1

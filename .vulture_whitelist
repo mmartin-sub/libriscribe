@@ -1,0 +1,8 @@
+# Error handling patterns
+_.error
+_.exception
+_.warning
+_.info
+_.debug
+_.log
+_.logger

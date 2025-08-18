@@ -1,0 +1,172 @@
+% ===================================================================
+% KOMA-SCRIPT PANDOC TEMPLATE - DEFINITIVE, WORKING VERSION
+% ===================================================================
+
+% --- Document Class & KOMA-Script Options ---
+\documentclass[$if(fontsize)$$fontsize$,$endif$$for(classoption)$$classoption$$sep$,$endfor$]{scrbook}
+$if(koma-options)$\KOMAoptions{$koma-options$}$endif$
+
+% ===================================================================
+% PREAMBLE: STABLE PACKAGE LOADING AND CONFIGURATION
+% ===================================================================
+
+% 1. Core Utilities, KOMA Page Styles
+\usepackage{calc}
+\usepackage{scrlayer-scrpage} % For headers/footers on main pages.
+
+\usepackage{pdftexcmds}      % MUST be loaded to provide \pdfmajorversion for LuaLaTeX.
+
+% 2. Geometry and Printer-Specific Setup
+$if(printer-profile)$
+  \def\LuluBookWidthCore{$book-width-core$}
+  \def\LuluBookHeightCore{$book-height-core$}
+  \def\LuluBindingType{$binding-type$}
+  \input{$printer-profile$}
+$else$
+  \usepackage[a4paper, margin=1in]{geometry}
+  \usepackage{etoolbox}
+$endif$
+
+
+% 7. PDF VERSIONING HOOK
+% THIS IS THE FINAL, CORRECT SOLUTION. The \AtBeginDocument hook ensures
+% these commands run after all packages are loaded but before the document
+% body begins, resolving all timing and engine-specific issues.
+$if(use-legacy-pdf-version)$
+  \AtBeginDocument{%
+    \pdfmajorversion=1
+    \pdfminorversion=4
+  }
+$endif$
+% 6. PDF Compliance and Hyperlinks
+$if(pdfa)$
+  \usepackage[$if(pdfx-standard)$$pdfx-standard$$else$x-3$endif$]{pdfx}
+$else$
+  \usepackage{hyperref}
+  \hypersetup{
+    final,
+    colorlinks=$if(colorlinks)$$colorlinks$$else$true$endif$,
+    urlcolor=$if(urlcolor)$$urlcolor$$else$blue$endif$,
+    linkcolor=$if(linkcolor)$$linkcolor$$else$blue$endif$,
+    citecolor=$if(citecolor)$$citecolor$$else$blue$endif$,
+    breaklinks=true,
+    bookmarksnumbered=true,
+    bookmarksopen=true
+  }
+$endif$
+
+% 3. Graphics, Fonts, Color, and Typography Packages
+\usepackage[HTML]{xcolor}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\usepackage[final]{microtype}
+\usepackage{csquotes}
+
+% 4. Font and Language Setup
+\setmainfont[$for(mainfontoptions)$$mainfontoptions$$sep$,$endfor$]{$mainfont$}
+$if(sansfont)$\setsansfont[$for(sansfontoptions)$$sansfontoptions$$sep$,$endfor$]{$sansfont$}$endif$
+$if(monofont)$\setmonofont[$for(monofontoptions)$$monofontoptions$$sep$,$endfor$]{$monofont$}$endif$
+$if(mathfont)$\usepackage{unicode-math}\setmathfont{$mathfont$}$endif$
+\setdefaultlanguage{$lang$}
+$if(otherlangs)$\setotherlanguages{$otherlangs$}$endif$
+
+% 5. Custom Definitions, Headers, and Footers
+$if(custom-coverpage)$
+  $if(cover-background-color)$\definecolor{coverbgcolor}{HTML}{$cover-background-color$}$endif$
+$endif$
+$if(custom-lastpage)$
+  $if(lastpage-background-color)$\definecolor{lastpagebgcolor}{HTML}{$lastpage-background-color$}$endif$
+$endif$
+
+\clearpairofpagestyles
+\ihead{\usekomafont{pageheadfoot}$if(header-left)$$header-left$$endif$}
+\ohead{\usekomafont{pageheadfoot}$if(header-right)$$header-right$$endif$}
+\ifoot*{\usekomafont{pageheadfoot}$if(footer-left)$$footer-left$$endif$}
+\ofoot*{\usekomafont{pageheadfoot}$if(footer-right)$$footer-right$$endif$}
+\setkomafont{pageheadfoot}{\normalfont\small\sffamily}
+
+
+\usepackage{bookmark}
+
+% 8. User-defined Header Includes (for custom highlighting, etc.)
+$for(header-includes)$
+$header-includes$
+$endfor$
+
+% ===================================================================
+% DOCUMENT METADATA
+% ===================================================================
+$if(title)$\title{$title$}$endif$
+$if(subtitle)$\subtitle{$subtitle$}$endif$
+$if(author)$\author{$for(author)$$author$$sep$ \and $endfor$}$endif$
+$if(date)$\date{$date$}$endif$
+$if(rights)$\publishers{$rights$}$endif$
+$if(subject)$\subject{$subject$}$endif$
+
+% ===================================================================
+% DOCUMENT BODY
+% ===================================================================
+\begin{document}
+
+% --- Custom Cover Page ---
+$if(custom-coverpage)$
+  \thispagestyle{empty}
+  $if(cover-background-color)$
+    % This part is correct, using KOMA-Script's layer command.
+    \AddToShipoutPicture*{\AtPageLowerLeft{\color{coverbgcolor}\rule{\paperwidth}{\paperheight}}}
+  $endif$
+  $if(cover-image-path)$
+    % CORRECTED LINE:
+    % Replaced the conflicting \ULCorner command with the KOMA-Script equivalent, \AtPageUpperLeft.
+    % This ensures we stay within the same package ecosystem for page layers.
+    \AddToShipoutPicture*{\AtPageUpperLeft{\includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio=false]{$cover-image-path$}}}
+  $endif$
+  \begin{titlepage}
+    \centering
+    \vfill
+    {\usekomafont{title}\Huge $title$\par}
+    \vspace{1cm}
+    {\usekomafont{subtitle}\Large $subtitle$\par}
+    \vfill
+    {\usekomafont{author}\LARGE $for(author)$$author$$sep$ \and $endfor$\par}
+    \vfill
+  \end{titlepage}
+$else$
+  $if(titlepage)$\maketitle$endif$
+$endif$
+
+% --- Front Matter ---
+\frontmatter
+$if(toc)$\tableofcontents$endif$
+$if(lof)$\listoffigures$endif$
+$if(lot)$\listoftables$endif$
+
+% --- Main Content ---
+\mainmatter
+$if(chapter-starts-on-right)$\preto\chapter{\cleardoublepage}$endif$
+
+$body$
+
+% --- Back Matter ---
+\backmatter
+$if(bibliography)$
+  \printbibliography
+$endif$
+
+% --- Custom Last Page (Colophon) ---
+$if(custom-lastpage)$
+  \cleardoublepage
+  \thispagestyle{empty}
+  $if(lastpage-background-color)$
+    \AddToShipoutPicture*{\AtPageLowerLeft{\color{lastpagebgcolor}\rule{\paperwidth}{\paperheight}}}
+  $endif$
+  $if(lastpage-image-path)$
+    \AddToShipoutPicture*{\ULCorner{\includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio=false]{$lastpage-image-path$}}}
+  $endif$
+  $if(lastpage-tex-path)$\input{$lastpage-tex-path$}$endif$
+  \clearpage
+$endif$
+
+\end{document}

@@ -1,0 +1,19 @@
+# Credits
+
+## Original Work
+- **Fernando Guerra** - Initial implementation and foundational work on the original LibriScribe project
+
+## LibriScribe2 Development
+This project (LibriScribe2) builds upon Fernando Guerra's original LibriScribe work with significant extensions, architectural improvements, and interface changes. LibriScribe2 is a distinct project that allows Fernando Guerra to maintain control over the original project's release and development without conflicts.
+
+### Key Differences from Original LibriScribe:
+- Enhanced multi-agent architecture
+- Improved validation system
+- Modern CLI interface
+- Advanced configuration management
+- Comprehensive testing framework
+- Updated dependencies and tooling
+
+## Current Development Team
+- **Lenxys** - Lead development and architectural improvements
+- **Michel Martin** - Core development and system enhancements

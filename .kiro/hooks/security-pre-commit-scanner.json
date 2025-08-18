@@ -1,0 +1,26 @@
+{
+  "name": "Security Pre-Commit Scanner",
+  "description": "Review changed files for potential security issues including API keys, tokens, credentials, and other sensitive data",
+  "trigger": {
+    "type": "file_change",
+    "patterns": ["**/*"],
+    "excludePatterns": [
+      "**/.git/**",
+      "**/node_modules/**",
+      "**/.venv/**",
+      "**/__pycache__/**",
+      "**/*.log",
+      "**/.history/**",
+      "**/.trunk/**"
+    ]
+  },
+  "request": {
+    "prompt": "You are a security scanner reviewing code changes for potential security vulnerabilities. Please analyze the changed files for the following security issues:\n\n1. **API Keys & Tokens**: Look for API keys, access tokens, or authentication credentials in source code\n2. **Private Keys**: Check for private keys, certificates, or cryptographic secrets\n3. **Encryption Keys**: Scan for encryption keys, certificates, or security tokens\n4. **Authentication Data**: Identify authentication tokens, session IDs, or login credentials\n5. **Configuration Secrets**: Flag passwords or secrets in configuration files (.env, .yaml, .json, .xml)\n6. **Sensitive IPs**: Detect IP addresses that may contain sensitive internal network information\n7. **Internal URLs**: Find hardcoded internal URLs that shouldn't be exposed\n8. **Database Credentials**: Spot database connection strings, usernames, or passwords\n\nFor each security issue found:\n- **Highlight the specific security risk** and explain why it's dangerous\n- **Suggest a secure alternative approach** (environment variables, secret management, etc.)\n- **Recommend security best practices** for handling this type of sensitive data\n\nIf no security issues are found, provide a brief confirmation that the files appear secure.\n\nFocus on practical, actionable security advice that helps developers fix issues immediately.",
+    "includeContext": {
+      "changedFiles": true,
+      "gitDiff": true
+    }
+  },
+  "enabled": true,
+  "autoRun": false
+}

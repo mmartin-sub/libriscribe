@@ -1,0 +1,9 @@
+{
+  "default": "gpt-4o-mini",
+  "outline": "gpt-4o",
+  "worldbuilding": "gpt-4o",
+  "chapter": "gpt-4o-mini",
+  "formatting": "gpt-4o",
+  "concept": "gpt-4o-mini",
+  "character": "gpt-4o"
+}

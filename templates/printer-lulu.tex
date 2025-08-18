@@ -1,0 +1,85 @@
+% ===================================================================
+% PRINTER PROFILE: LULU.COM (v4 - Final, Corrected)
+%
+% PURPOSE:
+%   - This file NO LONGER reads Pandoc variables directly.
+%   - It uses macros (\LuluBookWidthCore, \LuluBindingType) that
+%     MUST be defined in the main template before this file is input.
+% ===================================================================
+
+% 1. Load essential packages.
+\RequirePackage{etoolbox}
+\RequirePackage{lastpage}
+\RequirePackage{refcount}
+\RequirePackage{geometry}
+
+% 2. Define Lulu's fixed specifications.
+\newlength{\luluBleedAmount}
+\setlength{\luluBleedAmount}{0.125in}
+\newlength{\luluOuterSafetyMargin}
+\setlength{\luluOuterSafetyMargin}{0.5in}
+
+% 3. Calculate the full bleed paper size using the passed-in macros.
+\newlength{\bookwidthcore}
+\newlength{\bookheightcore}
+\setlength{\bookwidthcore}{\LuluBookWidthCore}   % <-- USES THE MACRO
+\setlength{\bookheightcore}{\LuluBookHeightCore} % <-- USES THE MACRO
+
+\newlength{\calculatedpaperwidth}
+\newlength{\calculatedpaperheight}
+\setlength{\calculatedpaperwidth}{\dimexpr\bookwidthcore + 2\luluBleedAmount\relax}
+\setlength{\calculatedpaperheight}{\dimexpr\bookheightcore + 2\luluBleedAmount\relax}
+
+% 4. Defer the final geometry setup.
+\AtBeginDocument{%
+  \newlength{\luluGutterMargin}
+
+  % === DYNAMIC GUTTER LOGIC ===
+  % This now uses the \LuluBindingType macro.
+
+  % --- HARDCOVER GUTTER REQUIREMENTS ---
+  \ifstrequal{\LuluBindingType}{hardcover}{% % <-- USES THE MACRO
+    \ifnum\getrefnumber{LastPage}>500
+      \setlength{\luluGutterMargin}{1.175in}%
+    \else
+      \ifnum\getrefnumber{LastPage}>300
+        \setlength{\luluGutterMargin}{1.05in}%
+      \else
+        \ifnum\getrefnumber{LastPage}>150
+          \setlength{\luluGutterMargin}{0.925in}%
+        \else
+          \setlength{\luluGutterMargin}{0.8in}%
+        \fi
+      \fi
+    \fi
+  }{}%
+
+  % --- PAPERBACK GUTTER REQUIREMENTS ---
+  \ifstrequal{\LuluBindingType}{paperback}{% % <-- USES THE MACRO
+    \ifnum\getrefnumber{LastPage}>500
+      \setlength{\luluGutterMargin}{0.875in}%
+    \else
+      \ifnum\getrefnumber{LastPage}>300
+        \setlength{\luluGutterMargin}{0.75in}%
+      \else
+        \ifnum\getrefnumber{LastPage}>150
+          \setlength{\luluGutterMargin}{0.625in}%
+        \else
+          \setlength{\luluGutterMargin}{0.5in}%
+        \fi
+      \fi
+    \fi
+  }{}%
+
+  % 5. Apply the final geometry.
+  \geometry{
+    paperwidth=\calculatedpaperwidth,
+    paperheight=\calculatedpaperheight,
+    top=\dimexpr\luluBleedAmount + \luluOuterSafetyMargin\relax,
+    bottom=\dimexpr\luluBleedAmount + \luluOuterSafetyMargin\relax,
+    outer=\dimexpr\luluBleedAmount + \luluOuterSafetyMargin\relax,
+    inner=\dimexpr\luluBleedAmount + \luluGutterMargin\relax,
+    includehead,
+    includefoot
+  }
+}

@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'LibriScribe',
+  title: 'LibriScribe2',
   tagline: 'Your AI-Powered Book Writing Assistant',
   favicon: 'img/favicon.ico',
 
@@ -13,12 +13,12 @@ const config: Config = {
   url: 'https://guerra2fernando.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/libriscribe/',
+  baseUrl: '/libriscribe2/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'guerra2fernando', // Usually your GitHub org/user name.
-  projectName: 'libriscribe', // Usually your repo name.
+  projectName: 'libriscribe2', // Usually your repo name.
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -40,7 +40,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/guerra2fernando/libriscribe/tree/main/docs/',
+            'https://github.com/guerra2fernando/libriscribe2/tree/main/docs/',
         },
         blog: {
           showReadingTime: true,
@@ -51,7 +51,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/guerra2fernando/libriscribe/tree/main/docs/',
+            'https://github.com/guerra2fernando/libriscribe2/tree/main/docs/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
@@ -67,13 +67,13 @@ const config: Config = {
   themeConfig: {
     // Replace with your project's social card
     image: 'img/libriscribe-social-card.jpg',
-    navbar: {
-      title: 'LibriScribe',
-      logo: {
-        alt: 'LibriScribe Logo',
-        src: 'img/logo.png',
+          navbar: {
+        title: 'LibriScribe2',
+        logo: {
+          alt: 'LibriScribe2 Logo',
+          src: 'img/logo.png',
+        },
       },
-    },
     footer: {
       style: 'dark',
       links: [

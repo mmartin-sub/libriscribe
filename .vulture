@@ -1,0 +1,47 @@
+# Vulture Configuration - Intentional Unused Variables
+# This file defines patterns for variables that are intentionally unused but required by design
+
+# =============================================================================
+# INTERFACE CONTRACT PARAMETERS
+# =============================================================================
+# These parameters are required by interface contracts but not always used by implementations
+# They maintain interface flexibility and future-proofing
+
+# Configuration change callbacks (standard pattern where old_config may not be used)
+_old_config
+
+# Resource management interface parameters (required by contract)
+_knowledge_base_path
+_workspace_path
+_workspace
+
+# =============================================================================
+# CALLBACK AND EXCEPTION HANDLING PATTERNS
+# =============================================================================
+# Standard callback parameters that follow Python conventions
+
+# Async context manager exception parameters (standard __aexit__ signature)
+_exc_type
+_exc_val
+_exc_tb
+
+# Exception handling callback parameters
+_exc_traceback
+
+# =============================================================================
+# ABSTRACT BASE CLASS PATTERNS
+# =============================================================================
+# Parameters required by abstract interfaces but not always used by implementations
+
+# Generic callback parameters that may not be used in all implementations
+_callback_param
+_context_param
+
+# =============================================================================
+# TESTING PATTERNS
+# =============================================================================
+# Test-specific parameters that are intentionally unused
+
+# Mock object parameters that are required by interface but not used in tests
+_mock_param
+_test_param
