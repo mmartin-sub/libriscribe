@@ -69,7 +69,7 @@ LibriScribe2 uses modern Python tooling for development and dependency managemen
 
 ### Installation
 
-For detailed installation instructions, see our comprehensive [Installation Guide](INSTALL.md).
+For detailed installation instructions for both users and developers, see our comprehensive [Installation Guide](INSTALL.md).
 
 ### Configuration
 

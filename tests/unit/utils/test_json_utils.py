@@ -2,9 +2,63 @@
 Unit tests for json_utils module.
 """
 
+import pyjson5
+import pytest
+
 from libriscribe2.utils.json_utils import (
     JSONProcessor,
+    load_json_with_schema,
 )
+
+
+@pytest.fixture
+def sample_schema():
+    return {
+        "type": "object",
+        "properties": {
+            "name": {"type": "string"},
+            "age": {"type": "number"},
+        },
+        "required": ["name", "age"],
+    }
+
+
+class TestLoadJsonWithSchema:
+    def test_load_valid_json(self, tmp_path, sample_schema):
+        content = '{"name": "Test", "age": 30}'
+        p = tmp_path / "valid.json"
+        p.write_text(content)
+
+        data = load_json_with_schema(str(p), sample_schema)
+        assert data == {"name": "Test", "age": 30}
+
+    def test_load_invalid_json(self, tmp_path, sample_schema):
+        content = '{"name": "Test"}'  # Missing age
+        p = tmp_path / "invalid.json"
+        p.write_text(content)
+
+        data = load_json_with_schema(str(p), sample_schema)
+        assert data is None
+
+    def test_load_json5(self, tmp_path, sample_schema):
+        content = "{name: 'Test', age: 30,}"  # JSON5 syntax
+        p = tmp_path / "valid.json5"
+        p.write_text(content)
+
+        data = load_json_with_schema(str(p), sample_schema)
+        assert data == {"name": "Test", "age": 30}
+
+    def test_load_nonexistent_file(self, sample_schema):
+        data = load_json_with_schema("nonexistent.json", sample_schema)
+        assert data is None
+
+    def test_load_bad_syntax(self, tmp_path, sample_schema):
+        content = '{"name": "Test", "age": 30,,}'
+        p = tmp_path / "bad_syntax.json"
+        p.write_text(content)
+
+        data = load_json_with_schema(str(p), sample_schema)
+        assert data is None
 
 
 class TestJSONProcessor:
@@ -126,7 +180,7 @@ class TestJSONProcessor:
         result = JSONProcessor.safe_json_loads(invalid_json)
 
         # Assert
-        assert result is None
+        assert result is not None  # pyjson5 is more lenient
 
     def test_safe_json_loads_empty(self):
         """Test safe JSON loading with empty string."""

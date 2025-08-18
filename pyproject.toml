@@ -44,6 +44,7 @@ dependencies = [
     "aiohttp>=3.12.0",
     "mistletoe>=1.4.0",
     "jinja2",
+    "jsonschema",
 ]
 
 [project.urls]
@@ -85,6 +86,7 @@ dev = [
     "types-fpdf2",
     "types-jinja2",
     "types-toml",
+    "types-jsonschema",
 ]
 
 all = [
@@ -234,6 +236,7 @@ module = [
     "reportlab.*",
     "rich.*",
     "json5.*",
+    "pyjson5.*",
     "pytest.*",
     "psd_tools.*",
     "fontTools.*",
