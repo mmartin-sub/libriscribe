@@ -81,7 +81,7 @@ class ConceptGeneratorAgent(Agent):
             json_str = json.dumps(concept_json, ensure_ascii=False)
 
             # Check if JSON is too long
-            if len(json_str) > 2000:  # Conservative limit for JSON in prompts
+            if len(json_str) > 5000:  # Conservative limit for JSON in prompts
                 self.logger.warning(f"Concept JSON too long: {len(json_str)} chars, truncating description")
 
                 # Truncate description if it's the main culprit

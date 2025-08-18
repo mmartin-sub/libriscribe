@@ -323,3 +323,41 @@ norecursedirs = ["tests/utils"]
 [tool.bandit]
 exclude_dirs = ["tests", ".venv"]
 skips = ["B101"]
+
+
+[tool.coverage.run]
+source = ["libriscribe2"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/build/*",
+    "*/dist/*",
+    "*/migrations/*",
+    "*/mypy_cache/*",
+    "*/ruff_cache/*",
+    "*/pytest_cache/*",
+    "*/coverage/*",
+]
+relative_files = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+    "raise ImportError",
+    "except ImportError:",
+    "if TYPE_CHECKING:",
+]
+
+[tool.coverage.html]
+directory = "tests/htmlcov"

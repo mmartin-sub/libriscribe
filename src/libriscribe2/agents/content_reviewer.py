@@ -1,9 +1,11 @@
 # src/libriscribe2/agents/content_reviewer.py
 import logging
+from pathlib import Path
 from typing import Any
 
 from rich.console import Console
 
+from ..knowledge_base import ProjectKnowledgeBase
 from ..utils.file_utils import read_markdown_file
 from ..utils.llm_client import LLMClient
 from .agent_base import Agent
@@ -48,9 +50,6 @@ class ContentReviewerAgent(Agent):
         # Since we're passed only the chapter_path, we need to infer the project
 
         # Extract project directory from chapter path to find project data
-        from pathlib import Path
-
-        from ..knowledge_base import ProjectKnowledgeBase
 
         chapter_file = Path(chapter_path)
         project_dir = chapter_file.parent

@@ -46,3 +46,4 @@ addopts
 direnv
 pypackages
 excepthook
+logline
