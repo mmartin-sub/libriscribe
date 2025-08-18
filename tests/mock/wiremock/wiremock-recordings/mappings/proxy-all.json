@@ -1,0 +1,17 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "ANY",
+    "urlPathPattern": "/v1/.*"
+  },
+  "response": {
+    "proxyBaseUrl": "{{systemValue type='ENVIRONMENT' key='TARGET_API_URL'}}",
+    "transformers": ["response-template"],
+    "additionalProxyRequestHeaders": {
+      "Host": "openrouter.ai",
+      "Authorization": "Bearer {{systemValue type='ENVIRONMENT' key='API_BEARER_TOKEN'}}",
+      "X-Debug-Proxied-URL": "{{request.url}}",
+      "X-Debug-Headers": "{{request.headers}}"
+    }
+  }
+}

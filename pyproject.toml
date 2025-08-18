@@ -328,6 +328,24 @@ norecursedirs = ["tests/utils"]
 exclude_dirs = ["tests", ".venv"]
 skips = ["B101"]
 
+
+[tool.coverage.run]
+source = ["libriscribe2"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/build/*",
+    "*/dist/*",
+    "*/migrations/*",
+    "*/mypy_cache/*",
+    "*/ruff_cache/*",
+    "*/pytest_cache/*",
+    "*/coverage/*",
+]
+relative_files = true
+
 [tool.coverage.report]
 exclude_lines = [
     "pragma: no cover",
@@ -338,6 +356,12 @@ exclude_lines = [
     "raise NotImplementedError",
     "if 0:",
     "if __name__ == .__main__.:",
-    "src/libriscribe2/utils/markdown_utils.py",
-    "src/libriscribe2/agents/style_editor.py",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+    "raise ImportError",
+    "except ImportError:",
+    "if TYPE_CHECKING:",
 ]
+
+[tool.coverage.html]
+directory = "tests/htmlcov"

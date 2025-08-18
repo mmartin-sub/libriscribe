@@ -10,7 +10,10 @@ from typing import Any, TypeVar
 from pydantic import BaseModel, ValidationError  # Import ValidationError
 
 from .markdown_formatter import ensure_header_spacing
-from .markdown_validator import MarkdownValidationError, validate_markdown  # Import MarkdownValidationError
+from .markdown_validator import (  # Import MarkdownValidationError
+    MarkdownValidationError,
+    validate_markdown,
+)
 from .timestamp_utils import get_unix_timestamp_int
 
 logger = logging.getLogger(__name__)
@@ -94,9 +97,9 @@ def write_json_file(file_path: str, data: dict[str, Any] | BaseModel) -> None:
         Path(file_path).parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, "w", encoding="utf-8") as f:
             if isinstance(data, BaseModel):
-                json.dump(data.model_dump(), f, indent=4)  # Use model_dump for Pydantic models
+                json.dump(data.model_dump(), f, indent=4, ensure_ascii=False)  # Use model_dump for Pydantic models
             else:
-                json.dump(data, f, indent=4)
+                json.dump(data, f, indent=4, ensure_ascii=False)
         logger.info(f"Data written to {_get_relative_path(file_path)}")
     except Exception as e:
         logger.exception(f"Error writing to JSON file {file_path}: {e}")
