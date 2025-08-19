@@ -1,5 +1,10 @@
+
+# WireMock Docker Commands
+
+## 1. Proxy Mode with Recording
+
 ```sh
-# --record-mappings is for the prox mode, remove it to act as a mock endpoint
+# --record-mappings is for the proxy mode, remove it to act as a mock endpoint
 docker run -it --rm \
   -p 2793:8080 \
   -v "$(pwd)/wiremock-recordings:/home/wiremock" \
@@ -7,7 +12,9 @@ docker run -it --rm \
   --global-response-templating \
   --record-mappings
   #   add:   --verbose if needed
-  ```
+```
+
+## 2. Proxy Mode with Target Configuration
 
 ```sh
 # only for proxy mode
@@ -20,7 +27,24 @@ docker run -it --rm \
   -e API_BEARER_TOKEN="${{ secrets.YOUR_SECRET_TOKEN }}" \
   wiremock/wiremock:latest \
   --global-response-templating
-  ```
-2. second
-3. third
+```
 
+## 3. Basic Mock Server
+
+```sh
+docker run -it --rm \
+  -p 2793:8080 \
+  -v "$(pwd)/wiremock-recordings:/home/wiremock" \
+  wiremock/wiremock:latest \
+  --global-response-templating
+```
+
+## 4. Mock Server with Different Mount Point
+
+```sh
+docker run -it --rm \
+  -p 2793:8080 \
+  -v "$(pwd)/wiremock-playing:/home/wiremock" \
+  wiremock/wiremock:latest \
+  --global-response-templating
+```

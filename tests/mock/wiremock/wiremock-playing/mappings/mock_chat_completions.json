@@ -1,0 +1,19 @@
+{
+  "name": "mock_chat_completions",
+  "request": {
+    "url": "/v1/chat/completions",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$.messages"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "mock_chat_completions_body.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
