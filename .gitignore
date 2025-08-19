@@ -211,3 +211,9 @@ config.json
 # Test output
 tests/output/
 tests/.config-test.json
+
+# Test mock wiremock files
+tests/mock/wiremock/*
+folder/*
+!tests/mock/wiremock/wiremock-recordings/mappings/proxy-all.json
+!tests/mock/wiremock/wiremock-recordings/mappings/example/*

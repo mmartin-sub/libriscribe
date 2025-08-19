@@ -473,10 +473,10 @@ Write directly without introductions."""
 
         # Log headers at INFO level only once, then use DEBUG level
         if not self._logged_headers_info:
-            self.logger.info(f"LiteLLM headers: {safe_headers}")
+            self.logger.info(f"OpenAI headers: {safe_headers}")
             self._logged_headers_info = True
         else:
-            self.logger.debug(f"LiteLLM headers: {safe_headers}")
+            self.logger.debug(f"OpenAI headers: {safe_headers}")
 
         self.logger.debug(f"Request timeout: {self.timeout} seconds")
         self.logger.debug(f"Request payload: {payload}")
