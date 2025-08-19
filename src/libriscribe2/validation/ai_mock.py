@@ -24,7 +24,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from ..settings import OPENAI_BASE_URL
+from ..settings import Settings
 
 # OpenAI SDK import
 logger = logging.getLogger(__name__)
@@ -104,8 +104,9 @@ class AIMockManager:
         self.mock_data_dir.mkdir(parents=True, exist_ok=True)
 
         # Initialize OpenAI client (LiteLLM configured via .env)
+        self.settings = Settings()
         self.openai_api_key = os.getenv("OPENAI_API_KEY", "")
-        self.openai_base_url = os.getenv("OPENAI_BASE_URL", OPENAI_BASE_URL)
+        self.openai_base_url = os.getenv("OPENAI_BASE_URL", self.settings.openai_base_url_default)
 
         # Determine if we should use mock based on API key
         self.use_mock_mode = not bool(self.openai_api_key.strip())
@@ -258,7 +259,8 @@ class AIMockManager:
                         }
                     ],
                     "recommendations": ["Consider reviewing tone consistency in chapter 3"],
-                }
+                },
+                ensure_ascii=False,
             )
         elif validator_id == "publishing_standards_validator":
             content = json.dumps(
@@ -268,7 +270,8 @@ class AIMockManager:
                     "structure_score": 92.0,
                     "findings": [],
                     "publishing_ready": True,
-                }
+                },
+                ensure_ascii=False,
             )
         elif validator_id == "quality_originality_validator":
             content = json.dumps(
@@ -285,7 +288,8 @@ class AIMockManager:
                             "confidence": 0.9,
                         }
                     ],
-                }
+                },
+                ensure_ascii=False,
             )
         else:
             content = json.dumps(
@@ -294,7 +298,8 @@ class AIMockManager:
                     "status": "passed",
                     "findings": [],
                     "recommendations": [],
-                }
+                },
+                ensure_ascii=False,
             )
 
         return MockResponse(
@@ -320,7 +325,8 @@ class AIMockManager:
                 "status": "excellent",
                 "findings": [],
                 "recommendations": ["Content meets high quality standards"],
-            }
+            },
+            ensure_ascii=False,
         )
 
         return MockResponse(
@@ -358,7 +364,8 @@ class AIMockManager:
                     "Consider regenerating content",
                     "Review tone consistency",
                 ],
-            }
+            },
+            ensure_ascii=False,
         )
 
         return MockResponse(
@@ -378,7 +385,8 @@ class AIMockManager:
                 "error_code": "VALIDATION_ERROR",
                 "message": "Unable to complete validation due to content issues",
                 "status": "failed",
-            }
+            },
+            ensure_ascii=False,
         )
 
         return MockResponse(
@@ -420,7 +428,8 @@ class AIMockManager:
                     }
                 ],
                 "recommendations": ["Retry validation", "Check system resources"],
-            }
+            },
+            ensure_ascii=False,
         )
 
         return MockResponse(
@@ -447,7 +456,8 @@ class AIMockManager:
                     }
                 ],
                 "metadata": {"content_length": 0, "processing_time": 0.001},
-            }
+            },
+            ensure_ascii=False,
         )
 
         return MockResponse(
@@ -519,7 +529,9 @@ class AIMockManager:
 
             # Return error response in same format
             return MockResponse(
-                content=json.dumps({"error": str(e), "status": "failed", "validator_id": validator_id}),
+                content=json.dumps(
+                    {"error": str(e), "status": "failed", "validator_id": validator_id}, ensure_ascii=False
+                ),
                 model=model,
                 tokens_used=0,
                 cost=0.0,
@@ -634,7 +646,7 @@ class AIMockManager:
         # Save to disk
         try:
             with open(interactions_file, "w") as f:
-                json.dump(existing_data, f, indent=2)
+                json.dump(existing_data, f, indent=2, ensure_ascii=False)
         except Exception as e:
             logger.error(f"Failed to save recorded interaction: {e}")
 
@@ -870,7 +882,7 @@ class AIMockManager:
 
         try:
             with open(interactions_file, "w") as f:
-                json.dump(interactions_data, f, indent=2)
+                json.dump(interactions_data, f, indent=2, ensure_ascii=False)
             logger.info(f"Saved {len(interactions_data)} recorded interactions")
         except Exception as e:
             logger.error(f"Failed to save recorded interactions: {e}")

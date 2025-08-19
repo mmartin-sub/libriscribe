@@ -20,7 +20,7 @@ def generate_large_worldbuilding_response() -> str:
         test_data = json.load(f)
 
     # Return the JSON as a string
-    return json.dumps(test_data, indent=4)
+    return json.dumps(test_data, indent=4, ensure_ascii=False)
 
 
 class TestWorldbuildingAgent:
@@ -29,10 +29,12 @@ class TestWorldbuildingAgent:
     def test_initialization(self):
         """Test WorldbuildingAgent initialization."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
 
         # Act
-        agent = WorldbuildingAgent(mock_llm)
+        agent = WorldbuildingAgent(mock_llm, settings)
 
         # Assert
         assert agent.name == "WorldbuildingAgent"
@@ -42,9 +44,11 @@ class TestWorldbuildingAgent:
     async def test_execute_basic(self):
         """Test basic worldbuilding generation execution."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.return_value = generate_large_worldbuilding_response()
-        agent = WorldbuildingAgent(mock_llm)
+        agent = WorldbuildingAgent(mock_llm, settings)
         kb = ProjectKnowledgeBase(project_name="test_project")
         kb.title = "Test Book"
         kb.genre = "Science Fiction"
@@ -63,9 +67,11 @@ class TestWorldbuildingAgent:
     async def test_execute_llm_error(self):
         """Test execution when LLM client raises an error."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.side_effect = Exception("LLM error")
-        agent = WorldbuildingAgent(mock_llm)
+        agent = WorldbuildingAgent(mock_llm, settings)
         kb = ProjectKnowledgeBase(project_name="test_project")
         kb.title = "Test Book"
         kb.genre = "Science Fiction"
@@ -83,8 +89,10 @@ class TestWorldbuildingAgent:
     def test_parse_worldbuilding_response_valid(self):
         """Test parsing valid worldbuilding response."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
-        agent = WorldbuildingAgent(mock_llm)
+        agent = WorldbuildingAgent(mock_llm, settings)
         response = generate_large_worldbuilding_response()
 
         # Act
@@ -97,8 +105,10 @@ class TestWorldbuildingAgent:
     def test_parse_worldbuilding_response_invalid(self):
         """Test parsing invalid worldbuilding response."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
-        agent = WorldbuildingAgent(mock_llm)
+        agent = WorldbuildingAgent(mock_llm, settings)
         response = "Invalid response without proper worldbuilding structure"
 
         # Act
@@ -110,8 +120,10 @@ class TestWorldbuildingAgent:
     def test_validate_worldbuilding_data_valid(self):
         """Test validation of valid worldbuilding data."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
-        agent = WorldbuildingAgent(mock_llm)
+        agent = WorldbuildingAgent(mock_llm, settings)
         worldbuilding_data = {
             "setting": "Space Station",
             "technology": "Advanced AI",
@@ -128,8 +140,10 @@ class TestWorldbuildingAgent:
     def test_validate_worldbuilding_data_missing_setting(self):
         """Test validation of worldbuilding data missing setting."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
-        agent = WorldbuildingAgent(mock_llm)
+        agent = WorldbuildingAgent(mock_llm, settings)
         worldbuilding_data = {"technology": "Advanced AI", "social_structure": "International crew"}
 
         # Act
@@ -143,8 +157,10 @@ class TestWorldbuildingAgent:
     def test_create_worldbuilding_from_data(self):
         """Test creating Worldbuilding object from data."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
-        agent = WorldbuildingAgent(mock_llm)
+        agent = WorldbuildingAgent(mock_llm, settings)
         worldbuilding_data = {
             "setting": "Space Station",
             "technology": "Advanced AI",
@@ -161,8 +177,10 @@ class TestWorldbuildingAgent:
     def test_save_worldbuilding_to_kb(self):
         """Test saving worldbuilding to knowledge base."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
-        agent = WorldbuildingAgent(mock_llm)
+        agent = WorldbuildingAgent(mock_llm, settings)
         kb = ProjectKnowledgeBase(project_name="test_project")
         worldbuilding_data = {
             "setting": "Space Station",

@@ -6,6 +6,7 @@ from typing import Any
 import requests
 from bs4 import BeautifulSoup, Tag
 
+from ..settings import Settings
 from ..utils import prompts_context as prompts
 from ..utils.file_utils import write_markdown_file
 from ..utils.llm_client import LLMClient
@@ -17,8 +18,9 @@ logger = logging.getLogger(__name__)
 class ResearcherAgent(Agent):
     """Conducts web research."""
 
-    def __init__(self, llm_client: LLMClient):
+    def __init__(self, llm_client: LLMClient, settings: Settings):
         super().__init__("ResearcherAgent", llm_client)
+        self.settings = settings
 
     async def execute(self, project_knowledge_base: Any, output_path: str | None = None, **kwargs: Any) -> None:
         """Performs web research and saves the results to a Markdown file."""
@@ -59,7 +61,7 @@ class ResearcherAgent(Agent):
         """Get language from project data or return default."""
         try:
             project_dir = Path(output_path).parent
-            project_data_path = project_dir / "project_data.json"
+            project_data_path = project_dir / self.settings.project_data_filename
             if project_data_path.exists():
                 from ..knowledge_base import ProjectKnowledgeBase
 
@@ -70,7 +72,7 @@ class ResearcherAgent(Agent):
                     return project_kb.language
         except Exception as e:
             self.logger.warning(f"Could not load project data for language detection: {e}")
-        return "English"  # Default
+        return self.settings.default_language
 
     def _format_search_results(self, search_results: list[dict[str, str]]) -> str:
         """Format search results as markdown."""

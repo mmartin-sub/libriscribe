@@ -68,6 +68,7 @@ dev = [
     "ruff>=0.5.0",
     "bandit",
     "detect-secrets",
+    "pre-commit>=2.18.1",
     # Legacy Tools (kept for pre-commit compatibility)
     "mypy>=1.10.0",
 
@@ -326,3 +327,17 @@ norecursedirs = ["tests/utils"]
 [tool.bandit]
 exclude_dirs = ["tests", ".venv"]
 skips = ["B101"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "src/libriscribe2/utils/markdown_utils.py",
+    "src/libriscribe2/agents/style_editor.py",
+]

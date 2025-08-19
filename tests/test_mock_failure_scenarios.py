@@ -20,14 +20,15 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from libriscribe2.services.book_creator import BookCreatorService
+from libriscribe2.settings import Settings
 from libriscribe2.utils.mock_llm_client import MockLLMClient
 
 
 class FailingMockLLMClient(MockLLMClient):
     """Mock LLM client that fails after a specified number of calls."""
 
-    def __init__(self, fail_after_calls: int = 1, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, fail_after_calls: int = 1, settings: Settings | None = None, *args, **kwargs):
+        super().__init__(*args, settings=settings, **kwargs)
         self.fail_after_calls = fail_after_calls
         self.call_count = 0
 
@@ -35,8 +36,8 @@ class FailingMockLLMClient(MockLLMClient):
         self,
         prompt: str,
         prompt_type: str = "default",
-        temperature: float = 0.7,
-        language: str = "English",
+        temperature: float | None = None,
+        language: str | None = None,
         timeout: int | None = None,
     ) -> str:
         """Generate content but fail after specified number of calls."""

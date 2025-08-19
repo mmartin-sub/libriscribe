@@ -10,13 +10,17 @@ import pytest
 from libriscribe2.utils.llm_client import LLMClient, LLMClientError
 
 
+from libriscribe2.settings import Settings
+
+
 class TestLLMClient:
     """Test cases for LLMClient."""
 
     def test_initialization(self):
         """Test LLMClient initialization."""
         # Arrange & Act
-        client = LLMClient("openai")
+        settings = Settings()
+        client = LLMClient("openai", settings)
 
         # Assert
         assert client.provider == "openai"
@@ -29,11 +33,13 @@ class TestLLMClient:
     def test_initialization_with_custom_config(self):
         """Test LLMClient initialization with custom configuration."""
         # Arrange
+        settings = Settings()
         model_config = {"default": "gpt-4o", "outline": "gpt-4o-mini"}
 
         # Act
         client = LLMClient(
-            provider="anthropic",
+            "anthropic",
+            settings,
             model_config=model_config,
             timeout=120.0,
             environment="production",
@@ -52,26 +58,30 @@ class TestLLMClient:
     def test_initialization_invalid_provider(self):
         """Test LLMClient initialization with invalid provider."""
         # Arrange & Act & Assert
+        settings = Settings()
         with pytest.raises(ValueError, match="Provider cannot be empty"):
-            LLMClient("")
+            LLMClient("", settings)
 
     def test_initialization_invalid_timeout(self):
         """Test LLMClient initialization with invalid timeout."""
+        settings = Settings()
         # Arrange & Act & Assert
         with pytest.raises(ValueError, match="Timeout must be positive"):
-            LLMClient("openai", timeout=0)
+            LLMClient("openai", settings, timeout=0)
 
     def test_initialization_negative_timeout(self):
         """Test LLMClient initialization with negative timeout."""
         # Arrange & Act & Assert
+        settings = Settings()
         with pytest.raises(ValueError, match="Timeout must be positive"):
-            LLMClient("openai", timeout=-1)
+            LLMClient("openai", settings, timeout=-1)
 
     def test_get_model_for_prompt_type(self):
         """Test getting model for specific prompt type."""
         # Arrange
+        settings = Settings()
         model_config = {"default": "gpt-4o-mini", "outline": "gpt-4o", "concept": "gpt-4o-mini"}
-        client = LLMClient("openai", model_config=model_config)
+        client = LLMClient("openai", settings, model_config=model_config)
 
         # Act & Assert
         assert client.get_model_for_prompt_type("outline") == "gpt-4o"
@@ -81,8 +91,9 @@ class TestLLMClient:
     def test_get_model_for_prompt_type_fallback(self):
         """Test getting model with fallback to default."""
         # Arrange
+        settings = Settings()
         model_config = {"outline": "gpt-4o"}
-        client = LLMClient("openai", model_config=model_config)
+        client = LLMClient("openai", settings, model_config=model_config)
 
         # Act & Assert
         assert client.get_model_for_prompt_type("outline") == "gpt-4o"
@@ -91,7 +102,8 @@ class TestLLMClient:
     def test_validate_prompt_valid(self):
         """Test prompt validation with valid prompt."""
         # Arrange
-        client = LLMClient("openai")
+        settings = Settings()
+        client = LLMClient("openai", settings)
 
         # Act & Assert
         assert client.validate_prompt("This is a valid prompt") is True
@@ -100,7 +112,8 @@ class TestLLMClient:
     def test_validate_prompt_empty(self):
         """Test prompt validation with empty prompt."""
         # Arrange
-        client = LLMClient("openai")
+        settings = Settings()
+        client = LLMClient("openai", settings)
 
         # Act & Assert
         assert client.validate_prompt("") is False
@@ -109,7 +122,8 @@ class TestLLMClient:
     def test_validate_prompt_none(self):
         """Test prompt validation with None prompt."""
         # Arrange
-        client = LLMClient("openai")
+        settings = Settings()
+        client = LLMClient("openai", settings)
 
         # Act & Assert
         assert client.validate_prompt(None) is False
@@ -117,7 +131,8 @@ class TestLLMClient:
     def test_validate_prompt_invalid_type(self):
         """Test prompt validation with invalid type."""
         # Arrange
-        client = LLMClient("openai")
+        settings = Settings()
+        client = LLMClient("openai", settings)
 
         # Act & Assert
         assert client.validate_prompt(123) is False
@@ -127,7 +142,8 @@ class TestLLMClient:
     def test_validate_prompt_too_long(self):
         """Test prompt validation with too long prompt."""
         # Arrange
-        client = LLMClient("openai")
+        settings = Settings()
+        client = LLMClient("openai", settings)
         long_prompt = "x" * 100000  # Very long prompt
 
         # Act & Assert
@@ -136,8 +152,10 @@ class TestLLMClient:
     def test_get_client_config(self):
         """Test getting client configuration."""
         # Arrange
+        settings = Settings()
         client = LLMClient(
-            provider="openai",
+            "openai",
+            settings,
             model_config={"default": "gpt-4o-mini"},
             timeout=60.0,
             environment="development",
@@ -162,7 +180,8 @@ class TestLLMClient:
     async def test_context_manager(self):
         """Test LLMClient as async context manager."""
         # Arrange
-        client = LLMClient("openai")
+        settings = Settings()
+        client = LLMClient("openai", settings)
 
         # Act & Assert
         async with client as ctx_client:
@@ -172,7 +191,8 @@ class TestLLMClient:
     async def test_initialize_session(self):
         """Test session initialization."""
         # Arrange
-        client = LLMClient("openai")
+        settings = Settings()
+        client = LLMClient("openai", settings)
 
         # Act
         await client.initialize_session()
@@ -183,7 +203,8 @@ class TestLLMClient:
     async def test_cleanup_session(self):
         """Test session cleanup."""
         # Arrange
-        client = LLMClient("openai")
+        settings = Settings()
+        client = LLMClient("openai", settings)
 
         # Act
         await client.cleanup_session()
@@ -194,7 +215,8 @@ class TestLLMClient:
     async def test_generate_content_basic(self):
         """Test basic content generation."""
         # Arrange
-        client = LLMClient("openai")
+        settings = Settings()
+        client = LLMClient("openai", settings)
 
         # Act & Assert - should not raise exception for basic call
         try:
@@ -208,7 +230,8 @@ class TestLLMClient:
     async def test_generate_content_with_fallback_basic(self):
         """Test basic content generation with fallback."""
         # Arrange
-        client = LLMClient("openai")
+        settings = Settings()
+        client = LLMClient("openai", settings)
 
         # Act & Assert - should not raise exception for basic call
         try:
@@ -241,7 +264,8 @@ class TestLLMClient:
     def test_validate_configuration(self):
         """Test configuration validation."""
         # Arrange
-        client = LLMClient("openai")
+        settings = Settings()
+        client = LLMClient("openai", settings)
 
         # Act & Assert - should not raise exception
         client._validate_configuration()
@@ -249,7 +273,8 @@ class TestLLMClient:
     def test_validate_configuration_empty_provider(self):
         """Test configuration validation with empty provider."""
         # Arrange
-        client = LLMClient("openai")
+        settings = Settings()
+        client = LLMClient("openai", settings)
         client.provider = ""
 
         # Act & Assert
@@ -259,7 +284,8 @@ class TestLLMClient:
     def test_validate_configuration_invalid_timeout(self):
         """Test configuration validation with invalid timeout."""
         # Arrange
-        client = LLMClient("openai")
+        settings = Settings()
+        client = LLMClient("openai", settings)
         client.timeout = 0
 
         # Act & Assert
@@ -269,7 +295,8 @@ class TestLLMClient:
     def test_validate_configuration_negative_timeout(self):
         """Test configuration validation with negative timeout."""
         # Arrange
-        client = LLMClient("openai")
+        settings = Settings()
+        client = LLMClient("openai", settings)
         client.timeout = -1
 
         # Act & Assert

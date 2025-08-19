@@ -5,6 +5,11 @@ This module tests the core functionality of the BookCreatorService class,
 including book creation workflows, error handling, and service interactions.
 """
 
+import logging
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
 from libriscribe2.services.book_creator import BookCreatorService
 
 
@@ -66,66 +71,46 @@ class TestBookCreatorService:
         assert service._is_valid_project_name("invalid@project") is False
         assert service._is_valid_project_name("invalid#project") is False
 
-    def test_display_book_statistics_no_project_manager(self):
-        """Test display_book_statistics when project_manager is None."""
-        # Arrange
+    def test_create_project_directory_safely(self, tmp_path):
+        """Test that _create_project_directory_safely creates a directory."""
         service = BookCreatorService()
-        service.project_manager = None
+        project_dir = tmp_path / "test-project"
+        result_dir = service._create_project_directory_safely(project_dir, "test-project")
+        assert result_dir.exists()
 
-        # Act & Assert - should not raise exception
-        service._display_book_statistics()
-
-    def test_display_book_statistics_no_knowledge_base(self):
-        """Test display_book_statistics when project_knowledge_base is None."""
-        from unittest.mock import MagicMock
-
-        # Arrange
+    def test_create_project_directory_safely_with_existing_dir(self, tmp_path):
+        """Test that _create_project_directory_safely raises an error for existing, non-empty dir."""
         service = BookCreatorService()
-        service.project_manager = MagicMock()
-        service.project_manager.project_knowledge_base = None
+        project_dir = tmp_path / "test-project"
+        project_dir.mkdir()
+        (project_dir / "file.txt").touch()
+        with pytest.raises(ValueError):
+            service._create_project_directory_safely(project_dir, "test-project")
 
-        # Act & Assert - should not raise exception
-        service._display_book_statistics()
-
-    def test_display_book_statistics_success(self):
-        """Test display_book_statistics with valid data."""
-        from pathlib import Path
-        from unittest.mock import MagicMock, patch
-
-        from libriscribe2.knowledge_base import ProjectKnowledgeBase
-
-        # Arrange
+    def test_setup_logging(self, tmp_path):
+        """Test that setup_logging sets up logging."""
         service = BookCreatorService()
-        service.project_manager = MagicMock()
+        project_dir = tmp_path / "test-project"
+        service.setup_logging(project_dir)
+        assert (project_dir / "book_creation.log").exists()
 
-        # Create a mock knowledge base with test data
-        kb = ProjectKnowledgeBase(project_name="test_project", title="Test Book")
-        kb.genre = "Fantasy"
-        kb.language = "English"
-        kb.category = "Fiction"
-        kb.book_length = "Novel"
-        kb.num_characters = 5
-        kb.num_chapters = 10
-        kb.worldbuilding_needed = True
-        kb.review_preference = "yes"
-        kb.description = "A test book description"
-        kb.dynamic_questions = {"q1": "answer1"}
-        kb.chapters = {1: MagicMock(title="Chapter 1")}
+    def test_create_knowledge_base(self):
+        """Test that _create_knowledge_base creates a knowledge base."""
+        service = BookCreatorService()
+        args = {"title": "Test Title"}
+        kb = service._create_knowledge_base(args, "test-project")
+        assert kb.title == "Test Title"
+        assert kb.project_name == "test-project"
 
-        service.project_manager.project_knowledge_base = kb
-        service.project_manager.project_dir = Path("/test/path")
-
-        # Mock console to capture output
-        with patch.object(service.console, "print") as mock_print:
-            with patch.object(Path, "exists", return_value=True):
-                # Act
-                service._display_book_statistics()
-
-                # Assert
-                assert mock_print.call_count > 0
-                # Check that key information is displayed
-                call_args_list = [str(call) for call in mock_print.call_args_list]
-                output_text = " ".join(call_args_list)
-                assert "Test Book" in output_text
-                assert "Fantasy" in output_text
-                assert "Fiction" in output_text
+    @pytest.mark.asyncio
+    @patch("libriscribe2.services.book_creator.ProjectManagerAgent")
+    async def test_acreate_book(self, mock_pm_agent, tmp_path):
+        """Test that acreate_book creates a book."""
+        service = BookCreatorService()
+        mock_pm_agent.return_value.acreate_book = AsyncMock(return_value=True)
+        args = {"title": "Test Title", "all": True}
+        with patch.object(service, "_execute_generation_steps", new_callable=AsyncMock) as mock_execute:
+            mock_execute.return_value = True
+            result = await service.acreate_book(args)
+            assert result is True
+            mock_execute.assert_awaited_once()

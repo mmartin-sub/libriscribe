@@ -103,7 +103,7 @@ src/libriscribe2/
 ├── utils/                  # Utility functions
 │   ├── llm_client.py      # LLM integration
 │   └── mock_llm_client.py # Testing framework
-└── main.py                # CLI entry point
+└── cli.py                # CLI entry point
 ```
 
 ### Dependencies

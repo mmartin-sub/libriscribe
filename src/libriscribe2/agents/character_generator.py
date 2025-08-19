@@ -4,7 +4,7 @@ import logging
 from typing import Any
 
 from ..knowledge_base import Character, ProjectKnowledgeBase
-from ..settings import DEFAULT_TEMPERATURE
+from ..settings import Settings
 from ..utils import prompts_context as prompts
 from ..utils.file_utils import write_json_file
 from ..utils.json_utils import JSONProcessor
@@ -17,8 +17,9 @@ logger = logging.getLogger(__name__)
 class CharacterGeneratorAgent(Agent):
     """Generates character profiles."""
 
-    def __init__(self, llm_client: LLMClient):
+    def __init__(self, llm_client: LLMClient, settings: Settings):
         super().__init__("CharacterGeneratorAgent", llm_client)
+        self.settings = settings
 
     async def execute(
         self,
@@ -40,7 +41,7 @@ class CharacterGeneratorAgent(Agent):
 
             # Use the safe method from base class
             character_response = await self.safe_generate_content(
-                prompt, prompt_type="character", temperature=DEFAULT_TEMPERATURE
+                prompt, prompt_type="character", temperature=self.settings.default_temperature
             )
 
             if not character_response:

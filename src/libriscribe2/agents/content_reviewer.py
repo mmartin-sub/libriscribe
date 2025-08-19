@@ -4,6 +4,7 @@ from typing import Any
 
 from rich.console import Console
 
+from ..settings import Settings
 from ..utils.file_utils import read_markdown_file
 from ..utils.llm_client import LLMClient
 from .agent_base import Agent
@@ -15,9 +16,10 @@ logger = logging.getLogger(__name__)
 class ContentReviewerAgent(Agent):
     """Reviews chapter content for consistency and clarity."""
 
-    def __init__(self, llm_client: LLMClient):
+    def __init__(self, llm_client: LLMClient, settings: Settings):
         super().__init__("ContentReviewerAgent", llm_client)
         self.llm_client = llm_client
+        self.settings = settings
 
     async def execute(self, project_knowledge_base: Any, output_path: str | None = None, **kwargs: Any) -> None:
         """Reviews a chapter for consistency, clarity, and plot holes.
@@ -54,10 +56,10 @@ class ContentReviewerAgent(Agent):
 
         chapter_file = Path(chapter_path)
         project_dir = chapter_file.parent
-        project_data_path = project_dir / "project_data.json"
+        project_data_path = project_dir / self.settings.project_data_filename
 
         # Default language in case we can't load the project data
-        language = "English"
+        language = self.settings.default_language
 
         # Try to load the project knowledge base to get the language
         if project_data_path.exists():

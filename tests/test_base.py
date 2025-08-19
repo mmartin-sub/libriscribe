@@ -27,13 +27,16 @@ class BaseTestCase:
     @pytest.fixture
     def sample_knowledge_base(self) -> ProjectKnowledgeBase:
         """Create a sample knowledge base for testing."""
+        from libriscribe2.settings import Settings
+
+        settings = Settings()
         return ProjectKnowledgeBase(
             project_name="test_project",
             title="Test Book",
             genre="Fantasy",
             description="A test book for unit testing",
             category="Fiction",
-            language="English",
+            language=settings.default_language,
             num_characters=3,
             num_chapters=3,  # Reduced for testing
             worldbuilding_needed=True,
@@ -87,8 +90,11 @@ class BaseTestCase:
         os.makedirs(chapters_dir, exist_ok=True)
 
         # Create sample files
+        from libriscribe2.settings import Settings
+
+        settings = Settings()
         files = {
-            "project_data.json": '{"project_name": "test", "title": "Test Book"}',
+            settings.project_data_filename: '{"project_name": "test", "title": "Test Book"}',
             "chapters/chapter_1.md": "# Chapter 1\n\nTest content.",
             "chapters/chapter_2.md": "# Chapter 2\n\nMore test content.",
         }

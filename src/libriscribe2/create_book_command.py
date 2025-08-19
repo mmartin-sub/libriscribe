@@ -16,7 +16,7 @@ from rich.console import Console
 
 from libriscribe2.agents.project_manager import ProjectManagerAgent
 from libriscribe2.knowledge_base import Chapter, ProjectKnowledgeBase
-from libriscribe2.settings import MANUSCRIPT_MD_FILENAME, Settings
+from libriscribe2.settings import Settings
 from libriscribe2.utils.language import normalize_language
 
 # Initialize console and logger
@@ -513,7 +513,7 @@ async def create_book(
         if generation_flags["format_book"]:
             console.print("\n[cyan]📘 Formatting book...[/cyan]")
             if project_manager.project_dir:
-                output_path = str(project_manager.project_dir / MANUSCRIPT_MD_FILENAME)
+                output_path = str(project_manager.project_dir / settings.manuscript_md_filename)
             else:
                 console.print("[red]Error: Project directory not set[/red]")
                 return EXIT_BOOK_CREATION_ERROR

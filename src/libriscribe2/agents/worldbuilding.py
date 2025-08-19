@@ -4,7 +4,7 @@ import logging
 from typing import Any
 
 from ..knowledge_base import ProjectKnowledgeBase, Worldbuilding
-from ..settings import DEFAULT_TEMPERATURE
+from ..settings import Settings
 from ..utils import prompts_context as prompts
 from ..utils.file_utils import write_json_file
 from ..utils.json_utils import JSONProcessor
@@ -18,8 +18,9 @@ logger = logging.getLogger(__name__)
 class WorldbuildingAgent(Agent):
     """Generates worldbuilding details."""
 
-    def __init__(self, llm_client: LLMClient):
+    def __init__(self, llm_client: LLMClient, settings: Settings):
         super().__init__("WorldbuildingAgent", llm_client)
+        self.settings = settings
 
     async def execute(
         self,
@@ -50,7 +51,7 @@ class WorldbuildingAgent(Agent):
             )
 
             worldbuilding_response = await self.safe_generate_content(
-                prompt, prompt_type="worldbuilding", temperature=DEFAULT_TEMPERATURE
+                prompt, prompt_type="worldbuilding", temperature=self.settings.default_temperature
             )
 
             if not worldbuilding_response:

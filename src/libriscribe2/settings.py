@@ -10,49 +10,62 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from .utils import project_state
 from .utils.timestamp_utils import get_utc_date_str
 
-# Default model configuration
-DEFAULT_MODEL_CONFIG = {
-    "general": "gpt-4o-mini",
-    "creative": "gpt-4o",
-    "analysis": "gpt-4o",
-    "title_generation": "gpt-4o-mini",
-    "character_generation": "gpt-4o",
-    "outline_generation": "gpt-4o",
-    "chapter_writing": "gpt-4o",
-    "worldbuilding": "gpt-4o",
-    "review": "gpt-4o",
-}
-
-# Fallback model for when primary model fails
-FALLBACK_MODEL = "gpt-4o-mini"
-
-# Manuscript filename constant
-MANUSCRIPT_MD_FILENAME = "manuscript.md"
-
-# File suffixes and constants
-REVISED_SUFFIX = "_revised"
-SCENES_JSON = "scenes.json"
-
-# API endpoints and URLs
-OPENAI_BASE_URL = "https://api.openai.com/v1"
-
-# Model names
-OPENAI_DEFAULT_MODEL = "gpt-4o-mini"
-
-# Default parameters
-DEFAULT_TEMPERATURE = 0.7
-DEFAULT_TIMEOUT = 300.0
-DEFAULT_MAX_TOKENS = 100000
-
-# Version information
-CLIENT_VERSION = "1.0.0"
-
-# Environment defaults
-DEFAULT_ENVIRONMENT = "production"
-
 
 class Settings(BaseSettings):
     """Application settings with improved configuration management."""
+
+    # Default model configuration
+    default_model_config: dict[str, str] = Field(
+        default_factory=lambda: {
+            "general": "gpt-4o-mini",
+            "creative": "gpt-4o",
+            "analysis": "gpt-4o",
+            "title_generation": "gpt-4o-mini",
+            "character_generation": "gpt-4o",
+            "outline_generation": "gpt-4o",
+            "chapter_writing": "gpt-4o",
+            "worldbuilding": "gpt-4o",
+            "review": "gpt-4o",
+        }
+    )
+
+    # Fallback model for when primary model fails
+    fallback_model: str = Field(default="gpt-4o-mini")
+
+    # Manuscript filename constant
+    manuscript_md_filename: str = Field(default="manuscript.md")
+    project_data_filename: str = Field(default="project_data.json")
+
+    # File suffixes and constants
+    revised_suffix: str = Field(default="_revised")
+    scenes_json: str = Field(default="scenes.json")
+
+    # API endpoints and URLs
+    openai_base_url_default: str = Field(default="https://api.openai.com/v1")
+
+    # Model names
+    openai_default_model_name: str = Field(default="gpt-4o-mini")
+
+    # Default parameters
+    default_temperature: float = Field(default=0.7)
+    default_timeout: float = Field(default=300.0)
+    default_max_tokens: int = Field(default=100000)
+    default_language: str = Field(default="English")
+
+    # Version information
+    client_version: str = Field(default="1.0.0")
+
+    # Environment defaults
+    default_environment: str = Field(default="production")
+
+    # Prompt limits
+    concept_prompt_max_len: int = Field(default=5000)
+    concept_prompt_min_len: int = Field(default=800)
+    max_prompt_length: int = Field(default=8000)
+    concept_json_max_len: int = Field(default=2000)
+
+    # LiteLLM settings
+    send_litellm_tags: bool = Field(default=False, description="Send x-litellm-tags header")
 
     # Core settings
     projects_dir: str = Field(default="projects", description="Directory for book projects")
@@ -303,16 +316,16 @@ class Settings(BaseSettings):
 
         # Return default model configuration
         return {
-            "default": OPENAI_DEFAULT_MODEL,
+            "default": self.openai_default_model_name,
             "outline": "gpt-4o",
             "worldbuilding": "gpt-4o",
-            "chapter": OPENAI_DEFAULT_MODEL,
+            "chapter": self.openai_default_model_name,
             "formatting": "gpt-4o-mini",
-            "concept": OPENAI_DEFAULT_MODEL,
+            "concept": self.openai_default_model_name,
             "character": "gpt-4o",
-            "scene_outline": OPENAI_DEFAULT_MODEL,
+            "scene_outline": self.openai_default_model_name,
             "editor": "gpt-4o",
-            "research": OPENAI_DEFAULT_MODEL,
-            "scene": OPENAI_DEFAULT_MODEL,
-            "keyword_generation": OPENAI_DEFAULT_MODEL,
+            "research": self.openai_default_model_name,
+            "scene": self.openai_default_model_name,
+            "keyword_generation": self.openai_default_model_name,
         }

@@ -118,13 +118,17 @@ class TestFormattingAgent:
         """Test FormattingAgent initialization."""
         # Arrange
         mock_llm = MagicMock()
+        from libriscribe2.settings import Settings
+
+        settings = Settings()
 
         # Act
-        agent = FormattingAgent(mock_llm)
+        agent = FormattingAgent(mock_llm, settings)
 
         # Assert
         assert agent.name == "FormattingAgent"
         assert agent.llm_client == mock_llm
+        assert agent.settings == settings
 
     @pytest.mark.asyncio
     async def test_execute_basic(self):
@@ -132,7 +136,10 @@ class TestFormattingAgent:
         # Arrange
         mock_llm = AsyncMock()
         mock_llm.generate_content.return_value = generate_large_formatting_response()
-        agent = FormattingAgent(mock_llm)
+        from libriscribe2.settings import Settings
+
+        settings = Settings()
+        agent = FormattingAgent(mock_llm, settings)
 
         # Create a unique temporary directory for this test in projects folder
 
@@ -155,7 +162,7 @@ class TestFormattingAgent:
             f.write("# Chapter 1\n\nTest chapter content.")
 
         # Create project data file
-        project_data_path = test_dir / "project_data.json"
+        project_data_path = test_dir / settings.project_data_filename
         with open(project_data_path, "w") as f:
             f.write(kb.to_json())
 
@@ -177,7 +184,10 @@ class TestFormattingAgent:
         # Arrange
         mock_llm = AsyncMock()
         mock_llm.generate_content.side_effect = Exception("LLM error")
-        agent = FormattingAgent(mock_llm)
+        from libriscribe2.settings import Settings
+
+        settings = Settings()
+        agent = FormattingAgent(mock_llm, settings)
 
         # Create a unique temporary directory for this test in projects folder
 
@@ -198,7 +208,7 @@ class TestFormattingAgent:
             f.write("# Chapter 1\n\nTest chapter content.")
 
         # Create project data file
-        project_data_path = test_dir / "project_data.json"
+        project_data_path = test_dir / settings.project_data_filename
         with open(project_data_path, "w") as f:
             f.write(kb.to_json())
 
@@ -219,7 +229,10 @@ class TestFormattingAgent:
         """Test creating title page."""
         # Arrange
         mock_llm = MagicMock()
-        agent = FormattingAgent(mock_llm)
+        from libriscribe2.settings import Settings
+
+        settings = Settings()
+        agent = FormattingAgent(mock_llm, settings)
         kb = ProjectKnowledgeBase(project_name="test_project", title="Test Book", genre="Fiction")
 
         # Act

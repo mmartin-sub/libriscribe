@@ -197,6 +197,12 @@ class BookCreatorService:
 
         return asyncio.run(self.acreate_book(args))
 
+    async def create_book_from_cli(self, args: dict[str, Any]) -> bool:
+        """
+        Creates a book from the raw CLI arguments.
+        """
+        return await self.acreate_book(args)
+
     async def acreate_book(self, args: dict[str, Any]) -> bool:
         """
         Asynchronous book creation. This is the preferred method for async code.
@@ -302,7 +308,7 @@ class BookCreatorService:
                         "  2. Use --mock flag for testing without API keys\n\n"
                         "Example: create-book --title 'My Book' --all --mock"
                     )
-                raise RuntimeError(error_msg) from None
+                raise RuntimeError(error_msg) from e
             elif "not fully implemented" in str(e) or "not_implemented" in str(e):
                 if is_mock_mode:
                     error_msg = "❌ LLM provider not fully implemented yet."
@@ -311,7 +317,7 @@ class BookCreatorService:
                         "❌ LLM provider not fully implemented yet.\n"
                         "  Use --mock flag for testing: create-book --title 'My Book' --all --mock"
                     )
-                raise RuntimeError(error_msg) from None
+                raise RuntimeError(error_msg) from e
             elif "Timeout" in str(e) or "timeout" in str(e).lower():
                 if is_mock_mode:
                     error_msg = "❌ Request timed out. Try again later."
@@ -323,7 +329,7 @@ class BookCreatorService:
                         "  3. Request being too complex\n\n"
                         "💡 Try again or use --mock flag for testing"
                     )
-                raise RuntimeError(error_msg) from None
+                raise RuntimeError(error_msg) from e
             elif "408" in str(e):
                 if is_mock_mode:
                     error_msg = "❌ Request timeout (408 error). Try again later."
@@ -332,11 +338,84 @@ class BookCreatorService:
                         "❌ Request timeout (408 error). The LLM service is taking too long to respond.\n"
                         "💡 Try again later or use --mock flag for testing"
                     )
-                raise RuntimeError(error_msg) from None
+                raise RuntimeError(error_msg) from e
             else:
                 # For other errors, provide a generic message without suggesting --mock
                 error_msg = "❌ Book creation failed. Check the log file for detailed error information."
-                raise RuntimeError(error_msg) from None
+                raise RuntimeError(error_msg) from e
+
+    async def generate_concept(self, project_name: str) -> None:
+        """Generates a book concept."""
+        if not self.project_manager:
+            self.project_manager = ProjectManagerAgent(settings=self.settings, model_config=self.model_config)
+        self.project_manager.load_project_data(project_name)
+        await self.project_manager.generate_concept()
+
+    async def generate_outline(self, project_name: str) -> None:
+        """Generates a book outline."""
+        if not self.project_manager:
+            self.project_manager = ProjectManagerAgent(settings=self.settings, model_config=self.model_config)
+        self.project_manager.load_project_data(project_name)
+        await self.project_manager.generate_outline()
+
+    async def generate_characters(self, project_name: str) -> None:
+        """Generates character profiles."""
+        if not self.project_manager:
+            self.project_manager = ProjectManagerAgent(settings=self.settings, model_config=self.model_config)
+        self.project_manager.load_project_data(project_name)
+        await self.project_manager.generate_characters()
+
+    async def generate_worldbuilding(self, project_name: str) -> None:
+        """Generates worldbuilding details."""
+        if not self.project_manager:
+            self.project_manager = ProjectManagerAgent(settings=self.settings, model_config=self.model_config)
+        self.project_manager.load_project_data(project_name)
+        await self.project_manager.generate_worldbuilding()
+
+    async def write_chapter(self, project_name: str, chapter_number: int) -> None:
+        """Writes a specific chapter."""
+        if not self.project_manager:
+            self.project_manager = ProjectManagerAgent(settings=self.settings, model_config=self.model_config)
+        self.project_manager.load_project_data(project_name)
+        await self.project_manager.write_and_review_chapter(chapter_number)
+
+    async def edit_chapter(self, project_name: str, chapter_number: int) -> None:
+        """Edits a specific chapter."""
+        if not self.project_manager:
+            self.project_manager = ProjectManagerAgent(settings=self.settings, model_config=self.model_config)
+        self.project_manager.load_project_data(project_name)
+        await self.project_manager.edit_chapter(chapter_number)
+
+    async def format_book(self, project_name: str) -> None:
+        """Formats the book."""
+        if not self.project_manager:
+            self.project_manager = ProjectManagerAgent(settings=self.settings, model_config=self.model_config)
+        self.project_manager.load_project_data(project_name)
+        await self.project_manager.format_book()
+
+    async def research_topic(self, query: str) -> None:
+        """Performs web research on a given query."""
+        if not self.project_manager:
+            self.project_manager = ProjectManagerAgent(settings=self.settings, model_config=self.model_config)
+        await self.project_manager.research_topic(query)
+
+    async def resume_project(self, project_name: str) -> None:
+        """Resumes a project from the last checkpoint."""
+        if not self.project_manager:
+            self.project_manager = ProjectManagerAgent(settings=self.settings, model_config=self.model_config)
+
+        try:
+            self.project_manager.load_project_data(project_name)
+            logger.info(f"Project '{project_name}' resumed successfully.")
+            self.console.print(f"✅ [green]Project '{project_name}' resumed.[/green]")
+        except FileNotFoundError:
+            logger.error(f"Project '{project_name}' not found.")
+            self.console.print(f"❌ [red]Error: Project '{project_name}' not found.[/red]")
+        except Exception:
+            logger.exception(f"Failed to resume project '{project_name}'")
+            self.console.print(
+                f"❌ [red]Error: Failed to resume project '{project_name}'. Check logs for details.[/red]"
+            )
 
     def _create_knowledge_base(self, args: dict[str, Any], project_name: str) -> ProjectKnowledgeBase:
         """Create a ProjectKnowledgeBase from CLI arguments."""
@@ -348,7 +427,7 @@ class BookCreatorService:
         kb.category = args.get("category", "Fiction")
         kb.genre = args.get("genre", "")
         kb.description = args.get("description", "")
-        kb.language = args.get("language", "English")
+        kb.language = args.get("language") or self.settings.default_language
         from libriscribe2.utils.validation_mixin import ValidationMixin as VM
 
         kb.target_audience = VM.validate_target_audience(args.get("target_audience", "General"))
@@ -554,7 +633,7 @@ class BookCreatorService:
             except Exception as e:
                 # Log detailed error to file only
                 logger.exception("Failed to generate concept")
-                raise RuntimeError(f"Concept generation failed: {e}") from None
+                raise RuntimeError(f"Concept generation failed: {e}") from e
 
         if steps["generate_outline"]:
             logger.info("Generating book outline...")

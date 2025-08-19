@@ -136,7 +136,7 @@ class TestJSONProcessor:
         data = {"title": "Test Book", "author": "Test Author"}
 
         # Act
-        result = JSONProcessor.safe_json_dumps(data)
+        result = JSONProcessor.safe_json_dumps(data, ensure_ascii=False)
 
         # Assert
         assert result is not None

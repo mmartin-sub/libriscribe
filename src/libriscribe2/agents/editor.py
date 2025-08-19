@@ -8,6 +8,7 @@ from typing import Any
 # Add this import
 from rich.console import Console
 
+from ..settings import Settings
 from ..utils import prompts_context as prompts
 from ..utils.file_utils import (
     read_markdown_file,
@@ -27,8 +28,9 @@ logger = logging.getLogger(__name__)
 class EditorAgent(Agent):
     """Edits and refines chapters."""
 
-    def __init__(self, llm_client: LLMClient):
+    def __init__(self, llm_client: LLMClient, settings: Settings):
         super().__init__("EditorAgent", llm_client)
+        self.settings = settings
 
     async def execute(
         self,
@@ -56,7 +58,7 @@ class EditorAgent(Agent):
             chapter_title = self.extract_chapter_title(chapter_content)
 
             # Get the review results first
-            reviewer_agent = ContentReviewerAgent(self.llm_client)
+            reviewer_agent = ContentReviewerAgent(self.llm_client, self.settings)
             await reviewer_agent.execute(project_knowledge_base, chapter_path=chapter_path)
 
             scene_titles = self.extract_scene_titles(chapter_content)

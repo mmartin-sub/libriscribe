@@ -8,7 +8,7 @@ from typing import Any
 import yaml
 from dotenv import load_dotenv
 
-from .settings import OPENAI_BASE_URL, OPENAI_DEFAULT_MODEL
+from .settings import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -191,27 +191,28 @@ def create_example_config_files() -> None:
     """Create example configuration files for reference."""
 
     # Example JSON configuration
+    settings = Settings()
     example_json_config = {
         "openai_api_key": "your-openai-api-key-here",
-        "openai_base_url": OPENAI_BASE_URL,
-        "openai_default_model": OPENAI_DEFAULT_MODEL,
+        "openai_base_url": settings.openai_base_url_default,
+        "openai_default_model": settings.openai_default_model_name,
         "default_llm": "openai",
         "llm_timeout": 360,
         "projects_dir": "./projects",
         "hide_generated_by": False,
         "models": {
-            "default": OPENAI_DEFAULT_MODEL,
+            "default": settings.openai_default_model_name,
             "outline": "gpt-4o",
             "worldbuilding": "gpt-4o",
-            "chapter": OPENAI_DEFAULT_MODEL,
+            "chapter": settings.openai_default_model_name,
             "formatting": "gpt-4o",
-            "concept": OPENAI_DEFAULT_MODEL,
+            "concept": settings.openai_default_model_name,
             "character": "gpt-4o",
-            "scene_outline": OPENAI_DEFAULT_MODEL,
+            "scene_outline": settings.openai_default_model_name,
             "editor": "gpt-4o",
-            "research": OPENAI_DEFAULT_MODEL,
-            "scene": OPENAI_DEFAULT_MODEL,
-            "keyword_generation": OPENAI_DEFAULT_MODEL,
+            "research": settings.openai_default_model_name,
+            "scene": settings.openai_default_model_name,
+            "keyword_generation": settings.openai_default_model_name,
         },
     }
 
@@ -221,8 +222,8 @@ def create_example_config_files() -> None:
 
 # OpenAI Configuration
 openai_api_key: "your-openai-api-key-here"
-openai_base_url: "{OPENAI_BASE_URL}"
-openai_default_model: "{OPENAI_DEFAULT_MODEL}"
+openai_base_url: "{settings.openai_base_url_default}"
+openai_default_model: "{settings.openai_default_model_name}"
 
 # General Settings
 default_llm: "openai"
@@ -233,34 +234,34 @@ hide_generated_by: false
 # Model Configuration
 # Specify which model to use for different types of content generation
 models:
-  default: "{OPENAI_DEFAULT_MODEL}"      # Default model when none specified
+  default: "{settings.openai_default_model_name}"      # Default model when none specified
   outline: "gpt-4o"          # For generating book outlines
   worldbuilding: "gpt-4o"    # For worldbuilding content
-  chapter: "{OPENAI_DEFAULT_MODEL}"     # For writing chapters
+  chapter: "{settings.openai_default_model_name}"     # For writing chapters
   formatting: "gpt-4o"       # For formatting tasks
-  concept: "{OPENAI_DEFAULT_MODEL}"     # For generating book concepts
+  concept: "{settings.openai_default_model_name}"     # For generating book concepts
   character: "gpt-4o"        # For character generation
-  scene_outline: "{OPENAI_DEFAULT_MODEL}"  # For generating scene outlines
+  scene_outline: "{settings.openai_default_model_name}"  # For generating scene outlines
   editor: "gpt-4o"           # For editing and revision
-  research: "{OPENAI_DEFAULT_MODEL}"    # For research tasks
-  scene: "{OPENAI_DEFAULT_MODEL}"       # For writing individual scenes
-  keyword_generation: "{OPENAI_DEFAULT_MODEL}"  # For generating keywords
+  research: "{settings.openai_default_model_name}"    # For research tasks
+  scene: "{settings.openai_default_model_name}"       # For writing individual scenes
+  keyword_generation: "{settings.openai_default_model_name}"  # For generating keywords
 """
 
     # Example model-only configuration
     example_model_config = {
-        "default": OPENAI_DEFAULT_MODEL,
+        "default": settings.openai_default_model_name,
         "outline": "gpt-4o",
         "worldbuilding": "gpt-4o",
-        "chapter": OPENAI_DEFAULT_MODEL,
+        "chapter": settings.openai_default_model_name,
         "formatting": "gpt-4o",
-        "concept": OPENAI_DEFAULT_MODEL,
+        "concept": settings.openai_default_model_name,
         "character": "gpt-4o",
-        "scene_outline": OPENAI_DEFAULT_MODEL,
+        "scene_outline": settings.openai_default_model_name,
         "editor": "gpt-4o",
-        "research": OPENAI_DEFAULT_MODEL,
-        "scene": OPENAI_DEFAULT_MODEL,
-        "keyword_generation": OPENAI_DEFAULT_MODEL,
+        "research": settings.openai_default_model_name,
+        "scene": settings.openai_default_model_name,
+        "keyword_generation": settings.openai_default_model_name,
     }
 
     # Write example files

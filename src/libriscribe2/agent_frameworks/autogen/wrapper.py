@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
 from ...agents.agent_base import Agent as LibriScribeAgent
-from ...settings import DEFAULT_TEMPERATURE, DEFAULT_TIMEOUT, OPENAI_BASE_URL, Settings
+from ...settings import Settings
 from ...utils.llm_client import LLMClient
 from ..base import BaseFrameworkWrapper, FrameworkAgent
 
@@ -156,13 +156,13 @@ class AutoGenAgentWrapper(BaseFrameworkWrapper):
         return {
             "config_list": [
                 {
-                    "model": self.settings.openai_default_model,
+                    "model": self.settings.openai_default_model_name,
                     "api_key": self.settings.openai_api_key,
-                    "base_url": getattr(self.settings, "openai_base_url", OPENAI_BASE_URL),
+                    "base_url": getattr(self.settings, "openai_base_url", self.settings.openai_base_url_default),
                 }
             ],
-            "temperature": DEFAULT_TEMPERATURE,
-            "timeout": DEFAULT_TIMEOUT,
+            "temperature": self.settings.default_temperature,
+            "timeout": self.settings.default_timeout,
         }
 
     def setup_book_creation_team(self, agents: dict[str, LibriScribeAgent]) -> list[FrameworkAgent]:

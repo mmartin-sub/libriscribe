@@ -24,8 +24,9 @@ def load_json_with_schema(file_path: str, schema: dict[str, Any]) -> dict[str, A
         The validated JSON data, or None if validation fails.
     """
     try:
-        with open(file_path) as f:
-            data = cast(dict[str, Any], pyjson5.load(f))
+        with open(file_path, encoding="utf-8") as f:
+            content = f.read()
+        data = cast(dict[str, Any], pyjson5.loads(content))
         jsonschema.validate(data, schema)
         return data
     except (OSError, jsonschema.ValidationError, pyjson5.Json5Exception) as e:
@@ -48,12 +49,12 @@ class JSONProcessor:
                     if isinstance(sub_value, str):
                         flattened_value += f"{sub_key}: {sub_value} "
                     else:
-                        flattened_value += f"{sub_key}: {json.dumps(sub_value)} "
+                        flattened_value += f"{sub_key}: {json.dumps(sub_value, ensure_ascii=False)} "
                 flattened[key] = flattened_value.strip()
             elif isinstance(value, str):
                 flattened[key] = value
             else:
-                flattened[key] = json.dumps(value)
+                flattened[key] = json.dumps(value, ensure_ascii=False)
         return flattened
 
     @staticmethod

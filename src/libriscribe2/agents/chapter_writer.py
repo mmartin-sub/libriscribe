@@ -8,6 +8,7 @@ from typing import Any
 from rich.console import Console
 
 from ..knowledge_base import Chapter, Scene
+from ..settings import Settings
 from ..utils import prompts_context as prompts
 from ..utils.file_utils import (
     write_markdown_file,
@@ -24,8 +25,8 @@ logger = logging.getLogger(__name__)
 class ChapterWriterAgent(Agent):
     """Writes chapters."""
 
-    def __init__(self, llm_client: LLMClient):
-        super().__init__("ChapterWriterAgent", llm_client)
+    def __init__(self, llm_client: LLMClient, settings: Settings):
+        super().__init__("ChapterWriterAgent", llm_client, settings)
 
     def format_scene(self, scene_title: str, scene_content: str) -> str:
         """

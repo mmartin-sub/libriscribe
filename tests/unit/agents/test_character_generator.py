@@ -160,10 +160,12 @@ class TestCharacterGeneratorAgent:
     def test_initialization(self):
         """Test CharacterGeneratorAgent initialization."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
 
         # Act
-        agent = CharacterGeneratorAgent(mock_llm)
+        agent = CharacterGeneratorAgent(mock_llm, settings)
 
         # Assert
         assert agent.name == "CharacterGeneratorAgent"
@@ -173,9 +175,11 @@ class TestCharacterGeneratorAgent:
     async def test_execute_basic(self):
         """Test basic character generation execution."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.return_value = generate_large_character_response()
-        agent = CharacterGeneratorAgent(mock_llm)
+        agent = CharacterGeneratorAgent(mock_llm, settings)
         kb = ProjectKnowledgeBase(project_name="test_project", title="Test Book")
         kb.set("concept", "A story about space exploration")
 
@@ -189,9 +193,11 @@ class TestCharacterGeneratorAgent:
     async def test_execute_llm_error(self):
         """Test execution when LLM client raises an error."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.side_effect = Exception("LLM error")
-        agent = CharacterGeneratorAgent(mock_llm)
+        agent = CharacterGeneratorAgent(mock_llm, settings)
         kb = ProjectKnowledgeBase(project_name="test_project", title="Test Book")
 
         # Act
@@ -204,8 +210,10 @@ class TestCharacterGeneratorAgent:
     def test_basic_functionality(self):
         """Test basic CharacterGeneratorAgent functionality."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
-        agent = CharacterGeneratorAgent(mock_llm)
+        agent = CharacterGeneratorAgent(mock_llm, settings)
 
         # Assert
         assert agent.name == "CharacterGeneratorAgent"

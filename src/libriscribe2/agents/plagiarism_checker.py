@@ -5,6 +5,7 @@ from typing import Any
 
 from rich.console import Console
 
+from ..settings import Settings
 from ..utils.file_utils import extract_json_from_markdown, read_markdown_file
 from ..utils.llm_client import LLMClient
 from .agent_base import Agent
@@ -16,9 +17,10 @@ logger = logging.getLogger(__name__)
 class PlagiarismCheckerAgent(Agent):
     """Checks a chapter for potential plagiarism."""
 
-    def __init__(self, llm_client: LLMClient):
+    def __init__(self, llm_client: LLMClient, settings: Settings):
         super().__init__("PlagiarismCheckerAgent", llm_client)
         self.llm_client = llm_client
+        self.settings = settings
 
     async def execute(self, project_knowledge_base: Any, output_path: str | None = None, **kwargs: Any) -> None:
         """Checks a chapter for potential plagiarism, handling Markdown-wrapped JSON."""

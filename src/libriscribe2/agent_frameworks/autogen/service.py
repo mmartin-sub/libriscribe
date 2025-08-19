@@ -17,7 +17,7 @@ from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.base import ChatAgent, Team
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 
-from ...settings import DEFAULT_TEMPERATURE, OPENAI_BASE_URL, Settings
+from ...settings import Settings
 from ...utils.llm_client import LLMClient
 from ..base import BaseFrameworkService
 from .wrapper import AutoGenAgentWrapper
@@ -156,9 +156,9 @@ class AutoGenService(BaseFrameworkService):
 
         agents: list[ChatAgent | Team] = []
         model_client = OpenAIChatCompletionClient(
-            model=self.settings.openai_default_model,
+            model=self.settings.openai_default_model_name,
             api_key=self.settings.openai_api_key,
-            base_url=getattr(self.settings, "openai_base_url", OPENAI_BASE_URL),
+            base_url=getattr(self.settings, "openai_base_url", self.settings.openai_base_url_default),
         )
 
         # Create specialized agents for book creation
@@ -248,9 +248,9 @@ class AutoGenService(BaseFrameworkService):
 
         agents: list[ChatAgent | Team] = []
         model_client = OpenAIChatCompletionClient(
-            model=self.settings.openai_default_model,
+            model=self.settings.openai_default_model_name,
             api_key=self.settings.openai_api_key,
-            base_url=getattr(self.settings, "openai_base_url", OPENAI_BASE_URL),
+            base_url=getattr(self.settings, "openai_base_url", self.settings.openai_base_url_default),
         )
 
         # Coordinator agent
@@ -326,7 +326,10 @@ class AutoGenService(BaseFrameworkService):
             conversation_data = {
                 "timestamp": datetime.now().isoformat(),
                 "result": str(chat_result),
-                "settings": {"model": self.settings.openai_default_model, "temperature": DEFAULT_TEMPERATURE},
+                "settings": {
+                    "model": self.settings.openai_default_model_name,
+                    "temperature": self.settings.default_temperature,
+                },
             }
 
             with open(output_file, "w") as f:
@@ -386,10 +389,11 @@ class AutoGenConfigurationManager:
     def get_recommended_configuration(self, use_case: str) -> dict[str, Any]:
         """Get recommended configuration for a specific use case."""
 
+        settings = Settings()
         configurations = {
             "book_creation": {
                 "max_conversation_turns": 50,
-                "temperature": DEFAULT_TEMPERATURE,
+                "temperature": settings.default_temperature,
                 "timeout": 300,
                 "agent_types": ["assistant", "user_proxy"],
                 "recommended_models": ["gpt-4", "gpt-4-32k"],

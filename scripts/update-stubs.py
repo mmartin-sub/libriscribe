@@ -101,7 +101,7 @@ for dist in metadata.distributions():
         "version": dist.version,
         "import_names": import_names,
     }
-print(json.dumps(packages, indent=2))
+print(json.dumps(packages, indent=2, ensure_ascii=False))
 """
     try:
         result = subprocess.run(
