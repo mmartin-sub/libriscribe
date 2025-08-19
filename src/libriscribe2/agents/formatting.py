@@ -9,6 +9,7 @@ from fpdf import FPDF
 from rich.console import Console
 
 from ..knowledge_base import ProjectKnowledgeBase
+from ..settings import Settings
 from ..utils import prompts_context as prompts
 from ..utils.file_utils import (
     get_chapter_files,
@@ -26,8 +27,9 @@ logger = logging.getLogger(__name__)
 class FormattingAgent(Agent):
     """Formats the book into a single Markdown or PDF file."""
 
-    def __init__(self, llm_client: LLMClient):
+    def __init__(self, llm_client: LLMClient, settings: Settings):
         super().__init__("FormattingAgent", llm_client)
+        self.settings = settings
 
     def _validate_project_path(self, project_dir: str) -> Path:
         """Validates and secures the project directory path to prevent path traversal attacks."""
@@ -87,35 +89,30 @@ class FormattingAgent(Agent):
                 all_chapters_content += read_markdown_file(chapter_file) + "\n\n"
 
             # Get project data (for title page) - using validated path
-            project_data_path = validated_project_dir / "project_data.json"
+            project_data_path = validated_project_dir / self.settings.project_data_filename
             project_kb = ProjectKnowledgeBase.load_from_file(str(project_data_path))
             if not project_kb:
                 print(f"ERROR: Could not load project data from {project_data_path}")
                 return
 
-            # Get settings for formatting options
-            from ..settings import Settings
-
-            settings = Settings()
-
             # Prepare conditional instructions
             title_page_instruction = ""
             toc_instruction = ""
 
-            if settings.formatting_add_title_page:
+            if self.settings.formatting_add_title_page:
                 title_page_instruction = """Add Title Page (if information available):
 
 If title, author, and genre are provided, create a title page at the beginning.
 
 Use appropriate Markdown headings for title and author."""
 
-            if settings.formatting_add_toc:
+            if self.settings.formatting_add_toc:
                 toc_instruction = """Table of Contents: Generate a table of contents with links to each chapter. For this basic version, just list the chapter titles."""
 
             # Assemble final manuscript
             console.print("📚 [cyan]Assembling final manuscript...[/cyan]")
             input_length = len(all_chapters_content)
-            min_expected_length = int(input_length * settings.formatting_min_length_ratio)
+            min_expected_length = int(input_length * self.settings.formatting_min_length_ratio)
 
             # Mock mode: bypass LLM and concatenate chapters directly
             formatted_markdown = ""
@@ -148,14 +145,14 @@ Use appropriate Markdown headings for title and author."""
 
                     if len(formatted_markdown) < min_expected_length:
                         self.logger.error(
-                            f"Formatting failed: Output length {len(formatted_markdown)} is less than {settings.formatting_min_length_ratio * 100}% of input length {input_length}"
+                            f"Formatting failed: Output length {len(formatted_markdown)} is less than {self.settings.formatting_min_length_ratio * 100}% of input length {input_length}"
                         )
                         console.print("[red]❌ Error: Formatting output too short after retry[/red]")
                         # Hard fail so the CLI does not report success
                         raise RuntimeError("formatting_output_too_short")
 
             # Add title page manually if enabled (applies to both mock and real LLM)
-            if settings.formatting_add_title_page:
+            if self.settings.formatting_add_title_page:
                 title_page = self.create_title_page(project_kb)
                 formatted_markdown = title_page + formatted_markdown
 

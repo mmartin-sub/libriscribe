@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any, TypeVar, cast
 from weakref import WeakValueDictionary
 
-from ..settings import DEFAULT_TIMEOUT
+from ..settings import Settings
 
 # Python 3.12: Type parameter for generic operations
 T = TypeVar("T")
@@ -58,9 +58,11 @@ class AsyncPerformanceMonitor:
         self.logger = logging.getLogger(__name__)
 
     async def monitor_operation(
-        self, operation_name: str, operation: Callable[[], Awaitable[T]], timeout: float = DEFAULT_TIMEOUT
+        self, operation_name: str, operation: Callable[[], Awaitable[T]], timeout: float | None = None
     ) -> T:
         """Monitor an async operation with timing."""
+        settings = Settings()
+        timeout = timeout or settings.default_timeout
 
         metric = PerformanceMetrics(operation_name)
 

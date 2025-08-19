@@ -47,7 +47,7 @@ async def test_api():
                 if response.status == 200:
                     data = await response.json()
                     print("Full API Response:")
-                    print(json.dumps(data, indent=2))
+                    print(json.dumps(data, indent=2, ensure_ascii=False))
                     if "choices" in data and data["choices"] and len(data["choices"]) > 0:
                         if "message" in data["choices"][0] and "content" in data["choices"][0]["message"]:
                             print(f"Response: {data['choices'][0]['message']['content'][:100]}...")

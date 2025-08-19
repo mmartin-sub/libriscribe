@@ -51,10 +51,12 @@ class TestChapterWriterAgent:
     def test_initialization(self):
         """Test ChapterWriterAgent initialization."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
 
         # Act
-        agent = ChapterWriterAgent(mock_llm)
+        agent = ChapterWriterAgent(mock_llm, settings)
 
         # Assert
         assert agent.name == "ChapterWriterAgent"
@@ -64,9 +66,11 @@ class TestChapterWriterAgent:
     async def test_execute_basic(self):
         """Test basic chapter writing execution."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.return_value = generate_large_chapter_content()
-        agent = ChapterWriterAgent(mock_llm)
+        agent = ChapterWriterAgent(mock_llm, settings)
         kb = ProjectKnowledgeBase(project_name="test_project", title="Test Book")
         kb.set("concept", "A story about space exploration")
         chapter = Chapter(chapter_number=1, title="Chapter 1")
@@ -82,9 +86,11 @@ class TestChapterWriterAgent:
     async def test_execute_llm_error(self):
         """Test execution when LLM client raises an error."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.side_effect = Exception("LLM error")
-        agent = ChapterWriterAgent(mock_llm)
+        agent = ChapterWriterAgent(mock_llm, settings)
         kb = ProjectKnowledgeBase(project_name="test_project", title="Test Book")
 
         # Act & Assert
@@ -94,8 +100,10 @@ class TestChapterWriterAgent:
     def test_format_scene(self):
         """Test formatting scene content."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
-        agent = ChapterWriterAgent(mock_llm)
+        agent = ChapterWriterAgent(mock_llm, settings)
         scene_title = "Scene 1: Opening"
         scene_content = "### **Scene 1: Opening**\n\nThis is the scene content."
 
@@ -112,8 +120,10 @@ class TestChapterWriterAgent:
     def test_format_scene_no_heading(self):
         """Test formatting scene content without heading."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
-        agent = ChapterWriterAgent(mock_llm)
+        agent = ChapterWriterAgent(mock_llm, settings)
         scene_title = "Scene 1: Opening"
         scene_content = "This is the scene content without a heading."
 
@@ -128,8 +138,10 @@ class TestChapterWriterAgent:
     def test_format_scene_variant_heading(self):
         """Test formatting scene content with variant heading format."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
-        agent = ChapterWriterAgent(mock_llm)
+        agent = ChapterWriterAgent(mock_llm, settings)
         scene_title = "Scene 1: Opening"
         scene_content = "**Scene 1: Opening**\n\nThis is the scene content."
 
@@ -147,9 +159,11 @@ class TestChapterWriterAgent:
     async def test_execute_with_invalid_chapter_number(self):
         """Test execution with invalid chapter number."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.return_value = generate_large_chapter_content()
-        agent = ChapterWriterAgent(mock_llm)
+        agent = ChapterWriterAgent(mock_llm, settings)
         kb = ProjectKnowledgeBase(project_name="test_project", title="Test Book")
         # No chapters added
 
@@ -164,9 +178,11 @@ class TestChapterWriterAgent:
     async def test_execute_with_empty_scenes(self):
         """Test execution with chapter that has no scenes."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.return_value = generate_large_chapter_content()
-        agent = ChapterWriterAgent(mock_llm)
+        agent = ChapterWriterAgent(mock_llm, settings)
         kb = ProjectKnowledgeBase(project_name="test_project", title="Test Book")
         chapter = Chapter(chapter_number=1, title="Chapter 1")
         kb.add_chapter(chapter)

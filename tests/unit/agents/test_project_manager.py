@@ -211,7 +211,7 @@ class TestProjectManagerAgent:
         agent.save_project_data()
 
         # Assert
-        mock_save.assert_called_once_with("/test/path/project_data.json")
+        mock_save.assert_called_once_with(f"/test/path/{settings.project_data_filename}")
 
     def test_save_project_data_no_project(self):
         """Test saving project data when no project is set."""
@@ -235,7 +235,7 @@ class TestProjectManagerAgent:
             # Create project directory and data file
             project_dir = Path(temp_dir) / "test_project"
             project_dir.mkdir(parents=True, exist_ok=True)
-            project_data_file = project_dir / "project_data.json"
+            project_data_file = project_dir / settings.project_data_filename
             project_data_file.write_text('{"project_name": "test_project"}')
 
             # Mock settings to use temp directory
@@ -292,7 +292,7 @@ class TestProjectManagerAgent:
             # Create project directory and data file
             project_dir = Path(temp_dir) / "test_project"
             project_dir.mkdir(parents=True, exist_ok=True)
-            project_data_file = project_dir / "project_data.json"
+            project_data_file = project_dir / settings.project_data_filename
             project_data_file.write_text("invalid json")
             settings.projects_dir = temp_dir
 
@@ -312,7 +312,7 @@ class TestProjectManagerAgent:
             # Create project directory and data file
             project_dir = Path(temp_dir) / "test_project"
             project_dir.mkdir(parents=True, exist_ok=True)
-            project_data_file = project_dir / "project_data.json"
+            project_data_file = project_dir / settings.project_data_filename
             project_data_file.write_text('{"project_name": "test_project"}')
             settings.projects_dir = temp_dir
 

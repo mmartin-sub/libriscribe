@@ -98,6 +98,17 @@ class Worldbuilding(BaseModel):
 class ProjectKnowledgeBase(BaseModel):
     project_name: str
     title: str = "Untitled"
+    subtitle: str | None = None
+    author: str | list[str] | None = None
+    date: str | None = None
+    publisher: str | None = None
+    isbn: str | None = None
+    rights: str | None = None
+    subject: str | None = None
+    koma_options: str | None = None
+    dir: str | None = None
+    fontsize: str | None = None
+    classoption: list[str] | None = None
     genre: str = "Unknown Genre"
     description: str = "No description provided."
     category: str = "Unknown Category"

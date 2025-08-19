@@ -66,6 +66,7 @@ class ProjectManagerAgent:
         # Use the timeout from settings to ensure all LLM calls respect the configured timeout
         self.llm_client = LLMClient(
             llm_provider,
+            settings=self.settings,
             model_config=combined_model_config,
             timeout=float(self.settings.llm_timeout),
             environment=self.settings.environment,
@@ -75,18 +76,18 @@ class ProjectManagerAgent:
 
         # Initialize traditional agents
         self.agents = {
-            "content_reviewer": ContentReviewerAgent(self.llm_client),  # Pass client
-            "concept_generator": ConceptGeneratorAgent(self.llm_client),
-            "outliner": OutlinerAgent(self.llm_client),
-            "character_generator": CharacterGeneratorAgent(self.llm_client),
-            "worldbuilding": WorldbuildingAgent(self.llm_client),
-            "chapter_writer": ChapterWriterAgent(self.llm_client),
-            "editor": EditorAgent(self.llm_client),
-            "researcher": ResearcherAgent(self.llm_client),
-            "formatting": FormattingAgent(self.llm_client),
-            "style_editor": StyleEditorAgent(self.llm_client),
-            "plagiarism_checker": PlagiarismCheckerAgent(self.llm_client),
-            "fact_checker": FactCheckerAgent(self.llm_client),
+            "content_reviewer": ContentReviewerAgent(self.llm_client, self.settings),
+            "concept_generator": ConceptGeneratorAgent(self.llm_client, self.settings),
+            "outliner": OutlinerAgent(self.llm_client, self.settings),
+            "character_generator": CharacterGeneratorAgent(self.llm_client, self.settings),
+            "worldbuilding": WorldbuildingAgent(self.llm_client, self.settings),
+            "chapter_writer": ChapterWriterAgent(self.llm_client, self.settings),
+            "editor": EditorAgent(self.llm_client, self.settings),
+            "researcher": ResearcherAgent(self.llm_client, self.settings),
+            "formatting": FormattingAgent(self.llm_client, self.settings),
+            "style_editor": StyleEditorAgent(self.llm_client, self.settings),
+            "plagiarism_checker": PlagiarismCheckerAgent(self.llm_client, self.settings),
+            "fact_checker": FactCheckerAgent(self.llm_client, self.settings),
         }
 
         # Initialize AutoGen service if enabled
@@ -119,7 +120,7 @@ class ProjectManagerAgent:
     def save_project_data(self):
         """Saves the project data to a JSON file."""
         if self.project_knowledge_base and self.project_dir:
-            project_data_path = self.project_dir / "project_data.json"
+            project_data_path = self.project_dir / self.settings.project_data_filename
             self.project_knowledge_base.save_to_file(str(project_data_path))
 
     def load_project_data(self, project_name: str) -> None:
@@ -132,7 +133,7 @@ class ProjectManagerAgent:
             raise FileNotFoundError(f"Project directory '{project_name}' not found in {self.settings.projects_dir}")
 
         # Check if project_data.json exists
-        project_data_path = project_dir / "project_data.json"
+        project_data_path = project_dir / self.settings.project_data_filename
         if not project_data_path.exists():
             raise FileNotFoundError(f"Project data file not found at {project_data_path}")
 

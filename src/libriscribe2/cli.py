@@ -1,10 +1,10 @@
-# src/libriscribe2/main.py
+# src/libriscribe2/cli.py
 """
 LibriScribe2 - Modern book creation CLI with rich output and type safety.
 
 Usage Examples:
     # Create a book with all generation steps (NON-INTERACTIVE - RECOMMENDED)
-    hatch run python src/libriscribe2/main.py create-book \
+    hatch run python src/libriscribe2/cli.py create-book \
         --title "My Awesome Book" \
         --genre fantasy \
         --description "A tale of epic proportions about 2 kids living in Lausanne called Eva and Justine" \
@@ -14,20 +14,20 @@ Usage Examples:
         --all
 
     # Create just the concept and outline (NON-INTERACTIVE - RECOMMENDED)
-    hatch run python src/libriscribe2/main.py create-book \
+    hatch run python src/libriscribe2/cli.py create-book \
         --title "My Book" \
         --genre mystery \
         --generate-concept \
         --generate-outline
 
     # Start interactive mode (ADVANCED - NOT FULLY SUPPORTED)
-    hatch run python src/libriscribe2/main.py start
+    hatch run python src/libriscribe2/cli.py start
 
     # Check book statistics (NON-INTERACTIVE - RECOMMENDED)
-    hatch run python src/libriscribe2/main.py book-stats --project-name my_book
+    hatch run python src/libriscribe2/cli.py book-stats --project-name my_book
 
     # Check book statistics with recent log entries
-    hatch run python src/libriscribe2/main.py book-stats --project-name my_book --show-logs
+    hatch run python src/libriscribe2/cli.py book-stats --project-name my_book --show-logs
 
 Requirements:
     - Python 3.12+
@@ -52,7 +52,7 @@ from .utils.timestamp_utils import format_timestamp_for_filename
 # Add better error handling for imports
 try:
     from libriscribe2.agents.project_manager import ProjectManagerAgent
-    from libriscribe2.settings import MANUSCRIPT_MD_FILENAME, Settings
+    from libriscribe2.settings import Settings
 except ImportError as e:
     print(f"❌ Import Error: {e}")
     print("💡 This might be due to:")
@@ -124,7 +124,7 @@ def suppress_traceback(exc_type: type[BaseException], exc_value: BaseException, 
         print(f"❌ Error: {exc_value}", file=sys.stderr)
 
 
-sys.excepthook = suppress_traceback
+# sys.excepthook = suppress_traceback
 
 console = Console()
 
@@ -254,7 +254,7 @@ def create_book(
     ),
     genre: str = typer.Option(None, "--genre", "-g", help="Book genre (e.g., fantasy, mystery, romance)"),
     description: str = typer.Option(None, "--description", "-d", help="Book description or synopsis"),
-    language: str = typer.Option("English", "--language", "-l", help="Book language [default: English]"),
+    language: str = typer.Option(None, "--language", "-l", help="Book language"),
     chapters: str = typer.Option(
         None, "--chapters", help="Number of chapters to generate (e.g., 10, 8-12) (overrides project-type)"
     ),
@@ -368,7 +368,7 @@ def create_book(
         # Create the book using the async method
         import asyncio
 
-        result = asyncio.run(book_creator.acreate_book(args))
+        result = asyncio.run(book_creator.create_book_from_cli(args))
         if result:
             console.print("[green]Book created successfully![/green]")
             return 0
@@ -400,37 +400,37 @@ def create_book(
 @app.command()
 async def concept(project_name: str = typer.Option(..., prompt="Project name")) -> None:
     """Generates a book concept (ADVANCED - NOT FULLY SUPPORTED)."""
-    # TODO: Implement project loading logic
-    # project_manager.load_project_data(project_name)
-    print(f"Project '{project_name}' loaded. Generating concept...")
-    await project_manager.generate_concept()
+    from libriscribe2.services.book_creator import BookCreatorService
+
+    service = BookCreatorService()
+    await service.generate_concept(project_name)
 
 
 @app.command()
 async def outline(project_name: str = typer.Option(..., prompt="Project name")) -> None:
     """Generates a book outline (ADVANCED - NOT FULLY SUPPORTED)."""
-    # TODO: Implement project loading logic
-    # project_manager.load_project_data(project_name)
-    print(f"Project '{project_name}' loaded. Generating outline...")
-    await project_manager.generate_outline()
+    from libriscribe2.services.book_creator import BookCreatorService
+
+    service = BookCreatorService()
+    await service.generate_outline(project_name)
 
 
 @app.command()
 async def characters(project_name: str = typer.Option(..., prompt="Project name")) -> None:
     """Generates character profiles (ADVANCED - NOT FULLY SUPPORTED)."""
-    # TODO: Implement project loading logic
-    # project_manager.load_project_data(project_name)
-    print(f"Project '{project_name}' loaded. Generating characters...")
-    await project_manager.generate_characters()
+    from libriscribe2.services.book_creator import BookCreatorService
+
+    service = BookCreatorService()
+    await service.generate_characters(project_name)
 
 
 @app.command()
 async def worldbuilding(project_name: str = typer.Option(..., prompt="Project name")) -> None:
     """Generates worldbuilding details (ADVANCED - NOT FULLY SUPPORTED)."""
-    # TODO: Implement project loading logic
-    # project_manager.load_project_data(project_name)
-    print(f"Project '{project_name}' loaded. Generating worldbuilding...")
-    await project_manager.generate_worldbuilding()
+    from libriscribe2.services.book_creator import BookCreatorService
+
+    service = BookCreatorService()
+    await service.generate_worldbuilding(project_name)
 
 
 @app.command()
@@ -439,10 +439,10 @@ async def write(
     chapter_number: int = typer.Option(..., prompt="Chapter number"),
 ) -> None:
     """Writes a specific chapter, with review process (ADVANCED - NOT FULLY SUPPORTED)."""
-    # TODO: Implement project loading logic
-    # project_manager.load_project_data(project_name)
-    print(f"Project '{project_name}' loaded. Writing chapter {chapter_number}...")
-    await project_manager.write_and_review_chapter(chapter_number)
+    from libriscribe2.services.book_creator import BookCreatorService
+
+    service = BookCreatorService()
+    await service.write_chapter(project_name, chapter_number)
 
 
 @app.command()
@@ -451,10 +451,10 @@ async def edit(
     chapter_number: int = typer.Option(..., prompt="Chapter number to edit"),
 ) -> None:
     """Edits and refines a specific chapter (ADVANCED - NOT FULLY SUPPORTED)"""
-    # TODO: Implement project loading logic
-    # project_manager.load_project_data(project_name)
-    print(f"Project '{project_name}' loaded. Editing chapter {chapter_number}...")
-    await project_manager.edit_chapter(chapter_number)
+    from libriscribe2.services.book_creator import BookCreatorService
+
+    service = BookCreatorService()
+    await service.edit_chapter(project_name, chapter_number)
 
 
 @app.command()
@@ -463,22 +463,19 @@ async def format(
     _output_format: str = typer.Option(None, "--output-format", help="Output format (md or pdf)"),
 ) -> None:
     """Formats the entire book into a single Markdown or PDF file (ADVANCED - NOT FULLY SUPPORTED)."""
-    # TODO: Implement project loading logic
-    # project_manager.load_project_data(project_name)
-    print(f"Project '{project_name}' loaded. Formatting book...")
+    from libriscribe2.services.book_creator import BookCreatorService
 
-    # Determine output path based on format
-    if not project_manager.project_dir:
-        console.print("[red]Error: Project directory not set[/red]")
-        return
-
-    await project_manager.format_book()
+    service = BookCreatorService()
+    await service.format_book(project_name)
 
 
 @app.command()
 async def research(query: str = typer.Option(..., prompt="Research query")) -> None:
     """Performs web research on a given query (ADVANCED - NOT FULLY SUPPORTED)."""
-    await project_manager.research_topic(query)
+    from libriscribe2.services.book_creator import BookCreatorService
+
+    service = BookCreatorService()
+    await service.research_topic(query)
 
 
 @app.command(name="book-stats")
@@ -644,115 +641,10 @@ def resume(
     project_name: str = typer.Option(..., prompt="Project name to resume"),
 ) -> None:
     """Resumes a project from the last checkpoint (ADVANCED - NOT FULLY SUPPORTED)."""
-    try:
-        # TODO: Implement project loading logic
-        # project_manager.load_project_data(project_name)
-        print(f"Project '{project_name}' loaded. Resuming...")
+    from libriscribe2.services.book_creator import BookCreatorService
 
-        if not project_manager.project_knowledge_base:
-            print("ERROR resuming project")
-            return
-
-        if not project_manager.project_dir:
-            print("ERROR: Project directory not set")
-            return
-
-        # Check if auto-title generation is needed
-        kb = project_manager.project_knowledge_base
-        if not kb:
-            print("ERROR: Project knowledge base not available")
-            return
-
-        async def generate_missing_content() -> None:
-            if project_manager.project_dir is None:
-                print("ERROR: Project directory not set")
-                return
-
-            # 1. Outline
-            outline_path = project_manager.project_dir / "outline.md"
-            if not outline_path.exists():
-                await project_manager.generate_outline()
-                project_manager.checkpoint()
-            else:
-                print("Outline already exists. Skipping outline generation.")
-
-            # 2. Characters
-            characters_path = project_manager.project_dir / "characters.md"
-            kb = project_manager.project_knowledge_base
-            if kb and kb.get("num_characters", 0) > 0 and not characters_path.exists():
-                await project_manager.generate_characters()
-                project_manager.checkpoint()
-            else:
-                print("Characters already generated or not needed. Skipping.")
-
-            # 3. Worldbuilding
-            worldbuilding_path = project_manager.project_dir / "worldbuilding.md"
-            kb = project_manager.project_knowledge_base
-            if kb and kb.get("worldbuilding_needed", False) and not worldbuilding_path.exists():
-                await project_manager.generate_worldbuilding()
-                project_manager.checkpoint()
-            else:
-                print("Worldbuilding already generated or not needed. Skipping.")
-
-        asyncio.run(generate_missing_content())
-
-        # 4. Chapters
-        kb = project_manager.project_knowledge_base
-        if not kb:
-            print("ERROR: Project knowledge base not available")
-            return
-        num_chapters = kb.get("num_chapters", 1)
-        if isinstance(num_chapters, tuple):
-            num_chapters = num_chapters[1]
-
-        if not project_manager.project_dir:
-            print("ERROR: Project directory not set")
-            return
-
-        last_chapter = 0
-        for i in range(1, num_chapters + 1):
-            chapter_path = project_manager.project_dir / f"chapter_{i}.md"
-            if chapter_path.exists():
-                last_chapter = i
-
-        print(f"Last written chapter: {last_chapter}/{num_chapters}")
-
-        async def write_chapters() -> None:
-            for i in range(last_chapter + 1, num_chapters + 1):
-                await project_manager.write_and_review_chapter(i)
-                project_manager.checkpoint()
-
-        asyncio.run(write_chapters())
-
-        # 5. Format book if all chapters exist and manuscript doesn't
-        manuscript_path = project_manager.project_dir / MANUSCRIPT_MD_FILENAME
-        if (
-            all((project_manager.project_dir / f"chapter_{i}.md").exists() for i in range(1, num_chapters + 1))
-            and not manuscript_path.exists()
-        ):
-            asyncio.run(project_manager.format_book())
-        else:
-            print("Book already formatted or chapters missing. Skipping formatting.")
-
-        # 6. Generate title if auto-title is enabled and we have content
-        if project_manager.needs_title_generation():
-            print("Generating title based on content...")
-            try:
-                success = asyncio.run(project_manager.generate_project_title())
-                if success:
-                    print("✅ Title generated successfully")
-                else:
-                    print("⚠️ Failed to generate title")
-            except Exception as e:
-                print(f"⚠️ Failed to generate title: {e}")
-        elif kb.auto_title and (kb.title == "Untitled" or kb.title == "Untitled Book"):
-            print("Auto-title enabled but insufficient content available for title generation")
-            print("  Title generation works best with: chapters, characters, or outline")
-
-    except FileNotFoundError:
-        print(f"Project '{project_name}' not found.")
-    except ValueError as e:
-        print(f"Error loading project data: {e}")
+    service = BookCreatorService()
+    asyncio.run(service.resume_project(project_name))
 
 
 @app.command()
@@ -783,7 +675,7 @@ def generate_title(
             return
 
         # Load project knowledge base
-        project_data_path = project_dir / "project_data.json"
+        project_data_path = project_dir / settings.project_data_filename
         if not project_data_path.exists():
             print(f"❌ Project data not found at {project_data_path}")
             return

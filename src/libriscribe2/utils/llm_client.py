@@ -17,17 +17,7 @@ from typing import Any, Protocol, TypeVar
 import aiohttp
 from aiohttp import ClientSession, ClientTimeout
 
-from ..settings import (
-    CLIENT_VERSION,
-    DEFAULT_ENVIRONMENT,
-    DEFAULT_MAX_TOKENS,
-    DEFAULT_MODEL_CONFIG,
-    DEFAULT_TEMPERATURE,
-    DEFAULT_TIMEOUT,
-    FALLBACK_MODEL,
-    OPENAI_BASE_URL,
-    OPENAI_DEFAULT_MODEL,
-)
+from ..settings import Settings
 
 T = TypeVar("T")
 
@@ -72,16 +62,18 @@ class LLMClient:
     def __init__(
         self,
         provider: str,
+        settings: Settings,
         model_config: dict[str, str] | None = None,
-        timeout: float = DEFAULT_TIMEOUT,
-        environment: str = DEFAULT_ENVIRONMENT,
+        timeout: float | None = None,
+        environment: str | None = None,
         project_name: str = "",
         user: str | None = None,
     ):
         self.provider = provider
-        self.model_config = model_config or DEFAULT_MODEL_CONFIG
-        self.timeout = timeout
-        self.environment = environment
+        self.settings = settings
+        self.model_config = model_config or self.settings.default_model_config
+        self.timeout = timeout if timeout is not None else self.settings.default_timeout
+        self.environment = environment or self.settings.default_environment
         self.project_name = project_name
         self.user = user
         self.logger = logging.getLogger(f"LLMClient({provider})")
@@ -104,14 +96,14 @@ class LLMClient:
 
     def get_model_for_prompt_type(self, prompt_type: str) -> str:
         """Gets the specific model for a given prompt type, falling back to default."""
-        return self.model_config.get(prompt_type, self.model_config.get("default", "gpt-4o-mini"))
+        return self.model_config.get(prompt_type, self.model_config.get("default", self.settings.fallback_model))
 
     # Python 3.12: Improved async method signatures
     async def generate_content(
         self,
         prompt: str,
         prompt_type: str = "general",
-        temperature: float = DEFAULT_TEMPERATURE,
+        temperature: float | None = None,
         max_tokens: int | None = None,
         **kwargs: Any,
     ) -> str:
@@ -120,17 +112,25 @@ class LLMClient:
         async def _generate() -> str:
             try:
                 # Get the appropriate model for this prompt type
-                model_to_use = self.model_config.get(prompt_type, self.model_config.get("default", FALLBACK_MODEL))
+                model_to_use = self.model_config.get(
+                    prompt_type, self.model_config.get("default", self.settings.fallback_model)
+                )
                 self.logger.debug(f"Using model '{model_to_use}' for prompt_type '{prompt_type}'")
 
                 # Python 3.12: Better async support
                 if self.provider == "openai":
                     return await self._generate_openai_content(
-                        prompt, temperature, max_tokens, model=model_to_use, **kwargs
+                        prompt,
+                        temperature or self.settings.default_temperature,
+                        max_tokens,
+                        model=model_to_use,
+                        **kwargs,
                     )
 
                 elif self.provider == "mock":
-                    return await self._generate_mock_content(prompt, temperature, prompt_type=prompt_type, **kwargs)
+                    return await self._generate_mock_content(
+                        prompt, temperature or self.settings.default_temperature, prompt_type=prompt_type, **kwargs
+                    )
                 else:
                     raise LLMClientError(f"Unsupported provider: {self.provider}", self.provider)
 
@@ -147,16 +147,20 @@ class LLMClient:
 
     # Python 3.12: Better async iteration support
     async def generate_streaming_content(
-        self, prompt: str, temperature: float = DEFAULT_TEMPERATURE, max_tokens: int | None = None, **kwargs: Any
+        self, prompt: str, temperature: float | None = None, max_tokens: int | None = None, **kwargs: Any
     ) -> AsyncIterator[str]:
         """Generate streaming content with improved async iteration."""
 
         try:
             if self.provider == "openai":
-                async for chunk in self._generate_openai_streaming(prompt, temperature, max_tokens, **kwargs):
+                async for chunk in self._generate_openai_streaming(
+                    prompt, temperature or self.settings.default_temperature, max_tokens, **kwargs
+                ):
                     yield chunk
             elif self.provider == "mock":
-                async for chunk in self._generate_mock_streaming(prompt, temperature, **kwargs):
+                async for chunk in self._generate_mock_streaming(
+                    prompt, temperature or self.settings.default_temperature, **kwargs
+                ):
                     yield chunk
             else:
                 raise LLMClientError(f"Unsupported provider for streaming: {self.provider}", self.provider)
@@ -230,7 +234,7 @@ class LLMClient:
             "user": self.user,
             "model_config": self.model_config,
             "capabilities": ["content_generation", "streaming_generation"],
-            "version": CLIENT_VERSION,
+            "version": self.settings.client_version,
         }
 
     # Python 3.12: Improved validation methods
@@ -244,7 +248,7 @@ class LLMClient:
             return False
 
         # Python 3.12: Better string handling
-        if len(prompt) > DEFAULT_MAX_TOKENS:  # Reasonable limit
+        if len(prompt) > self.settings.default_max_tokens:  # Reasonable limit
             return False
 
         return True
@@ -311,27 +315,29 @@ class LLMClient:
         primary_prompt: str,
         fallback_prompt: str | None = None,
         prompt_type: str = "general",
-        temperature: float = DEFAULT_TEMPERATURE,
+        temperature: float | None = None,
         max_retries: int = 2,
         **kwargs: Any,
     ) -> str | None:
         """Generate content with fallback for content filtering issues."""
 
+        temp = temperature or self.settings.default_temperature
+
         for attempt in range(max_retries + 1):
             try:
                 if attempt == 0:
                     # Try with primary prompt
-                    result = await self.generate_content(primary_prompt, prompt_type, temperature, **kwargs)
+                    result = await self.generate_content(primary_prompt, prompt_type, temp, **kwargs)
                 else:
                     # Try with fallback prompt
                     if fallback_prompt:
                         self.logger.info(f"Retry {attempt}: Using fallback prompt for {prompt_type}")
-                        result = await self.generate_content(fallback_prompt, prompt_type, temperature, **kwargs)
+                        result = await self.generate_content(fallback_prompt, prompt_type, temp, **kwargs)
                     else:
                         # Generate a simplified fallback prompt
                         simplified_prompt = self._create_simplified_prompt(primary_prompt, prompt_type)
                         self.logger.info(f"Retry {attempt}: Using auto-generated simplified prompt for {prompt_type}")
-                        result = await self.generate_content(simplified_prompt, prompt_type, temperature, **kwargs)
+                        result = await self.generate_content(simplified_prompt, prompt_type, temp, **kwargs)
 
                 if result:
                     return result
@@ -396,9 +402,10 @@ Write directly without introductions."""
             return original_prompt[:500] + "..." if len(original_prompt) > 500 else original_prompt
 
     async def _generate_openai_content(
-        self, prompt: str, temperature: float, max_tokens: int | None, model: str = OPENAI_DEFAULT_MODEL, **kwargs: Any
+        self, prompt: str, temperature: float, max_tokens: int | None, model: str | None = None, **kwargs: Any
     ) -> str:
         """Generate content using OpenAI."""
+        model = model or self.settings.openai_default_model_name
         # Check if OpenAI API key is available
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
@@ -413,7 +420,7 @@ Write directly without introductions."""
             self.logger.warning(f"API key format may be invalid: {api_key[:10]}...")
 
         # Get base URL from environment (defaults to OpenAI's official API)
-        base_url = os.getenv("OPENAI_BASE_URL", OPENAI_BASE_URL)
+        base_url = os.getenv("OPENAI_BASE_URL", self.settings.openai_base_url_default)
 
         # Prepare the request payload
         payload = {
@@ -452,7 +459,7 @@ Write directly without introductions."""
         if date_tag:
             tag_items.append(date_tag)
 
-        if tag_items:
+        if self.settings.send_litellm_tags and tag_items:
             headers["x-litellm-tags"] = ",".join(tag_items)
 
         # Log LiteLLM metadata and timeout (with API key truncated)
@@ -466,10 +473,10 @@ Write directly without introductions."""
 
         # Log headers at INFO level only once, then use DEBUG level
         if not self._logged_headers_info:
-            self.logger.info(f"LiteLLM headers: {safe_headers}")
+            self.logger.info(f"OpenAI headers: {safe_headers}")
             self._logged_headers_info = True
         else:
-            self.logger.debug(f"LiteLLM headers: {safe_headers}")
+            self.logger.debug(f"OpenAI headers: {safe_headers}")
 
         self.logger.debug(f"Request timeout: {self.timeout} seconds")
         self.logger.debug(f"Request payload: {payload}")
@@ -594,14 +601,17 @@ Write directly without introductions."""
 
         # Create a mock client instance with LiteLLM metadata
         mock_client = MockLLMClient(
-            model_config=self.model_config, environment=self.environment, project_name=self.project_name, user=self.user
+            model_config=self.model_config,
+            project_name=self.project_name,
+            user=self.user,
+            settings=self.settings,
         )
 
         # Extract prompt_type from kwargs or use default
         prompt_type = kwargs.get("prompt_type", "general")
 
         # Extract language from prompt if available
-        language = "English"  # Default
+        language = self.settings.default_language
         if "language" in prompt:
             # Try to extract language from prompt format like "language=French" or "The book is written in French"
             import re

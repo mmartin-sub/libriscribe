@@ -1,0 +1,16 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "ANY",
+    "urlPathPattern": "/v1/.*"
+  },
+  "response": {
+    "proxyBaseUrl": "https://openrouter.ai/api",
+    "transformers": ["response-template"],
+    "additionalProxyRequestHeaders": {
+      "Host": "openrouter.ai",
+      "X-Debug-Proxied-URL": "{{request.url}}",
+      "X-Debug-Headers": "{{request.headers}}"
+    }
+  }
+}

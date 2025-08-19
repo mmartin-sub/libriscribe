@@ -4,9 +4,34 @@
 import json
 import logging
 import re
-from typing import Any
+from typing import Any, cast
+
+import jsonschema
+import pyjson5
 
 logger = logging.getLogger(__name__)
+
+
+def load_json_with_schema(file_path: str, schema: dict[str, Any]) -> dict[str, Any] | None:
+    """
+    Loads a JSON5 file and validates it against a schema.
+
+    Args:
+        file_path: The path to the JSON5 file.
+        schema: The JSON schema to validate against.
+
+    Returns:
+        The validated JSON data, or None if validation fails.
+    """
+    try:
+        with open(file_path, encoding="utf-8") as f:
+            content = f.read()
+        data = cast(dict[str, Any], pyjson5.loads(content))
+        jsonschema.validate(data, schema)
+        return data
+    except (OSError, jsonschema.ValidationError, pyjson5.Json5Exception) as e:
+        logger.error(f"Failed to load or validate JSON file {file_path}: {e}")
+        return None
 
 
 class JSONProcessor:
@@ -24,12 +49,12 @@ class JSONProcessor:
                     if isinstance(sub_value, str):
                         flattened_value += f"{sub_key}: {sub_value} "
                     else:
-                        flattened_value += f"{sub_key}: {json.dumps(sub_value)} "
+                        flattened_value += f"{sub_key}: {json.dumps(sub_value, ensure_ascii=False)} "
                 flattened[key] = flattened_value.strip()
             elif isinstance(value, str):
                 flattened[key] = value
             else:
-                flattened[key] = json.dumps(value)
+                flattened[key] = json.dumps(value, ensure_ascii=False)
         return flattened
 
     @staticmethod
@@ -57,10 +82,10 @@ class JSONProcessor:
 
     @staticmethod
     def safe_json_loads(json_str: str) -> Any | None:
-        """Safely parse JSON string."""
+        """Safely parse JSON string using pyjson5."""
         try:
-            return json.loads(json_str)
-        except json.JSONDecodeError as e:
+            return pyjson5.loads(json_str)
+        except pyjson5.Json5Exception as e:
             logger.error(f"Error parsing JSON string: {e}")
             return None
 
@@ -283,11 +308,11 @@ class JSONProcessor:
             matches = re.findall(pattern, response, re.DOTALL)
             for match in matches:
                 try:
-                    result = json.loads(match)
+                    result = pyjson5.loads(match)
                     if isinstance(result, dict):
                         logger.debug(f"Successfully extracted JSON using pattern: {pattern}")
                         return result
-                except json.JSONDecodeError:
+                except pyjson5.Json5Exception:
                     continue
 
         logger.debug("Failed to extract valid JSON from response")

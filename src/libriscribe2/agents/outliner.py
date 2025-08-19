@@ -7,7 +7,7 @@ from typing import Any
 from rich.console import Console
 
 from ..knowledge_base import Chapter, ProjectKnowledgeBase, Scene
-from ..settings import SCENES_JSON
+from ..settings import Settings
 from ..utils import prompts_context as prompts
 from ..utils.file_utils import (
     write_json_file,
@@ -24,8 +24,9 @@ logger = logging.getLogger(__name__)
 class OutlinerAgent(Agent):
     """Generates book outlines."""
 
-    def __init__(self, llm_client: LLMClient):
+    def __init__(self, llm_client: LLMClient, settings: Settings):
         super().__init__("OutlinerAgent", llm_client)
+        self.settings = settings
 
     async def execute(
         self,
@@ -126,7 +127,7 @@ class OutlinerAgent(Agent):
 
             # Save the updated project data with scenes
             if hasattr(project_knowledge_base, "project_dir") and project_knowledge_base.project_dir:
-                scenes_path = str(Path(project_knowledge_base.project_dir) / SCENES_JSON)
+                scenes_path = str(Path(project_knowledge_base.project_dir) / self.settings.scenes_json)
 
                 # Create a simplified structure to save scene data
                 scenes_data = {}
@@ -339,9 +340,11 @@ class OutlinerAgent(Agent):
         if "Scene" in header_line and ":" in header_line:
             try:
                 # Try to extract number from "Scene X:" format
-                number_part = header_line.split("Scene", 1)[1].split(":", 1)[0].strip()
-                if number_part.isdigit():
-                    scene_data["scene_number"] = int(number_part)
+                parts = header_line.split("Scene", 1)
+                if len(parts) > 1:
+                    number_part = parts[1].split(":", 1)[0].strip()
+                    if number_part.isdigit():
+                        scene_data["scene_number"] = int(number_part)
             except (IndexError, ValueError):
                 # If extraction fails, use the default
                 pass
@@ -363,10 +366,10 @@ class OutlinerAgent(Agent):
                 ("emotional_beat", "Emotional Beat:"),
             ]:
                 if marker.lower() in line.lower():
+                    # Find the position of the marker, case-insensitive
+                    marker_pos = line.lower().find(marker.lower())
                     # Get the content after the marker
-                    content = (
-                        line.split(marker, 1)[1].strip() if marker in line else line.split(marker.lower(), 1)[1].strip()
-                    )
+                    content = line[marker_pos + len(marker) :].strip()
 
                     # Clean up the content (remove bullets, asterisks, brackets)
                     content = content.lstrip("*-[]").strip()

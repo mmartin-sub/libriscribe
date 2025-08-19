@@ -16,7 +16,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Protocol, TypeVar
 
-from ..settings import CLIENT_VERSION, DEFAULT_TEMPERATURE, DEFAULT_TIMEOUT
+from ..settings import Settings
 from ..utils.llm_client import LLMClient
 from ..utils.timestamp_utils import get_iso8601_utc_timestamp
 
@@ -64,9 +64,10 @@ class AgentExecutionError(Exception):
 class Agent(ABC):
     """Base agent class using Python 3.12 features."""
 
-    def __init__(self, name: str, llm_client: LLMClient):
+    def __init__(self, name: str, llm_client: LLMClient, settings: Settings | None = None):
         self.name = name
         self.llm_client = llm_client
+        self.settings = settings or Settings()
         self.logger = logging.getLogger(__name__)
 
     @abstractmethod
@@ -112,10 +113,11 @@ class Agent(ABC):
                 "content_type": content_type,
                 "agent_name": self.name,
                 "timestamp": get_iso8601_utc_timestamp(),
-                "raw_content": content,
                 "content_length": len(content),
                 "content_preview": content[:500] + "..." if len(content) > 500 else content,
             }
+            if content_type not in ["concept", "concept_revised"]:
+                debug_data["raw_content"] = content
 
             # Write the debug file
             with open(debug_file, "w", encoding="utf-8") as f:
@@ -140,14 +142,16 @@ class Agent(ABC):
         self,
         prompt: str,
         prompt_type: str = "general",
-        temperature: float = DEFAULT_TEMPERATURE,
-        timeout: float = DEFAULT_TIMEOUT,
+        temperature: float | None = None,
+        timeout: float | None = None,
     ) -> str | None:
         """Safely generate content with error handling."""
         try:
+            settings = Settings()
+            temp = temperature or settings.default_temperature
 
             async def _generate() -> str | None:
-                return await self.llm_client.generate_content(prompt, prompt_type=prompt_type, temperature=temperature)
+                return await self.llm_client.generate_content(prompt, prompt_type=prompt_type, temperature=temp)
 
             return await self.execute_with_fallback(_generate)
         except Exception as e:
@@ -312,7 +316,7 @@ class Agent(ABC):
             "class": self.__class__.__name__,
             "llm_client": type(self.llm_client).__name__,
             "capabilities": getattr(self, "capabilities", []),
-            "version": getattr(self, "version", CLIENT_VERSION),
+            "version": getattr(self, "version", self.settings.client_version),
         }
 
     # Python 3.12: Improved string formatting

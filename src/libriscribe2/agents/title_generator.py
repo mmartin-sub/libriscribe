@@ -9,7 +9,7 @@ from typing import Any
 
 from libriscribe2.agents.agent_base import Agent
 from libriscribe2.knowledge_base import ProjectKnowledgeBase
-from libriscribe2.settings import DEFAULT_TEMPERATURE
+from libriscribe2.settings import Settings
 from libriscribe2.utils.json_utils import JSONProcessor
 
 logger = logging.getLogger(__name__)
@@ -18,8 +18,9 @@ logger = logging.getLogger(__name__)
 class TitleGeneratorAgent(Agent):
     """Generates book titles based on content and metadata."""
 
-    def __init__(self, llm_client):
+    def __init__(self, llm_client, settings: Settings | None = None):
         super().__init__("TitleGeneratorAgent", llm_client)
+        self.settings = settings or Settings()
 
     async def execute(
         self,
@@ -34,7 +35,7 @@ class TitleGeneratorAgent(Agent):
 
             # Generate title using LLM with proper prompt_type
             response = await self.llm_client.generate_content(
-                prompt, prompt_type="title_generation", temperature=DEFAULT_TEMPERATURE
+                prompt, prompt_type="title_generation", temperature=self.settings.default_temperature
             )
 
             # Extract title from response

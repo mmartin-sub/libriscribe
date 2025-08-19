@@ -85,10 +85,12 @@ class TestContentReviewerAgent:
     def test_initialization(self):
         """Test ContentReviewerAgent initialization."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
 
         # Act
-        agent = ContentReviewerAgent(mock_llm)
+        agent = ContentReviewerAgent(mock_llm, settings)
 
         # Assert
         assert agent.name == "ContentReviewerAgent"
@@ -98,9 +100,11 @@ class TestContentReviewerAgent:
     async def test_execute_basic(self):
         """Test basic content review execution."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.return_value = generate_large_review_response()
-        agent = ContentReviewerAgent(mock_llm)
+        agent = ContentReviewerAgent(mock_llm, settings)
         kb = ProjectKnowledgeBase(project_name="test_project", title="Test Book")
         chapter = Chapter(chapter_number=1, title="Chapter 1")
         kb.add_chapter(chapter)
@@ -117,9 +121,11 @@ class TestContentReviewerAgent:
     async def test_execute_llm_error(self):
         """Test execution when LLM client raises an error."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.side_effect = Exception("LLM error")
-        agent = ContentReviewerAgent(mock_llm)
+        agent = ContentReviewerAgent(mock_llm, settings)
         kb = ProjectKnowledgeBase(project_name="test_project", title="Test Book")
         chapter = Chapter(chapter_number=1, title="Chapter 1")
         kb.add_chapter(chapter)
@@ -136,8 +142,10 @@ class TestContentReviewerAgent:
     async def test_execute_invalid_chapter_index(self):
         """Test execution with invalid chapter index."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = AsyncMock()
-        agent = ContentReviewerAgent(mock_llm)
+        agent = ContentReviewerAgent(mock_llm, settings)
         kb = ProjectKnowledgeBase(project_name="test_project", title="Test Book")
         # No chapters added
 
@@ -149,8 +157,10 @@ class TestContentReviewerAgent:
     def test_basic_functionality(self):
         """Test basic ContentReviewerAgent functionality."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
-        agent = ContentReviewerAgent(mock_llm)
+        agent = ContentReviewerAgent(mock_llm, settings)
 
         # Assert
         assert agent.name == "ContentReviewerAgent"

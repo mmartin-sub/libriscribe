@@ -42,12 +42,17 @@ class TestCLIBookStats:
             kb.review_preference = "yes"
             kb.description = "A test book description"
 
-            project_data_file = project_dir / "project_data.json"
+            from libriscribe2.settings import Settings
+
+            settings = Settings()
+            project_data_file = project_dir / settings.project_data_filename
             kb.save_to_file(str(project_data_file))
 
             # Mock settings to use temp directory
             with patch("libriscribe2.cli.Settings") as mock_settings:
+                # Configure the mock to return the temporary directory and the correct filename
                 mock_settings.return_value.projects_dir = temp_dir
+                mock_settings.return_value.project_data_filename = settings.project_data_filename
 
                 # Act
                 result = self.runner.invoke(app, ["book-stats", "--project-name", "test_project"])
@@ -80,7 +85,10 @@ class TestCLIBookStats:
             project_dir.mkdir(parents=True, exist_ok=True)
 
             # Create corrupted project data file
-            project_data_file = project_dir / "project_data.json"
+            from libriscribe2.settings import Settings
+
+            settings = Settings()
+            project_data_file = project_dir / settings.project_data_filename
             project_data_file.write_text("invalid json")
 
             # Mock settings to use temp directory

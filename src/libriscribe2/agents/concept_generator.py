@@ -31,15 +31,16 @@ logger = logging.getLogger(__name__)
 class ConceptGeneratorAgent(Agent):
     """Generates book concepts."""
 
-    def __init__(self, llm_client: LLMClient):
+    def __init__(self, llm_client: LLMClient, settings: Settings):
         super().__init__("ConceptGeneratorAgent", llm_client)
-        # Maximum prompt length to prevent issues with very long content
-        self.max_prompt_length = 8000  # Conservative limit for most LLMs
+        self.settings = settings
 
     def _validate_prompt_length(self, prompt: str, prompt_type: str) -> bool:
         """Validate that prompt length is within acceptable limits."""
-        if len(prompt) > self.max_prompt_length:
-            self.logger.warning(f"{prompt_type} prompt too long: {len(prompt)} chars (max: {self.max_prompt_length})")
+        if len(prompt) > self.settings.max_prompt_length:
+            self.logger.warning(
+                f"{prompt_type} prompt too long: {len(prompt)} chars (max: {self.settings.max_prompt_length})"
+            )
             return False
         return True
 
@@ -67,7 +68,7 @@ class ConceptGeneratorAgent(Agent):
             r"data:",  # Data URI injection
         ]
 
-        content_str = json.dumps(concept_json)
+        content_str = json.dumps(concept_json, ensure_ascii=False)
         for pattern in suspicious_patterns:
             if re.search(pattern, content_str, re.IGNORECASE):
                 self.logger.warning(f"Potentially suspicious content detected in concept: {pattern}")
@@ -81,12 +82,15 @@ class ConceptGeneratorAgent(Agent):
             json_str = json.dumps(concept_json, ensure_ascii=False)
 
             # Check if JSON is too long
-            if len(json_str) > 5000:  # Conservative limit for JSON in prompts
+            if len(json_str) > self.settings.concept_json_max_len:
                 self.logger.warning(f"Concept JSON too long: {len(json_str)} chars, truncating description")
 
                 # Truncate description if it's the main culprit
-                if "description" in concept_json and len(concept_json["description"]) > 800:
-                    truncated_desc = concept_json["description"][:800] + "..."
+                if (
+                    "description" in concept_json
+                    and len(concept_json["description"]) > self.settings.concept_prompt_min_len
+                ):
+                    truncated_desc = concept_json["description"][: self.settings.concept_prompt_min_len] + "..."
                     safe_concept = concept_json.copy()
                     safe_concept["description"] = truncated_desc
                     json_str = json.dumps(safe_concept, ensure_ascii=False)
@@ -248,7 +252,7 @@ class ConceptGeneratorAgent(Agent):
                 error_msg = "Failed to generate keywords"
                 self.log_error(error_msg)
                 fallback_keywords = self._generate_fallback_keywords(refined_concept_json)
-                keywords_md = f"```json\n{json.dumps(fallback_keywords, indent=2)}\n```"
+                keywords_md = f"```json\n{json.dumps(fallback_keywords, indent=2, ensure_ascii=False)}\n```"
 
             # Process and format the keywords response
             if keywords_md:

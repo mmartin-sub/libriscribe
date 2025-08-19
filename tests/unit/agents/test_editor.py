@@ -82,10 +82,12 @@ class TestEditorAgent:
     def test_initialization(self):
         """Test EditorAgent initialization."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
 
         # Act
-        agent = EditorAgent(mock_llm)
+        agent = EditorAgent(mock_llm, settings)
 
         # Assert
         assert agent.name == "EditorAgent"
@@ -95,9 +97,11 @@ class TestEditorAgent:
     async def test_execute_basic(self):
         """Test basic editing execution."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.return_value = generate_large_editing_response()
-        agent = EditorAgent(mock_llm)
+        agent = EditorAgent(mock_llm, settings)
         # Create a unique temporary directory for this test
         import os
         import tempfile
@@ -141,9 +145,11 @@ class TestEditorAgent:
     async def test_execute_llm_error(self):
         """Test execution when LLM client raises an error."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.side_effect = Exception("LLM error")
-        agent = EditorAgent(mock_llm)
+        agent = EditorAgent(mock_llm, settings)
 
         # Create a unique temporary directory for this test
         import os
@@ -186,10 +192,12 @@ class TestEditorAgent:
     async def test_execute_invalid_chapter_index(self):
         """Test execution with invalid chapter index."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = AsyncMock()
         # Configure the mock to return a valid response
         mock_llm.generate_content.return_value = "# Chapter 1\n\nEdited content"
-        agent = EditorAgent(mock_llm)
+        agent = EditorAgent(mock_llm, settings)
 
         # Create a unique temporary directory for this test
         import os
@@ -233,8 +241,10 @@ class TestEditorAgent:
     def test_extract_chapter_title(self):
         """Test extracting chapter title from content."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
-        agent = EditorAgent(mock_llm)
+        agent = EditorAgent(mock_llm, settings)
         content = "# Chapter 1: The Discovery\n\nThis is the chapter content."
 
         # Act
@@ -246,8 +256,10 @@ class TestEditorAgent:
     def test_extract_scene_titles(self):
         """Test extracting scene titles from content."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
-        agent = EditorAgent(mock_llm)
+        agent = EditorAgent(mock_llm, settings)
         content = "# Chapter 1\n\n## Scene 1: Opening\nContent here.\n\n## Scene 2: Discovery\nMore content."
 
         # Act
@@ -260,8 +272,10 @@ class TestEditorAgent:
     def test_extract_chapter_number(self):
         """Test extracting chapter number from path."""
         # Arrange
+        from libriscribe2.settings import Settings
+        settings = Settings()
         mock_llm = MagicMock()
-        agent = EditorAgent(mock_llm)
+        agent = EditorAgent(mock_llm, settings)
         chapter_path = "chapter_1.md"
 
         # Act

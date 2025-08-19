@@ -92,7 +92,7 @@ class TestProjectKnowledgeBase:
         kb_data = {"project_name": "test_project", "title": "Test Book", "scenes_per_chapter": "6-10"}
 
         # Act
-        kb = ProjectKnowledgeBase.from_json(json.dumps(kb_data))
+        kb = ProjectKnowledgeBase.from_json(json.dumps(kb_data, ensure_ascii=False))
 
         # Assert
         assert kb.scenes_per_chapter == "6-10"

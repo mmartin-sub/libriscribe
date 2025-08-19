@@ -119,6 +119,9 @@ def generate_yaml_metadata(project_knowledge_base: Any, write_to_file: bool = Tr
         lstrip_blocks=True,
     )
 
+    # Add a default value for koma-options to the context
+    context.setdefault("koma-options", "open=right, toc=graduated, numbers=auto, chapterprefix=true")
+
     # 3. Load and render the template.
     try:
         template = env.get_template(template_file)

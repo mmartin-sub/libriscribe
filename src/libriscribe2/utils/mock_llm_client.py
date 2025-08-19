@@ -6,7 +6,7 @@ import re
 import secrets
 from typing import ClassVar, TypedDict
 
-from ..settings import DEFAULT_ENVIRONMENT, DEFAULT_TEMPERATURE
+from ..settings import Settings
 
 
 class MockConfig(TypedDict):
@@ -163,15 +163,16 @@ class MockLLMClient:
         self,
         llm_provider: str = "mock",
         model_config: dict[str, str] | None = None,
-        environment: str = DEFAULT_ENVIRONMENT,
+        settings: Settings | None = None,
         project_name: str = "",
         user: str | None = None,
         mock_config: MockConfig | None = None,
     ):
         self.llm_provider = llm_provider
+        self.settings = settings or Settings()
         self.model_config = model_config if model_config is not None else {}
         self.default_model = self.model_config.get("default", "mock-model")
-        self.environment = environment
+        self.environment = self.settings.default_environment
         self.project_name = project_name
         self.user = user
 
@@ -289,13 +290,15 @@ class MockLLMClient:
         self,
         prompt: str,
         prompt_type: str = "default",
-        temperature: float = DEFAULT_TEMPERATURE,
-        language: str = "English",
+        temperature: float | None = None,
+        language: str | None = None,
         timeout: int | None = None,
     ) -> str:
         """
         Generates mock content based on the prompt type.
         """
+        temperature = temperature or self.settings.default_temperature
+        language = language or self.settings.default_language
         model_to_use = self.get_model_for_prompt_type(prompt_type)
         logger.debug(f"MockLLMClient: Generating content for prompt_type={prompt_type}, model={model_to_use}")
 
@@ -669,7 +672,7 @@ class MockLLMClient:
         self,
         original_prompt: str,
         prompt_type: str = "default",
-        temperature: float = DEFAULT_TEMPERATURE,
+        temperature: float | None = None,
     ) -> str:
         """
         Generates mock content and simulates JSON repair if needed.

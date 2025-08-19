@@ -97,8 +97,10 @@ def test_llm_client_model_config():
     try:
         # Create LLMClient with model config (this will fail without API key, but we can test the config part)
         # Use a reasonable timeout for testing
+        settings = Settings()
         client = LLMClient(
             "openai",
+            settings=settings,
             model_config=model_config,
             timeout=60.0,
             environment="testing",

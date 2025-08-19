@@ -21,7 +21,7 @@ from pathlib import Path
 # Using TypeAlias for mypy compatibility
 from typing import Any, Protocol, TypeVar, cast
 
-from ..settings import DEFAULT_TEMPERATURE, DEFAULT_TIMEOUT
+from ..settings import Settings
 
 
 # Define base classes for type bounds
@@ -96,9 +96,27 @@ class AgentConfig:
 
     name: str
     model: str
-    temperature: float = DEFAULT_TEMPERATURE
+    temperature: float
+    timeout: float
     max_tokens: int = 4000
-    timeout: float = DEFAULT_TIMEOUT
+    settings: Settings | None = None
+
+    def __init__(
+        self,
+        name: str,
+        model: str,
+        settings: Settings,
+        temperature: float | None = None,
+        max_tokens: int = 4000,
+        timeout: float | None = None,
+    ):
+        self.name = name
+        self.model = model
+        self.settings = settings
+        self.temperature = temperature or self.settings.default_temperature
+        self.max_tokens = max_tokens
+        self.timeout = timeout or self.settings.default_timeout
+        self.__post_init__()
 
     def __post_init__(self) -> None:
         """Validate configuration after initialization."""
@@ -149,9 +167,11 @@ def process_agent_result(result: T, validator: Callable[[T], bool]) -> T:
 
 # Python 3.12: Improved async function signatures
 async def execute_agent_with_timeout(
-    agent: BaseAgent, input_data: AgentInput, timeout: float = DEFAULT_TIMEOUT
+    agent: BaseAgent, input_data: AgentInput, timeout: float | None = None
 ) -> AgentResult:
     """Execute agent with timeout using Python 3.12 features."""
+    settings = Settings()
+    timeout = timeout or settings.default_timeout
 
     async def _execute() -> AgentResult:
         if hasattr(agent, "execute"):
