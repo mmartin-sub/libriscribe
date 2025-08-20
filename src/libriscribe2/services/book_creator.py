@@ -512,8 +512,20 @@ class BookCreatorService:
         # Set scenes per chapter
         if args.get("scenes_per_chapter"):
             # Manual override
-            kb.scenes_per_chapter = args["scenes_per_chapter"]
-            logger.info(f"Using manual scenes override: {kb.scenes_per_chapter}")
+            scenes_spec = args["scenes_per_chapter"]
+            # Check if it's a comma-separated list of integers
+            if isinstance(scenes_spec, str) and "," in scenes_spec:
+                try:
+                    kb.scenes_per_chapter_list = [int(s.strip()) for s in scenes_spec.split(",")]
+                    logger.info(f"Using fixed scenes per chapter: {kb.scenes_per_chapter_list}")
+                except ValueError:
+                    logger.warning(
+                        f"Invalid format for --scenes-per-chapter: '{scenes_spec}'. Expected a comma-separated list of numbers. Falling back to default."
+                    )
+                    kb.scenes_per_chapter = self.settings.get_effective_scenes_per_chapter()
+            else:
+                kb.scenes_per_chapter = scenes_spec
+                logger.info(f"Using manual scenes override: {kb.scenes_per_chapter}")
         else:
             # Use project type defaults
             kb.scenes_per_chapter = self.settings.get_effective_scenes_per_chapter()

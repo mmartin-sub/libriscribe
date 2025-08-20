@@ -61,7 +61,9 @@ class WorldbuildingAgent(Agent):
             # Dump raw response for debugging
             self._dump_raw_response(worldbuilding_response, output_path, "worldbuilding")
 
-            worldbuilding_data = self.safe_extract_json(worldbuilding_response, "worldbuilding response")
+            worldbuilding_data = self.safe_extract_json(
+                worldbuilding_response, "worldbuilding response", output_path=output_path
+            )
             if not worldbuilding_data:
                 self.log_error("Invalid worldbuilding data received (could not extract JSON).")
                 return

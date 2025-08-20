@@ -1,9 +1,10 @@
 # src/libriscribe2/agents/concept_generator.py
-import json
 import logging
 import re
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
+
+import pyjson5 as json
 
 from ..knowledge_base import ProjectKnowledgeBase
 from ..settings import Settings
@@ -79,7 +80,7 @@ class ConceptGeneratorAgent(Agent):
     def _build_safe_json_string(self, concept_json: dict[str, Any]) -> str:
         """Build a safe JSON string representation with length validation."""
         try:
-            json_str = json.dumps(concept_json, ensure_ascii=False)
+            json_str = cast(str, json.dumps(concept_json, ensure_ascii=False))
 
             # Check if JSON is too long
             if len(json_str) > self.settings.concept_json_max_len:
@@ -93,20 +94,23 @@ class ConceptGeneratorAgent(Agent):
                     truncated_desc = concept_json["description"][: self.settings.concept_prompt_min_len] + "..."
                     safe_concept = concept_json.copy()
                     safe_concept["description"] = truncated_desc
-                    json_str = json.dumps(safe_concept, ensure_ascii=False)
+                    json_str = cast(str, json.dumps(safe_concept, ensure_ascii=False))
                     self.logger.info(f"Truncated description to {len(truncated_desc)} chars")
 
             return json_str
         except Exception as e:
             self.logger.error(f"Failed to serialize concept JSON: {e}")
             # Return a minimal safe version
-            return json.dumps(
-                {
-                    "title": concept_json.get("title", "Unknown Title"),
-                    "logline": concept_json.get("logline", "Unknown Logline"),
-                    "description": concept_json.get("description", "Description unavailable")[:500],
-                },
-                ensure_ascii=False,
+            return cast(
+                str,
+                json.dumps(
+                    {
+                        "title": concept_json.get("title", "Unknown Title"),
+                        "logline": concept_json.get("logline", "Unknown Logline"),
+                        "description": concept_json.get("description", "Description unavailable")[:500],
+                    },
+                    ensure_ascii=False,
+                ),
             )
 
     async def execute(
@@ -155,7 +159,7 @@ class ConceptGeneratorAgent(Agent):
             # Dump raw response for debugging
             self._dump_raw_response(initial_concept_md, output_path, "concept")
 
-            initial_concept_json = self.safe_extract_json(initial_concept_md, "initial concept")
+            initial_concept_json = self.safe_extract_json(initial_concept_md, "initial concept", output_path)
             if not initial_concept_json:
                 error_msg = "Failed to parse book concept JSON"
                 self.logger.error(f"JSON parsing failed for concept: {initial_concept_md[:200]}...")
@@ -219,7 +223,7 @@ class ConceptGeneratorAgent(Agent):
                 refined_concept_json = initial_concept_json
             else:
                 self._dump_raw_response(refined_concept_md, output_path, "concept_revised")
-                refined_concept_result = self.safe_extract_json(refined_concept_md, "refined concept")
+                refined_concept_result = self.safe_extract_json(refined_concept_md, "refined concept", output_path)
                 if not refined_concept_result:
                     self.log_warning("Failed to parse refined concept, using original")
                     refined_concept_json = initial_concept_json
@@ -744,7 +748,7 @@ class ConceptGeneratorAgent(Agent):
 
             return keywords_data, raw_keywords_text
 
-        except (json.JSONDecodeError, ValueError) as e:
+        except ValueError as e:
             self.logger.warning(f"Failed to parse keywords JSON: {e}")
             # Return default empty keywords structure
             return {"primary_keywords": [], "secondary_keywords": [], "genre_keywords": []}, ""
@@ -784,7 +788,7 @@ def _format_keywords_response(self, keywords_md: str) -> tuple[dict[str, Any], s
 
         return keywords_data, raw_keywords_text
 
-    except (json.JSONDecodeError, ValueError) as e:
+    except ValueError as e:
         self.logger.warning(f"Failed to parse keywords JSON: {e}")
         # Fallback to extracting any list-like structures
         keywords: dict[str, list[str]] = {"primary_keywords": [], "secondary_keywords": [], "genre_keywords": []}

@@ -55,21 +55,22 @@ Your AI-Powered Book Writing Assistant
 - **Cross-Platform Compatibility:** Consistent behavior across different operating systems
 - **Python 3.12 Optimizations:** Enhanced performance with slots, improved async operations, and memory efficiency
 
-## 🚀 Quickstart
-
-> 📖 **Need detailed installation instructions?** See our comprehensive [Installation Guide](INSTALL.md)
+## 🚀 Getting Started
 
 ### Prerequisites
 
-LibriScribe2 uses modern Python tooling for development and dependency management. You'll need:
+Before you begin, ensure you have the following installed:
 
 - **Python 3.12+**
-- **uv** (fast Python package installer)
-- **hatch** (modern Python project manager)
+- **uv** (a fast Python package installer)
+- **hatch** (a modern Python project manager)
 
 ### Installation
 
-For detailed installation instructions for both users and developers, see our comprehensive [Installation Guide](INSTALL.md).
+We provide separate installation guides for users and developers:
+
+- **[Installation Guide for Users](docs/user-guide/installation.md)**
+- **[Installation Guide for Developers](docs/development/installation.md)**
 
 ### Configuration
 
@@ -495,7 +496,8 @@ For detailed information, see [Timestamp Standards Documentation](docs/developme
 ## 🔗 Quick Links
 
 - [📚 Documentation](https://guerra2fernando.github.io/libriscribe2/)
-- [🚀 Installation Guide](INSTALL.md)
+- [🚀 Installation Guide for Users](docs/user-guide/installation.md)
+- [🚀 Installation Guide for Developers](docs/development/installation.md)
 - [⚙️ Configuration Guide](docs/user-guide/configuration.md)
 - [🖥️ CLI API Documentation](docs/api/cli-api.md)
 - [📝 CLI Function Signatures](docs/api/cli-signatures.md)

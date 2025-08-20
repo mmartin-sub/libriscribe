@@ -83,6 +83,7 @@ class TestEditorAgent:
         """Test EditorAgent initialization."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
 
@@ -98,6 +99,7 @@ class TestEditorAgent:
         """Test basic editing execution."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.return_value = generate_large_editing_response()
@@ -146,6 +148,7 @@ class TestEditorAgent:
         """Test execution when LLM client raises an error."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.side_effect = Exception("LLM error")
@@ -193,6 +196,7 @@ class TestEditorAgent:
         """Test execution with invalid chapter index."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         # Configure the mock to return a valid response
@@ -242,6 +246,7 @@ class TestEditorAgent:
         """Test extracting chapter title from content."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = EditorAgent(mock_llm, settings)
@@ -257,6 +262,7 @@ class TestEditorAgent:
         """Test extracting scene titles from content."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = EditorAgent(mock_llm, settings)
@@ -273,6 +279,7 @@ class TestEditorAgent:
         """Test extracting chapter number from path."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = EditorAgent(mock_llm, settings)

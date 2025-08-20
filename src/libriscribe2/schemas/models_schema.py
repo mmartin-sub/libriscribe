@@ -1,0 +1,16 @@
+MODELS_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Libriscribe Models Schema",
+    "description": "Schema for the models configuration file (models.json)",
+    "type": "object",
+    "properties": {
+        "default": {"type": "string", "description": "The default model to use."},
+        "outline": {"type": "string", "description": "The model to use for generating outlines."},
+        "worldbuilding": {"type": "string", "description": "The model to use for worldbuilding."},
+        "chapter": {"type": "string", "description": "The model to use for writing chapters."},
+        "formatting": {"type": "string", "description": "The model to use for formatting."},
+        "concept": {"type": "string", "description": "The model to use for generating concepts."},
+        "character": {"type": "string", "description": "The model to use for generating characters."},
+    },
+    "required": ["default"],
+}

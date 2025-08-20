@@ -33,6 +33,7 @@ class TestConceptGeneratorAgent:
         """Test ConceptGeneratorAgent initialization."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
 
@@ -91,6 +92,7 @@ class TestConceptGeneratorAgent:
             ]
         )
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = ConceptGeneratorAgent(mock_llm, settings)
         kb = ProjectKnowledgeBase(project_name="test_project", title="Test Book")
@@ -110,6 +112,7 @@ class TestConceptGeneratorAgent:
         """Test execution when LLM client raises an error."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.side_effect = Exception("LLM error")
@@ -125,6 +128,7 @@ class TestConceptGeneratorAgent:
         """Test execution when LLM returns null content."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         # Mock all generate_content calls to return None
@@ -140,6 +144,7 @@ class TestConceptGeneratorAgent:
         """Test building initial prompt."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = ConceptGeneratorAgent(mock_llm, settings)
@@ -157,6 +162,7 @@ class TestConceptGeneratorAgent:
         """Test building critique prompt."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = ConceptGeneratorAgent(mock_llm, settings)
@@ -174,6 +180,7 @@ class TestConceptGeneratorAgent:
         """Test building refine prompt."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = ConceptGeneratorAgent(mock_llm, settings)
@@ -192,6 +199,7 @@ class TestConceptGeneratorAgent:
         """Test building keywords prompt."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = ConceptGeneratorAgent(mock_llm, settings)
@@ -209,6 +217,7 @@ class TestConceptGeneratorAgent:
         """Test formatting concept as markdown."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = ConceptGeneratorAgent(mock_llm, settings)
@@ -229,6 +238,7 @@ class TestConceptGeneratorAgent:
         """Test updating knowledge base with concept data."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = ConceptGeneratorAgent(mock_llm, settings)
@@ -253,6 +263,7 @@ class TestConceptGeneratorAgent:
         """Test that concept generator creates files with correct numbered names."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         # Mock responses for all the generate_content calls

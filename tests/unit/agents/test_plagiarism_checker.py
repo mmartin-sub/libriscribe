@@ -19,6 +19,7 @@ class TestPlagiarismCheckerAgent:
     def test_split_into_chunks(self):
         """Test that split_into_chunks correctly splits the text."""
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = PlagiarismCheckerAgent(MagicMock(), settings)
         text = "word " * 1000
@@ -30,6 +31,7 @@ class TestPlagiarismCheckerAgent:
     def test_split_into_chunks_with_empty_text(self):
         """Test that split_into_chunks handles an empty string."""
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = PlagiarismCheckerAgent(MagicMock(), settings)
         chunks = agent.split_into_chunks("", chunk_size=500)
@@ -39,6 +41,7 @@ class TestPlagiarismCheckerAgent:
     async def test_check_plagiarism_with_valid_response(self, mock_llm_client):
         """Test that check_plagiarism returns a list of plagiarism results."""
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm_client.generate_content.return_value = (
             '```json\n[{"text": "plagiarized text", "similarity_score": 0.9, "source": "http://example.com"}]\n```'
@@ -52,6 +55,7 @@ class TestPlagiarismCheckerAgent:
     async def test_check_plagiarism_with_invalid_response(self, mock_llm_client):
         """Test that check_plagiarism returns an empty list."""
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm_client.generate_content.return_value = "not a valid json"
         agent = PlagiarismCheckerAgent(mock_llm_client, settings)
@@ -64,6 +68,7 @@ class TestPlagiarismCheckerAgent:
     async def test_execute_with_valid_chapter(self, mock_write_json, mock_read_markdown, mock_llm_client, tmp_path):
         """Test the execute method with a valid chapter."""
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm_client.generate_content.return_value = "[]"
         agent = PlagiarismCheckerAgent(mock_llm_client, settings)
@@ -81,6 +86,7 @@ class TestPlagiarismCheckerAgent:
     async def test_execute_with_no_chapter_path(self, mock_llm_client):
         """Test that execute logs an error when no chapter_path is provided."""
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = PlagiarismCheckerAgent(mock_llm_client, settings)
         with patch("rich.console.Console.print") as mock_print:
@@ -92,6 +98,7 @@ class TestPlagiarismCheckerAgent:
     async def test_execute_with_empty_chapter(self, mock_read_markdown, mock_llm_client):
         """Test that execute handles an empty chapter."""
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = PlagiarismCheckerAgent(mock_llm_client, settings)
         with patch("builtins.print") as mock_print:

@@ -52,14 +52,20 @@ class EnvironmentConfig:
                 return
 
             # Handle YAML and JSON files
-            with open(config_path, encoding="utf-8") as f:
-                if config_path.suffix.lower() in [".yaml", ".yml"]:
-                    config_data = yaml.safe_load(f) or {}
-                elif config_path.suffix.lower() == ".json":
-                    config_data = json.load(f)
-                else:
-                    logger.warning(f"Unsupported configuration file format: {config_path.suffix}")
+            if config_path.suffix.lower() == ".json":
+                from .schemas.config_schema import CONFIG_SCHEMA
+                from .utils.json_utils import load_json_with_schema
+
+                config_data = load_json_with_schema(str(config_path), CONFIG_SCHEMA)
+                if not config_data:
+                    logger.error(f"Configuration file {self.config_file} is invalid.")
                     return
+            elif config_path.suffix.lower() in [".yaml", ".yml"]:
+                with open(config_path, encoding="utf-8") as f:
+                    config_data = yaml.safe_load(f) or {}
+            else:
+                logger.warning(f"Unsupported configuration file format: {config_path.suffix}")
+                return
 
             logger.info(f"Loaded configuration from: {self.config_file}")
 
@@ -92,6 +98,8 @@ class EnvironmentConfig:
             "projects_dir": "PROJECTS_DIR",
             "num_chapters": "NUM_CHAPTERS",
             "hide_generated_by": "HIDE_GENERATED_BY",
+            "log_llm_output": "LOG_LLM_OUTPUT",
+            "llm_timeout": "LLM_TIMEOUT",
         }
 
         for config_key, env_var in env_mapping.items():
@@ -156,17 +164,18 @@ def load_model_config(model_config_file: str | None = None) -> dict[str, str]:
         return {}
 
     try:
-        with open(config_path, encoding="utf-8") as f:
-            if config_path.suffix.lower() in [".yaml", ".yml"]:
-                config_data = yaml.safe_load(f) or {}
-            elif config_path.suffix.lower() == ".json":
+        if config_path.suffix.lower() == ".json":
+            with open(config_path, encoding="utf-8") as f:
                 config_data = json.load(f)
-            else:
-                logger.warning(f"Unsupported model config file format: {config_path.suffix}")
-                return {}
+        elif config_path.suffix.lower() in [".yaml", ".yml"]:
+            with open(config_path, encoding="utf-8") as f:
+                config_data = yaml.safe_load(f) or {}
+        else:
+            logger.warning(f"Unsupported model config file format: {config_path.suffix}")
+            return {}
 
         # Extract only the models section
-        model_config = config_data.get("models", {})
+        model_config = config_data
 
         # Validate that all values are strings
         validated_config = {}
@@ -270,7 +279,7 @@ models:
 
     # JSON config example
     with open(examples_dir / "config-example.json", "w", encoding="utf-8") as f:
-        json.dump(example_json_config, f, indent=2)
+        json.dump(example_json_config, f, indent=2, ensure_ascii=False)
 
     # YAML config example
     with open(examples_dir / "config.yaml", "w", encoding="utf-8") as f:
@@ -278,7 +287,7 @@ models:
 
     # Model config example
     with open(examples_dir / "models.json", "w", encoding="utf-8") as f:
-        json.dump(example_model_config, f, indent=2)
+        json.dump(example_model_config, f, indent=2, ensure_ascii=False)
 
     logger.info("Created example configuration files in examples/ directory")
 

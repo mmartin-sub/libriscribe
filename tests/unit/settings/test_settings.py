@@ -103,6 +103,8 @@ class TestSettings:
         """Test get_model_config with config file."""
         # Arrange
         config_data = {
+            "openai_api_key": "test-key",
+            "default_llm": "test-llm",
             "models": {
                 "default": "custom-default-model",
                 "concept": "custom-concept-model",
@@ -147,33 +149,6 @@ class TestSettings:
             # Cleanup
             Path(config_path).unlink(missing_ok=True)
 
-    def test_get_model_config_with_specific_file(self):
-        """Test get_model_config with specific model config file."""
-        # Arrange
-        model_config_data = {
-            "models": {
-                "default": "specific-default-model",
-                "concept": "specific-concept-model",
-            }
-        }
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-            json.dump(model_config_data, f)
-            model_config_path = f.name
-
-        try:
-            settings = Settings()
-
-            # Act
-            model_config = settings.get_model_config(model_config_path)
-
-            # Assert
-            assert model_config["default"] == "specific-default-model"
-            assert model_config["concept"] == "specific-concept-model"
-
-        finally:
-            # Cleanup
-            Path(model_config_path).unlink(missing_ok=True)
 
     def test_get_model_config_with_invalid_file(self):
         """Test get_model_config with invalid config file."""

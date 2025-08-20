@@ -179,6 +179,7 @@ class TestOutlinerAgent:
         """Test OutlinerAgent initialization."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
 
@@ -194,6 +195,7 @@ class TestOutlinerAgent:
         """Test basic outline generation execution."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
 
@@ -251,6 +253,7 @@ class TestOutlinerAgent:
         """Test execution when LLM client raises an error."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.side_effect = Exception("LLM error")
@@ -265,6 +268,7 @@ class TestOutlinerAgent:
         """Test processing outline."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = OutlinerAgent(mock_llm, settings)
@@ -282,6 +286,7 @@ class TestOutlinerAgent:
         """Test enforcing chapter limit."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = OutlinerAgent(mock_llm, settings)
@@ -302,6 +307,7 @@ class TestOutlinerAgent:
         """Test updating outline markdown."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = OutlinerAgent(mock_llm, settings)
@@ -322,6 +328,7 @@ class TestOutlinerAgent:
         """Test getting project type chapters."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = OutlinerAgent(mock_llm, settings)
@@ -339,6 +346,7 @@ class TestOutlinerAgent:
         """Test generating scene outline."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.return_value = generate_large_scene_outline_response()
@@ -357,6 +365,7 @@ class TestOutlinerAgent:
         """Test splitting into scene sections."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = OutlinerAgent(mock_llm, settings)
@@ -374,6 +383,7 @@ class TestOutlinerAgent:
         """Test extracting scene data."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = OutlinerAgent(mock_llm, settings)
@@ -398,6 +408,7 @@ class TestOutlinerAgent:
         """Test extracting scene data from invalid section."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = OutlinerAgent(mock_llm, settings)
@@ -413,6 +424,7 @@ class TestOutlinerAgent:
         """Test processing scene outline."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = OutlinerAgent(mock_llm, settings)
@@ -424,3 +436,25 @@ class TestOutlinerAgent:
 
         # Assert
         assert len(chapter.scenes) > 0
+
+    @pytest.mark.asyncio
+    async def test_generate_scene_outline_fixed_scenes(self):
+        """Test generating scene outline with a fixed number of scenes per chapter."""
+        # Arrange
+        from libriscribe2.settings import Settings
+
+        settings = Settings()
+        mock_llm = AsyncMock()
+        mock_llm.generate_content.return_value = generate_flexible_scene_outline_response(num_scenes=4)
+        agent = OutlinerAgent(mock_llm, settings)
+        kb = ProjectKnowledgeBase(project_name="test_project", title="Test Book")
+        kb.scenes_per_chapter_list = [4, 6, 2]
+        chapter = Chapter(chapter_number=1, title="Chapter 1", summary="Introduction")
+
+        # Act
+        result = await agent.generate_scene_outline(kb, chapter)
+
+        # Assert
+        assert result is True
+        assert len(chapter.scenes) == 4
+        mock_llm.generate_content.assert_called_once()

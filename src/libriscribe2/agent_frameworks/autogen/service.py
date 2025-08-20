@@ -333,7 +333,7 @@ class AutoGenService(BaseFrameworkService):
             }
 
             with open(output_file, "w") as f:
-                json.dump(conversation_data, f, indent=2)
+                json.dump(conversation_data, f, indent=2, ensure_ascii=False)
 
             self.logger.info(f"Conversation saved to: {output_file}")
 
@@ -359,7 +359,7 @@ class AutoGenService(BaseFrameworkService):
             import json
 
             with open(output_path, "w") as f:
-                json.dump(self.conversation_history, f, indent=2)
+                json.dump(self.conversation_history, f, indent=2, ensure_ascii=False)
             self.logger.info(f"Conversation log exported to {output_path}")
         except Exception as e:
             self.logger.error(f"Failed to export conversation log: {e}")

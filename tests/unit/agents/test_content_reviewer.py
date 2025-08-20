@@ -86,6 +86,7 @@ class TestContentReviewerAgent:
         """Test ContentReviewerAgent initialization."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
 
@@ -101,6 +102,7 @@ class TestContentReviewerAgent:
         """Test basic content review execution."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.return_value = generate_large_review_response()
@@ -122,6 +124,7 @@ class TestContentReviewerAgent:
         """Test execution when LLM client raises an error."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.side_effect = Exception("LLM error")
@@ -143,6 +146,7 @@ class TestContentReviewerAgent:
         """Test execution with invalid chapter index."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         agent = ContentReviewerAgent(mock_llm, settings)
@@ -158,6 +162,7 @@ class TestContentReviewerAgent:
         """Test basic ContentReviewerAgent functionality."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = ContentReviewerAgent(mock_llm, settings)

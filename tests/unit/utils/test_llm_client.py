@@ -7,10 +7,8 @@ including initialization, configuration validation, content generation, and erro
 
 import pytest
 
-from libriscribe2.utils.llm_client import LLMClient, LLMClientError
-
-
 from libriscribe2.settings import Settings
+from libriscribe2.utils.llm_client import LLMClient, LLMClientError
 
 
 class TestLLMClient:
