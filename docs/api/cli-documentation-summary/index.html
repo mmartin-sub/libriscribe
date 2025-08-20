@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-api/cli-documentation-summary" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.7.0">
+<title data-rh="true">LibriScribe2 CLI Documentation Summary | LibriScribe2</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://guerra2fernando.github.io/libriscribe2/img/libriscribe-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://guerra2fernando.github.io/libriscribe2/img/libriscribe-social-card.jpg"><meta data-rh="true" property="og:url" content="https://guerra2fernando.github.io/libriscribe2/docs/api/cli-documentation-summary"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="LibriScribe2 CLI Documentation Summary | LibriScribe2"><meta data-rh="true" name="description" content="Overview"><meta data-rh="true" property="og:description" content="Overview"><link data-rh="true" rel="icon" href="/libriscribe2/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://guerra2fernando.github.io/libriscribe2/docs/api/cli-documentation-summary"><link data-rh="true" rel="alternate" href="https://guerra2fernando.github.io/libriscribe2/docs/api/cli-documentation-summary" hreflang="en"><link data-rh="true" rel="alternate" href="https://guerra2fernando.github.io/libriscribe2/docs/api/cli-documentation-summary" hreflang="x-default"><link rel="stylesheet" href="/libriscribe2/assets/css/styles.1f773033.css">
+<script src="/libriscribe2/assets/js/runtime~main.35d3d892.js" defer="defer"></script>
+<script src="/libriscribe2/assets/js/main.b5130c67.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<script>!function(){function t(t){document.documentElement.setAttribute("data-theme",t)}var e=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();t(null!==e?e:"light")}(),function(){try{const n=new URLSearchParams(window.location.search).entries();for(var[t,e]of n)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><link rel="preload" as="image" href="/libriscribe2/img/logo.png"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="navbar navbar--fixed-top"><div class="navbar__inner"><div class="navbar__items"><a class="navbar__brand" href="/libriscribe2/"><div class="navbar__logo"><img src="/libriscribe2/img/logo.png" alt="LibriScribe2 Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/libriscribe2/img/logo.png" alt="LibriScribe2 Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">LibriScribe2</b></a></div><div class="navbar__items navbar__items--right"><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="Switch between dark and light mode (currently light mode)" aria-label="Switch between dark and light mode (currently light mode)" aria-live="polite" aria-pressed="false"><svg viewBox="0 0 24 24" width="24" height="24" class="lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" class="darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/libriscribe2/docs/PYTHON_VERSION_SETUP">Python Version Management</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/libriscribe2/docs/">Website</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/libriscribe2/docs/ai_mock_system_signatures">AI Mock System - Function Signatures</a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/libriscribe2/docs/api/ai-mock-system">api</a></div><ul style="display:block;overflow:visible;height:auto" class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/libriscribe2/docs/api/ai-mock-system">AI Mock System Documentation</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/libriscribe2/docs/api/cli-api">LibriScribe2 CLI API Documentation</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/libriscribe2/docs/api/cli-documentation-summary">LibriScribe2 CLI Documentation Summary</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/libriscribe2/docs/api/cli-signatures">LibriScribe2 CLI - Function Signatures</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/libriscribe2/docs/api/concept-generator-api">concept-generator-api</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/libriscribe2/docs/api/llm-client-api">LLM Client API Documentation</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/libriscribe2/docs/api/llm-client-signatures">LLM Client - Function and Class Signatures</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/libriscribe2/docs/api/mock-llm-client-api">Mock LLM Client API Documentation</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/libriscribe2/docs/api/performance-improvements-signatures">Performance Improvements - Function Signatures</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/libriscribe2/docs/api/performance-improvements-summary">Performance Improvements Module - Documentation Summary</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/libriscribe2/docs/api/project-manager-api">ProjectManagerAgent API Documentation</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/libriscribe2/docs/api/project-manager-signatures">ProjectManagerAgent - Function Signatures</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/libriscribe2/docs/api/validation-interfaces-api">LibriScribe Validation Interfaces API Documentation</a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/libriscribe2/docs/development/BEST_PRACTICES">development</a></div></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/libriscribe2/docs/exception_handling_improvements">Exception Handling Improvements</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/libriscribe2/docs/setup">LibriScribe2 Documentation Setup</a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/libriscribe2/docs/testing/systematic-failure-testing">testing</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/libriscribe2/docs/user-guide/usage">user-guide</a></div></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/libriscribe2/docs/validation_engine_api">ValidationEngine API Documentation</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/libriscribe2/docs/validation_interfaces_signatures">LibriScribe Validation Interfaces - Function and Class Signatures</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/libriscribe2/docs/validation_utils_signatures">LibriScribe Validation Utils - Function and Class Signatures</a></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/libriscribe2/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">api</span><meta itemprop="position" content="1"></li><li itemscope="" itemprop="itemListElement" itemtype="https://schema.org/ListItem" class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link" itemprop="name">LibriScribe2 CLI Documentation Summary</span><meta itemprop="position" content="2"></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>LibriScribe2 CLI Documentation Summary</h1></header>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="overview">Overview<a href="#overview" class="hash-link" aria-label="Direct link to Overview" title="Direct link to Overview">​</a></h2>
+<p>This document summarizes the comprehensive CLI documentation created for LibriScribe2, including the recent enhancement to improve error messaging in the <code>book-stats</code> command.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="recent-changes">Recent Changes<a href="#recent-changes" class="hash-link" aria-label="Direct link to Recent Changes" title="Direct link to Recent Changes">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="log-file-path-display-enhancement">Log File Path Display Enhancement<a href="#log-file-path-display-enhancement" class="hash-link" aria-label="Direct link to Log File Path Display Enhancement" title="Direct link to Log File Path Display Enhancement">​</a></h3>
+<p><strong>File Modified</strong>: <code>src/libriscribe2/cli.py</code></p>
+<p><strong>Change</strong>: Updated the error message in the <code>book_stats()</code> command to provide more specific information when a log file is not found.</p>
+<p><strong>Before</strong>:</p>
+<div class="language-python codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-python codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">console</span><span class="token punctuation" style="color:#393A34">.</span><span class="token keyword" style="color:#00009f">print</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string-interpolation string" style="color:#e3116c">f&quot;[yellow]No log file found for &#x27;</span><span class="token string-interpolation interpolation punctuation" style="color:#393A34">{</span><span class="token string-interpolation interpolation">project_name</span><span class="token string-interpolation interpolation punctuation" style="color:#393A34">}</span><span class="token string-interpolation string" style="color:#e3116c">&#x27;.[/yellow]&quot;</span><span class="token punctuation" style="color:#393A34">)</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p><strong>After</strong>:</p>
+<div class="language-python codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-python codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">console</span><span class="token punctuation" style="color:#393A34">.</span><span class="token keyword" style="color:#00009f">print</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string-interpolation string" style="color:#e3116c">f&quot;[yellow]No log file found at </span><span class="token string-interpolation interpolation punctuation" style="color:#393A34">{</span><span class="token string-interpolation interpolation">project_log_file</span><span class="token string-interpolation interpolation punctuation" style="color:#393A34">}</span><span class="token string-interpolation string" style="color:#e3116c">.[/yellow]&quot;</span><span class="token punctuation" style="color:#393A34">)</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p><strong>Impact</strong>:</p>
+<ul>
+<li>Users now see the exact path where the system expected to find the log file</li>
+<li>Improves debugging experience by showing the full file path</li>
+<li>Helps users understand the project structure and file organization</li>
+<li>Provides actionable information for troubleshooting</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="documentation-created">Documentation Created<a href="#documentation-created" class="hash-link" aria-label="Direct link to Documentation Created" title="Direct link to Documentation Created">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="1-cli-api-documentation-docsapicli-apimd">1. CLI API Documentation (<code>docs/api/cli-api.md</code>)<a href="#1-cli-api-documentation-docsapicli-apimd" class="hash-link" aria-label="Direct link to 1-cli-api-documentation-docsapicli-apimd" title="Direct link to 1-cli-api-documentation-docsapicli-apimd">​</a></h3>
+<p><strong>Comprehensive API reference including:</strong></p>
+<ul>
+<li>Module structure and components</li>
+<li>Command categories (NON-INTERACTIVE vs INTERACTIVE)</li>
+<li>Detailed function signatures with parameters and return types</li>
+<li>Usage examples for all commands</li>
+<li>Error handling and exit codes</li>
+<li>Logging configuration</li>
+<li>Integration patterns</li>
+<li>Dependencies and requirements</li>
+</ul>
+<p><strong>Key Features Documented:</strong></p>
+<ul>
+<li>🟢 <strong>NON-INTERACTIVE (RECOMMENDED)</strong>: <code>create-book</code>, <code>book-stats</code>, <code>format</code>, <code>generate-title</code></li>
+<li>🟡 <strong>INTERACTIVE (ADVANCED)</strong>: <code>start</code>, <code>concept</code>, <code>outline</code>, <code>characters</code>, <code>worldbuilding</code>, <code>write</code>, <code>edit</code>, <code>research</code>, <code>resume</code></li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="2-cli-function-signatures-docsapicli-signaturesmd">2. CLI Function Signatures (<code>docs/api/cli-signatures.md</code>)<a href="#2-cli-function-signatures-docsapicli-signaturesmd" class="hash-link" aria-label="Direct link to 2-cli-function-signatures-docsapicli-signaturesmd" title="Direct link to 2-cli-function-signatures-docsapicli-signaturesmd">​</a></h3>
+<p><strong>Complete function signature reference including:</strong></p>
+<ul>
+<li>Module-level utility functions</li>
+<li>Command functions with full parameter specifications</li>
+<li>Async command functions</li>
+<li>Global variables and their types</li>
+<li>Type annotations summary</li>
+<li>Usage patterns and examples</li>
+<li>Import requirements</li>
+<li>Command registration patterns</li>
+</ul>
+<p><strong>Signature Categories:</strong></p>
+<ul>
+<li>Utility functions (logging, help, version)</li>
+<li>Synchronous commands (create-book, book-stats, generate-title, resume)</li>
+<li>Asynchronous commands (concept, outline, characters, worldbuilding, write, edit, format, research)</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="3-cli-usage-examples-examplescli_usage_examplespy">3. CLI Usage Examples (<code>examples/cli_usage_examples.py</code>)<a href="#3-cli-usage-examples-examplescli_usage_examplespy" class="hash-link" aria-label="Direct link to 3-cli-usage-examples-examplescli_usage_examplespy" title="Direct link to 3-cli-usage-examples-examplescli_usage_examplespy">​</a></h3>
+<p><strong>Practical usage examples covering:</strong></p>
+<ul>
+<li>Basic book creation scenarios</li>
+<li>Advanced configuration options</li>
+<li>Step-by-step generation workflows</li>
+<li>Project management operations</li>
+<li>Testing and development scenarios</li>
+<li>Character and worldbuilding configurations</li>
+<li>Error handling and workflow integration</li>
+<li>Genre-specific examples</li>
+<li>Help and version commands</li>
+<li>Interactive commands (experimental)</li>
+<li>Complete workflow examples</li>
+<li>Troubleshooting scenarios</li>
+<li>Configuration file examples</li>
+<li>Performance optimization</li>
+</ul>
+<p><strong>Example Categories:</strong></p>
+<ul>
+<li>24 different usage scenarios</li>
+<li>Shell command examples for terminal execution</li>
+<li>Workflow integration patterns</li>
+<li>Configuration file templates</li>
+<li>Troubleshooting guides</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="command-structure">Command Structure<a href="#command-structure" class="hash-link" aria-label="Direct link to Command Structure" title="Direct link to Command Structure">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="production-ready-commands--non-interactive">Production-Ready Commands (🟢 NON-INTERACTIVE)<a href="#production-ready-commands--non-interactive" class="hash-link" aria-label="Direct link to Production-Ready Commands (🟢 NON-INTERACTIVE)" title="Direct link to Production-Ready Commands (🟢 NON-INTERACTIVE)">​</a></h3>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="create-book">create-book<a href="#create-book" class="hash-link" aria-label="Direct link to create-book" title="Direct link to create-book">​</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Complete book creation with command-line arguments</li>
+<li><strong>Parameters</strong>: 23 configurable options</li>
+<li><strong>Features</strong>: Project types, auto-title generation, mock mode, step-by-step control</li>
+<li><strong>Exit Codes</strong>: 0 (success), 1 (runtime error), 2 (invalid input), 3 (import error), 5 (creation failed)</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="book-stats">book-stats<a href="#book-stats" class="hash-link" aria-label="Direct link to book-stats" title="Direct link to book-stats">​</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Display project statistics and log viewing</li>
+<li><strong>Features</strong>: Metadata display, chapter status, log file access</li>
+<li><strong>Enhancement</strong>: Now shows exact log file path when missing</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="generate-title">generate-title<a href="#generate-title" class="hash-link" aria-label="Direct link to generate-title" title="Direct link to generate-title">​</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Generate better titles for existing projects</li>
+<li><strong>Features</strong>: Content-based title generation, auto-title support</li>
+<li><strong>Requirements</strong>: Existing project with sufficient content</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="format-async">format (async)<a href="#format-async" class="hash-link" aria-label="Direct link to format (async)" title="Direct link to format (async)">​</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Format books into final output</li>
+<li><strong>Status</strong>: Partially implemented</li>
+<li><strong>Features</strong>: Markdown and PDF output support</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="experimental-commands--interactive">Experimental Commands (🟡 INTERACTIVE)<a href="#experimental-commands--interactive" class="hash-link" aria-label="Direct link to Experimental Commands (🟡 INTERACTIVE)" title="Direct link to Experimental Commands (🟡 INTERACTIVE)">​</a></h3>
+<p>Most interactive commands are placeholders or partially implemented:</p>
+<ul>
+<li><code>start</code>: Interactive mode (not implemented)</li>
+<li><code>concept</code>, <code>outline</code>, <code>characters</code>, <code>worldbuilding</code>: Individual generators (not implemented)</li>
+<li><code>write</code>, <code>edit</code>: Chapter-specific operations (not implemented)</li>
+<li><code>research</code>: Web research functionality (not implemented)</li>
+<li><code>resume</code>: Project continuation (partially implemented)</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="technical-features">Technical Features<a href="#technical-features" class="hash-link" aria-label="Direct link to Technical Features" title="Direct link to Technical Features">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="error-handling">Error Handling<a href="#error-handling" class="hash-link" aria-label="Direct link to Error Handling" title="Direct link to Error Handling">​</a></h3>
+<ul>
+<li>Comprehensive exception handling with specific exit codes</li>
+<li>Traceback suppression for clean console output</li>
+<li>Full error logging to file for debugging</li>
+<li>Graceful degradation for missing dependencies</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="logging-system">Logging System<a href="#logging-system" class="hash-link" aria-label="Direct link to Logging System" title="Direct link to Logging System">​</a></h3>
+<ul>
+<li>Application-level logging to timestamped files</li>
+<li>Configurable log levels (DEBUG, INFO, WARNING, ERROR, CRITICAL)</li>
+<li>Console output minimization (CRITICAL only)</li>
+<li>Project-specific log files in project directories</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="configuration-support">Configuration Support<a href="#configuration-support" class="hash-link" aria-label="Direct link to Configuration Support" title="Direct link to Configuration Support">​</a></h3>
+<ul>
+<li>Multiple configuration file formats (.env, .json, .yaml)</li>
+<li>Environment variable support</li>
+<li>Command-line parameter override</li>
+<li>Mock mode for testing without API consumption</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="rich-console-output">Rich Console Output<a href="#rich-console-output" class="hash-link" aria-label="Direct link to Rich Console Output" title="Direct link to Rich Console Output">​</a></h3>
+<ul>
+<li>Colored output using Rich library</li>
+<li>Progress indicators and status messages</li>
+<li>Formatted tables and panels</li>
+<li>Interactive prompts for missing parameters</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="integration-capabilities">Integration Capabilities<a href="#integration-capabilities" class="hash-link" aria-label="Direct link to Integration Capabilities" title="Direct link to Integration Capabilities">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="workflow-integration">Workflow Integration<a href="#workflow-integration" class="hash-link" aria-label="Direct link to Workflow Integration" title="Direct link to Workflow Integration">​</a></h3>
+<ul>
+<li>Exit codes for automated workflow decisions</li>
+<li>Batch processing support</li>
+<li>Configuration file standardization</li>
+<li>Resource isolation for parallel processing</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="api-integration">API Integration<a href="#api-integration" class="hash-link" aria-label="Direct link to API Integration" title="Direct link to API Integration">​</a></h3>
+<ul>
+<li>LiteLLM proxy support for AI providers</li>
+<li>User tagging for usage tracking</li>
+<li>Cost monitoring and reporting</li>
+<li>Rate limiting and timeout handling</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="development-support">Development Support<a href="#development-support" class="hash-link" aria-label="Direct link to Development Support" title="Direct link to Development Support">​</a></h3>
+<ul>
+<li>Mock mode for testing without API costs</li>
+<li>Debug logging for troubleshooting</li>
+<li>Performance monitoring</li>
+<li>Dependency validation</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="usage-recommendations">Usage Recommendations<a href="#usage-recommendations" class="hash-link" aria-label="Direct link to Usage Recommendations" title="Direct link to Usage Recommendations">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="for-production-use">For Production Use<a href="#for-production-use" class="hash-link" aria-label="Direct link to For Production Use" title="Direct link to For Production Use">​</a></h3>
+<ol>
+<li>Use NON-INTERACTIVE commands (<code>create-book</code>, <code>book-stats</code>)</li>
+<li>Provide configuration files for consistent settings</li>
+<li>Monitor exit codes for workflow integration</li>
+<li>Use appropriate log levels for debugging</li>
+<li>Implement proper error handling in scripts</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="for-development-and-testing">For Development and Testing<a href="#for-development-and-testing" class="hash-link" aria-label="Direct link to For Development and Testing" title="Direct link to For Development and Testing">​</a></h3>
+<ol>
+<li>Use <code>--mock</code> flag to avoid API consumption</li>
+<li>Enable DEBUG logging for detailed information</li>
+<li>Test with different project types and configurations</li>
+<li>Validate configuration files before production use</li>
+<li>Use version control for configuration management</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="for-troubleshooting">For Troubleshooting<a href="#for-troubleshooting" class="hash-link" aria-label="Direct link to For Troubleshooting" title="Direct link to For Troubleshooting">​</a></h3>
+<ol>
+<li>Check log files for detailed error information</li>
+<li>Verify configuration file syntax and values</li>
+<li>Test with mock mode to isolate API issues</li>
+<li>Review project directory structure</li>
+<li>Validate dependencies and Python version</li>
+</ol>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="future-enhancements">Future Enhancements<a href="#future-enhancements" class="hash-link" aria-label="Direct link to Future Enhancements" title="Direct link to Future Enhancements">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="planned-improvements">Planned Improvements<a href="#planned-improvements" class="hash-link" aria-label="Direct link to Planned Improvements" title="Direct link to Planned Improvements">​</a></h3>
+<ol>
+<li>Complete implementation of interactive commands</li>
+<li>Enhanced error recovery mechanisms</li>
+<li>Performance optimization for large projects</li>
+<li>Extended configuration options</li>
+<li>Improved workflow integration features</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="documentation-maintenance">Documentation Maintenance<a href="#documentation-maintenance" class="hash-link" aria-label="Direct link to Documentation Maintenance" title="Direct link to Documentation Maintenance">​</a></h3>
+<ol>
+<li>Keep examples updated with new features</li>
+<li>Add troubleshooting guides for common issues</li>
+<li>Expand configuration documentation</li>
+<li>Include performance benchmarking data</li>
+<li>Maintain compatibility with dependency updates</li>
+</ol>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="files-updatedcreated">Files Updated/Created<a href="#files-updatedcreated" class="hash-link" aria-label="Direct link to Files Updated/Created" title="Direct link to Files Updated/Created">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="new-documentation-files">New Documentation Files<a href="#new-documentation-files" class="hash-link" aria-label="Direct link to New Documentation Files" title="Direct link to New Documentation Files">​</a></h3>
+<ul>
+<li><code>docs/api/cli-api.md</code> - Comprehensive CLI API documentation</li>
+<li><code>docs/api/cli-signatures.md</code> - Complete function signature reference</li>
+<li><code>examples/cli_usage_examples.py</code> - Practical usage examples</li>
+<li><code>docs/api/cli-documentation-summary.md</code> - This summary document</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="updated-files">Updated Files<a href="#updated-files" class="hash-link" aria-label="Direct link to Updated Files" title="Direct link to Updated Files">​</a></h3>
+<ul>
+<li><code>src/libriscribe2/cli.py</code> - Enhanced error message in book-stats command</li>
+<li><code>README.md</code> - Added links to new CLI documentation</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="documentation-integration">Documentation Integration<a href="#documentation-integration" class="hash-link" aria-label="Direct link to Documentation Integration" title="Direct link to Documentation Integration">​</a></h3>
+<ul>
+<li>Added CLI documentation links to README.md Quick Links section</li>
+<li>Integrated with existing documentation structure</li>
+<li>Cross-referenced with related API documentation</li>
+<li>Maintained consistency with project documentation standards</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="conclusion">Conclusion<a href="#conclusion" class="hash-link" aria-label="Direct link to Conclusion" title="Direct link to Conclusion">​</a></h2>
+<p>The LibriScribe2 CLI documentation now provides comprehensive coverage of all commands, functions, and usage patterns. The recent enhancement to the <code>book-stats</code> command improves user experience by providing more specific error information. The documentation supports both new users learning the system and experienced users implementing advanced workflows.</p>
+<p>The documentation follows project standards and integrates seamlessly with the existing documentation ecosystem, providing a complete reference for CLI usage across all supported scenarios.</p></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col"><a href="https://github.com/guerra2fernando/libriscribe2/tree/main/docs/docs/api/cli-documentation-summary.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="pagination-nav docusaurus-mt-lg" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/libriscribe2/docs/api/cli-api"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">LibriScribe2 CLI API Documentation</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/libriscribe2/docs/api/cli-signatures"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">LibriScribe2 CLI - Function Signatures</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#overview" class="table-of-contents__link toc-highlight">Overview</a></li><li><a href="#recent-changes" class="table-of-contents__link toc-highlight">Recent Changes</a><ul><li><a href="#log-file-path-display-enhancement" class="table-of-contents__link toc-highlight">Log File Path Display Enhancement</a></li></ul></li><li><a href="#documentation-created" class="table-of-contents__link toc-highlight">Documentation Created</a><ul><li><a href="#1-cli-api-documentation-docsapicli-apimd" class="table-of-contents__link toc-highlight">1. CLI API Documentation (<code>docs/api/cli-api.md</code>)</a></li><li><a href="#2-cli-function-signatures-docsapicli-signaturesmd" class="table-of-contents__link toc-highlight">2. CLI Function Signatures (<code>docs/api/cli-signatures.md</code>)</a></li><li><a href="#3-cli-usage-examples-examplescli_usage_examplespy" class="table-of-contents__link toc-highlight">3. CLI Usage Examples (<code>examples/cli_usage_examples.py</code>)</a></li></ul></li><li><a href="#command-structure" class="table-of-contents__link toc-highlight">Command Structure</a><ul><li><a href="#production-ready-commands--non-interactive" class="table-of-contents__link toc-highlight">Production-Ready Commands (🟢 NON-INTERACTIVE)</a></li><li><a href="#experimental-commands--interactive" class="table-of-contents__link toc-highlight">Experimental Commands (🟡 INTERACTIVE)</a></li></ul></li><li><a href="#technical-features" class="table-of-contents__link toc-highlight">Technical Features</a><ul><li><a href="#error-handling" class="table-of-contents__link toc-highlight">Error Handling</a></li><li><a href="#logging-system" class="table-of-contents__link toc-highlight">Logging System</a></li><li><a href="#configuration-support" class="table-of-contents__link toc-highlight">Configuration Support</a></li><li><a href="#rich-console-output" class="table-of-contents__link toc-highlight">Rich Console Output</a></li></ul></li><li><a href="#integration-capabilities" class="table-of-contents__link toc-highlight">Integration Capabilities</a><ul><li><a href="#workflow-integration" class="table-of-contents__link toc-highlight">Workflow Integration</a></li><li><a href="#api-integration" class="table-of-contents__link toc-highlight">API Integration</a></li><li><a href="#development-support" class="table-of-contents__link toc-highlight">Development Support</a></li></ul></li><li><a href="#usage-recommendations" class="table-of-contents__link toc-highlight">Usage Recommendations</a><ul><li><a href="#for-production-use" class="table-of-contents__link toc-highlight">For Production Use</a></li><li><a href="#for-development-and-testing" class="table-of-contents__link toc-highlight">For Development and Testing</a></li><li><a href="#for-troubleshooting" class="table-of-contents__link toc-highlight">For Troubleshooting</a></li></ul></li><li><a href="#future-enhancements" class="table-of-contents__link toc-highlight">Future Enhancements</a><ul><li><a href="#planned-improvements" class="table-of-contents__link toc-highlight">Planned Improvements</a></li><li><a href="#documentation-maintenance" class="table-of-contents__link toc-highlight">Documentation Maintenance</a></li></ul></li><li><a href="#files-updatedcreated" class="table-of-contents__link toc-highlight">Files Updated/Created</a><ul><li><a href="#new-documentation-files" class="table-of-contents__link toc-highlight">New Documentation Files</a></li><li><a href="#updated-files" class="table-of-contents__link toc-highlight">Updated Files</a></li><li><a href="#documentation-integration" class="table-of-contents__link toc-highlight">Documentation Integration</a></li></ul></li><li><a href="#conclusion" class="table-of-contents__link toc-highlight">Conclusion</a></li></ul></div></div></div></div></main></div></div></div><footer class="footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2025 Lenxys, Inc. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>
