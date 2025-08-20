@@ -1,0 +1,22 @@
+{
+  "name": "mock_v1_chat_completions_inV1p",
+  "priority": 5,
+  "request": {
+    "url": "/v1/chat/completions",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"messages\":[{\"role\":\"user\",\"content\":\"Generate relevant keywords for this book concept:\\n\\n        ```json\\n        {\\\"title\\\":\\\"Half a Map, Half the World\\\",\\\"logline\\\":\\\"On the night a blood-red lunar eclipse will be visible in both France and Korea, two estranged sisters\\\\u2014one an Alsatian night-shift nurse, the other a Seoul housewife\\\\u2014each receive half of their stroke-stricken mother\\\\u2019s impossible train map. With their children beside them, they have seventy-two hours to cross borders, outrun their own regrets, and meet on the single track where the two halves finally join.\\\",\\\"description\\\":\\\"Isa Moreau knows the fluorescent hush of Strasbourg\\\\u2019s ICU at 3 a.m.; Caro Han knows the wide-awake silence of a Seoul high-rise while her diplomat husband sleeps in the next room. Once they raised toddlers together in the same Alsatian village, but twenty years, two marriages, and seven time zones have reduced them to emoji-laden birthday texts.\\\\n\\\\nThe stroke erases that distance in a heartbeat. In the same hour, each sister receives a battered envelope: inside, half of their mother\\\\u2019s hand-drawn atlas\\\\u2014routes that don\\\\u2019t exist on any schedule, tickets that pre-date the internet, and a single red circle labeled only \\\\u201cEclipse Terminus.\\\\u201d A sticky note in their mother\\\\u2019s shaky script says, You have until the moon turns. Come together or lose each other for good.\\\\n\\\\nIsa has one overnight bag and her fearless seventeen-year-old daughter, who\\\\u2019s skipping final exams to translate Korean social media. Caro has a passport thick with unused pages and her anxious ten-year-old son, who has never missed a day of school. Neither can afford to fly; the map insists on ground travel\\\\u2014slow trains, night ferries, and one border the internet says is closed to civilians.\\\\n\\\\nChapter by chapter, the sisters trade voice memos and real-time GPS pins, revealing the unspoken resentments that calcified over two decades: Isa\\\\u2019s resentment that Caro \\\\u201cescaped\\\\u201d to Asia, Caro\\\\u2019s envy of Isa\\\\u2019s steady hands in an emergency, and the shared terror that their mother\\\\u2019s love was the only thing still tethering them to planet Earth.\\\\n\\\\nAs the eclipse countdown shrinks, so does the margin for error. Caro bribes a conductor with homemade kimchi; Isa forges a doctor\\\\u2019s note to claim compassionate leave. Their kids\\\\u2014terrified, exhilarated, and suddenly bilingual\\\\u2014become co-conspirators in a heist against time, bureaucracy, and the gravitational pull of adult failure.\\\\n\\\\nWhen the moon finally copperizes above two continents at once, the map leads them to a decommissioned station on the Rhine where tracks once met and were torn up in 1962. The reunion is not soft-focus forgiveness\\\\u2014it\\\\u2019s raw, argumentative, and interrupted by border police\\\\u2014but it is real, and it is enough to let them redraw the rest of the route together.\\\"}\\n        ```\\n\\n        The book should be written in US-English.\\n\\n        Return a JSON object with:\\n        - \\\"primary_keywords\\\": List of main themes/topics\\n        - \\\"secondary_keywords\\\": List of supporting themes\\n        - \\\"genre_keywords\\\": List of genre-specific terms\\n\\n        ```json\\n        {\\n            \\\"primary_keywords\\\": [\\\"keyword1\\\", \\\"keyword2\\\"],\\n            \\\"secondary_keywords\\\": [\\\"keyword3\\\", \\\"keyword4\\\"],\\n            \\\"genre_keywords\\\": [\\\"keyword5\\\", \\\"keyword6\\\"]\\n        }\\n        ```\"}]}",
+        "ignoreExtraElements": true,
+        "ignoreArrayOrder": true
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "mock_v1_chat_completions_inV1p_body.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

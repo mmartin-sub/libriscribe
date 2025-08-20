@@ -6,7 +6,7 @@ services:
     ports:
       - "2793:8080"
     # This line dynamically reads the UID and GID from the shell
-    user: "${UID}:${GID}"
+    user: "${UID:-1000}:${GID:-1000}"
     volumes:
       # - ./wiremock-playing:/home/wiremock # only for replay mode, usefull for git actions
       - ./wiremock-recordings:/home/wiremock

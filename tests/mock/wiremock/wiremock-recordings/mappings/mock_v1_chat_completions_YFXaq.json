@@ -1,0 +1,22 @@
+{
+  "name": "mock_v1_chat_completions_YFXaq",
+  "priority": 5,
+  "request": {
+    "url": "/v1/chat/completions",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"messages\":[{\"role\":\"user\",\"content\":\"Critique the following book concept:\\n\\n        ```json\\n        {\\\"title\\\":\\\"The Meridian Bridge\\\",\\\"logline\\\":\\\"Two sisters\\\\u2014one a night-shift nurse in Strasbourg, the other a Seoul housewife\\\\u2014race across continents and a dying mother\\\\u2019s riddled map to reunite before time, oceans, and their own guilt erase the last bridge between them.\\\",\\\"description\\\":\\\"Isa Moreau and Caro Han were once inseparable, raising their toddlers side by side in a quiet Alsatian village. When Isa\\\\u2019s husband, an EU humanitarian logistics officer, is transferred to Strasbourg, and Caro follows her Korean diplomat spouse to Seoul, the sisters fall into separate orbits across twelve time zones. Years collapse into quick video calls and missed birthdays until their mother\\\\u2019s stroke cracks open a family secret: a hand-drawn atlas of impossible train lines, midnight ferries, and unmarked bridges said to be \\\\u2018passable only by the brave.\\\\u2019 Each sister receives half of the map and a cryptic plea\\\\u2014come together before the last \\\\u2018meridian moon\\\\u2019 or lose the family thread forever.\\\\n\\\\nWith their own children in tow\\\\u2014Isa\\\\u2019s fearless daughter and Caro\\\\u2019s anxious son\\\\u2014the women launch twin odysseys, trading WhatsApp breadcrumbs as they ride midnight freighters, board bullet trains, and cross contested borders. At every checkpoint they confront the reasons they drifted: career envy, parenting shame, and the silent fear that love can expire. The journey demands they become the mothers\\\\u2014and sisters\\\\u2014they thought they no longer had time to be.\\\"}\\n        ```\\n        The book should be written in US-English.\\n\\n        Evaluate:\\n        - Strengths and weaknesses\\n        - Market potential\\n        - Originality\\n        - Clarity and coherence\\n\\n        IMPORTANT: Write your critique entirely in US-English.\\n        Start your response directly with the critique content. Do not include any introductory phrases like \\\"Of course\\\" or \\\"Here is a detailed critique\\\". Begin immediately with your analysis.\"}]}",
+        "ignoreExtraElements": true,
+        "ignoreArrayOrder": true
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "mock_v1_chat_completions_YFXaq_body.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

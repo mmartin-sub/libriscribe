@@ -11,36 +11,43 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:  # <--- ADD THIS SECTION
-      contents: write  #  <--- Grant write access to the repository contents
+    permissions:
+      contents: write
       pages: write
       id-token: write
 
-    concurrency: # Recommended
+    concurrency:
       group: "pages"
       cancel-in-progress: false
+
+    # This default is still correct for your 'run' steps (npm install, npm build)
+    defaults:
+      run:
+        working-directory: ./docs
+
     steps:
-    - name: Checkout
+    - name: Checkout repository
       uses: actions/checkout@v3
 
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18'
+        node-version: '22'
         cache: 'npm'
+        # FIX: Provide the full path to the lock file from the repository root
         cache-dependency-path: docs/package-lock.json
 
     - name: Install dependencies
+      # This runs in './docs' because of the 'defaults' setting
       run: npm install
-      working-directory: ./docs
 
     - name: Build website
+      # This also runs in './docs'
       run: npm run build
-      working-directory: ./docs
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        # This path is relative to the REPOSITORY root, so it's correct
         publish_dir: ./docs/build
-        # cname: example.com  # If using a custom domain

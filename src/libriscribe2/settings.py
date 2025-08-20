@@ -117,6 +117,7 @@ class Settings(BaseSettings):
         env_prefix="",
         env_ignore_empty=True,
         env_nested_delimiter="__",
+        extra="ignore",  # accept other env variables (in .env)
     )
 
     def __init__(self, config_file: str | None = None, **kwargs: Any) -> None:

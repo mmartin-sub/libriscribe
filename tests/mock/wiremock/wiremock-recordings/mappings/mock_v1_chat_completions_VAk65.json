@@ -1,0 +1,22 @@
+{
+  "name": "mock_v1_chat_completions_VAk65",
+  "priority": 5,
+  "request": {
+    "url": "/v1/chat/completions",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"messages\":[{\"role\":\"user\",\"content\":\"\\nWrite Scene 1 of 5 for Chapter 1: The Fluorescent Hour of the Hero's journey fiction book \\\"Half a Map, Half the World\\\".\\nThe book is written in US-English.\\n\\nChapter Summary:\\nAt 3:07 a.m. in Strasbourg’s ICU, Isa Moreau is resuscitating a seizing teenager when her phone buzzes with a Seoul number. The stroke, the nurse says; come quickly. Twelve minutes earlier, Caro Han stands in her darkened high-rise kitchen, watching the Han River disappear into fog, when the same call reaches her. Both open identical battered envelopes: half of their mother’s hand-drawn atlas, a red circle labeled “Eclipse Terminus,” and a sticky note—You have until the moon turns. Isa packs an overnight bag, drafts a forged doctor’s note, and bribes her fearless seventeen-year-old daughter, Lila, with the promise of authentic Korean fried chicken. Caro stuffs her passport with diplomatic pouches, promises her anxious ten-year-old son, Min, that missing a week of school will become “a family legend,” and trades homemade kimchi for a conductor’s blind eye. By dawn, both women are on opposite platforms, clutching half a map and the same impossible deadline.\\n\\nScene Details:\\n- Summary: Isa Moreau, an ICU nurse in Strasbourg, fights to stabilize a seizing teenager during a tense 3:07 a.m. shift. Her phone buzzes with a Seoul number, delivering news of her mother’s stroke.\\n- Characters: Isa Moreau, Teenage Patient, Dr. Weber (colleague), Phone (voice of nurse)\\n- Setting: ICU at Strasbourg Hospital, France\\n- Goal: Introduce Isa’s high-stakes professional life and the inciting incident (her mother’s stroke).\\n- Emotional Beat: Urgency, guilt (duty vs. familial obligation)\\n\\nInstructions:\\n- Write a vivid, engaging scene that captures these elements.\\n- Include descriptive details and sensory information about the setting.\\n- Show character emotions and development through actions and dialogue.\\n- Advance the story according to the scene's goal and emotional beat.\\n- Make the scene flow naturally and avoid unnecessary exposition.\\n- Ensure the scene ends in a way that connects smoothly to the next scene.\\n- Use language and style appropriate for the genre.\\n\\nImportant: Focus on showing rather than telling. Create an immersive experience that brings the scene to life.\\n\\nIMPORTANT: The content should be written entirely in US-English.\\n\\n\\nIMPORTANT: Begin the scene with the title: ## Scene 1: Isa Moreau, an ICU nurse in Strasbourg, fights to stabilize a seizing teenager during a tense 3:07 a.m. shift. Her phone buzzes with a Seoul number, delivering news of her mother’s stroke. (as a Markdown heading, not bold, not triple #, no extra formatting)\"}]}",
+        "ignoreExtraElements": true,
+        "ignoreArrayOrder": true
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "mock_v1_chat_completions_VAk65_body.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

@@ -216,3 +216,6 @@ tests/.config-test.json
 # tests/mock/wiremock/* # we want the mock
 !tests/mock/wiremock/wiremock-recordings/mappings/proxy-all.json
 !tests/mock/wiremock/wiremock-recordings/mappings/example/*
+
+# For act - local github actions
+.secrets

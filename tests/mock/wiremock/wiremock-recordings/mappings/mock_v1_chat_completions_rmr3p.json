@@ -1,0 +1,22 @@
+{
+  "name": "mock_v1_chat_completions_rmr3p",
+  "priority": 5,
+  "request": {
+    "url": "/v1/chat/completions",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"messages\":[{\"role\":\"user\",\"content\":\"\\n            Create a detailed outline for the scenes in Chapter 2: The Closed Border\\n            of a Hero's journey book titled \\\"Half a Map, Half the World\\\"\\n            which is categorized as fiction.\\n            The book should be written in US-English.\\n\\n            Book Description: “Half a Map, Half the World” follows estranged sisters Isa Moreau and Caro Han as they race across two continents, guided only by the torn halves of their late mother’s hand-drawn atlas, to reach a mysterious rendezvous before a total lunar eclipse. The stroke that fells their mother erases twenty years of silence overnight, forcing Isa—an ICU nurse in Strasbourg—and Caro—a diplomat’s wife in Seoul—to confront the resentments that have calcified between them. Traveling by slow trains, night ferries, and a border the internet says is closed, each sister drags a reluctant child and an even heavier past. What begins as a frantic scavenger hunt becomes a raw, argumentative reunion on the banks of the Rhine, where the tracks that once connected Europe were torn up in 1962. By moonset, the sisters discover that the map was never about geography—it was a final lesson in how love can reroute itself when everything else is broken.\\n\\n            Chapter Summary: Three days later, the map’s route collides with reality. Isa and Lila ride a rattling regional train through Bavaria, the atlas page curling at the edges, while Caro and Min are stuck at a fogged-in ferry terminal in Vladivostok because the border the map insists on crossing—the one at Tumen River—has been closed to civilians since 2017. Voice memos fly across time zones: Isa accuses Caro of choosing glamour over family; Caro snaps back that Isa’s hero complex kept their mother alive but alone. Between accusations, the kids swap Instagram handles and begin stitching the two halves of the map into a single digital file, discovering that the route forms a perfect infinity symbol when overlapped. Caro trades her wedding watch for a fisherman’s promise to sail them upriver under radar cover. Isa pretends Lila is a medical courier transporting a human heart, flashing the forged note to skeptical guards. Each crossing costs them something—Caro’s diplomatic immunity, Isa’s last reserve of maternal authority—but every mile peels back another layer of the story they never told: the real reason Caro fled to Asia, the night Isa stopped answering emails, and the money their mother wired every Christmas that neither sister ever cashed.\\n\\n            The outline should include a breakdown of EXACTLY 7 scenes for this chapter, with EACH scene having:\\n            * Scene Number: (e.g., Scene 1, Scene 2, etc.)\\n            * Summary: (A short description of what happens in the scene, 1-2 sentences)\\n            * Characters: (A list of the characters involved, separated by commas)\\n            * Setting: (Where the scene takes place)\\n            * Goal: (The purpose of the scene)\\n            * Emotional Beat: (The primary emotion conveyed in the scene)\\n\\n            IMPORTANT: Format the scene outline using Markdown bullet points, as shown below:\\n\\n            Scene 1:\\n                * Summary: [Scene summary here]\\n                * Characters: [Character 1, Character 2, ...]\\n                * Setting: [Scene setting]\\n                * Goal: [Scene goal]\\n                * Emotional Beat: [Scene emotional beat]\\n\\n            Scene 2:\\n                * Summary: [Scene summary here]\\n                * Characters: [Character 1, Character 2, ...]\\n                * Setting: [Scene setting]\\n                * Goal: [Scene goal]\\n                * Emotional Beat: [Scene emotional beat]\\n\\n            [Repeat for exactly 7 scenes, maintaining the exact same bullet point format]\\n\\n            Be sure to include all main characters relevant to this chapter and create a natural flow between scenes.\\n            \"}]}",
+        "ignoreExtraElements": true,
+        "ignoreArrayOrder": true
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "mock_v1_chat_completions_rmr3p_body.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

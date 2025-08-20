@@ -1,0 +1,22 @@
+{
+  "name": "mock_v1_chat_completions_2Rq6U",
+  "priority": 5,
+  "request": {
+    "url": "/v1/chat/completions",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"messages\":[{\"role\":\"user\",\"content\":\"\\nCreate a structured outline for a Hero's journey book titled \\\"Half a Map, Half the World\\\" which is categorized as fiction.\\nThe book is written in US-English.\\n\\nDescription: Isa Moreau knows the fluorescent hush of Strasbourg’s ICU at 3 a.m.; Caro Han knows the wide-awake silence of a Seoul high-rise while her diplomat husband sleeps in the next room. Once they raised toddlers together in the same Alsatian village, but twenty years, two marriages, and seven time zones have reduced them to emoji-laden birthday texts.\\n\\nThe stroke erases that distance in a heartbeat. In the same hour, each sister receives a battered envelope: inside, half of their mother’s hand-drawn atlas—routes that don’t exist on any schedule, tickets that pre-date the internet, and a single red circle labeled only “Eclipse Terminus.” A sticky note in their mother’s shaky script says, You have until the moon turns. Come together or lose each other for good.\\n\\nIsa has one overnight bag and her fearless seventeen-year-old daughter, who’s skipping final exams to translate Korean social media. Caro has a passport thick with unused pages and her anxious ten-year-old son, who has never missed a day of school. Neither can afford to fly; the map insists on ground travel—slow trains, night ferries, and one border the internet says is closed to civilians.\\n\\nChapter by chapter, the sisters trade voice memos and real-time GPS pins, revealing the unspoken resentments that calcified over two decades: Isa’s resentment that Caro “escaped” to Asia, Caro’s envy of Isa’s steady hands in an emergency, and the shared terror that their mother’s love was the only thing still tethering them to planet Earth.\\n\\nAs the eclipse countdown shrinks, so does the margin for error. Caro bribes a conductor with homemade kimchi; Isa forges a doctor’s note to claim compassionate leave. Their kids—terrified, exhilarated, and suddenly bilingual—become co-conspirators in a heist against time, bureaucracy, and the gravitational pull of adult failure.\\n\\nWhen the moon finally copperizes above two continents at once, the map leads them to a decommissioned station on the Rhine where tracks once met and were torn up in 1962. The reunion is not soft-focus forgiveness—it’s raw, argumentative, and interrupted by border police—but it is real, and it is enough to let them redraw the rest of the route together.\\n\\nIMPORTANT: Format your response EXACTLY as shown below, with consistent header formatting and numbering:\\nIf there's a book length: (high), adjust the number of chapters accordingly.\\n\\n# Book Summary\\n[Write a brief summary of the entire book here, 2-3 paragraphs]\\n\\n# Chapter List\\n[Total number of chapters, definitively stated. NO optional chapters.]\\n\\n# Chapter Details\\n\\n## Chapter 1: [Chapter Title]\\n### Summary\\n[Detailed chapter summary, 1-2 paragraphs]\\n\\n### Key Events\\n- [Event 1]\\n- [Event 2]\\n- [Event 3]\\n\\n## Chapter 2: [Chapter Title]\\n### Summary\\n[Detailed chapter summary, 1-2 paragraphs]\\n\\n### Key Events\\n- [Event 1]\\n- [Event 2]\\n- [Event 3]\\n\\n[Repeat the Chapter structure for each chapter, maintaining EXACT same formatting]\\n\\nNote: For short stories, use 1-2 chapters. For novellas, use 5-10 chapters. For novels, use 10+ chapters.\\nReturn the outline using this EXACT Markdown structure. Do not include any optional or conditional chapters.\\nCRITICALLY IMPORTANT: Add specific chapter numbers to each chapter (Chapter 1, Chapter 2, etc.)\\n\\nIMPORTANT: The content should be written entirely in US-English.\\n\\n\\nIMPORTANT: This is a BOOK (80-150 pages). Generate EXACTLY 3 chapters. Do not exceed this limit.\"}]}",
+        "ignoreExtraElements": true,
+        "ignoreArrayOrder": true
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "mock_v1_chat_completions_2Rq6U_body.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
