@@ -138,7 +138,7 @@ class LLMClient:
 
             except Exception as e:
                 # Don't log here - let the calling code handle logging
-                raise LLMClientError(f"Content generation failed: {e}", self.provider) from e
+                raise LLMClientError(f"Content generation failed: {e}", self.provider)
 
         try:
             self.logger.debug(f"Starting content generation with timeout: {self.timeout} seconds")
@@ -169,7 +169,7 @@ class LLMClient:
 
         except Exception as e:
             self.logger.error(f"Streaming content generation failed: {e}")
-            raise LLMClientError(f"Streaming generation failed: {e}", self.provider) from e
+            raise LLMClientError(f"Streaming generation failed: {e}", self.provider)
 
     # Python 3.12: Improved async context manager
     @asynccontextmanager

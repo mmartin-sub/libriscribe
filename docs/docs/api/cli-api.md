@@ -739,7 +739,5 @@ console.print(f"[yellow]No log file found at {project_log_file}.[/yellow]")
 
 ## See Also
 
-- [BookCreator Service API](book-creator-api.md)
 - [ProjectManager API](project-manager-api.md)
 - [Settings Configuration](../user-guide/configuration.md)
-- [Installation Guide](../../INSTALL.md)

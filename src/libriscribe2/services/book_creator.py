@@ -190,6 +190,14 @@ class BookCreatorService:
         logger.debug(f"Project directory: {project_dir}")
         logger.debug(f"Project log file: {log_path}")
 
+        # Log links to other relevant log files
+        logger.info("---")
+        logger.info("Other log files:")
+        for log_pattern in ["llm_output_*.log", "libriscribe_*.log"]:
+            for log_file in project_dir.glob(log_pattern):
+                logger.info(f"  - {log_file.name}")
+        logger.info("---")
+
     def create_book(self, args: dict[str, Any]) -> bool:
         """
         Synchronous book creation. For async usage, prefer `await acreate_book(args)`.

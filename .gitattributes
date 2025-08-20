@@ -51,3 +51,7 @@
 
 # PDF
 *.pdf binary
+
+# Lock files
+*.lock binary
+package-lock.json text merge=npm-merge-driver

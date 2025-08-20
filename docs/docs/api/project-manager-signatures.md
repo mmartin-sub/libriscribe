@@ -124,7 +124,7 @@ Generate worldbuilding details including settings and cultures.
 async def write_chapter(self, chapter_number: int) -> None
 ```
 
-Write a specific chapter and save as chapter_{number}.md.
+Write a specific chapter and save as `chapter_{number}.md`.
 
 #### write_and_review_chapter()
 

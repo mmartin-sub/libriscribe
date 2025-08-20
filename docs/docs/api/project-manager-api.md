@@ -215,7 +215,7 @@ async def write_chapter(self, chapter_number: int) -> None
 - `chapter_number` (int): Chapter number to write
 
 **Description:**
-Writes a specific chapter and saves it as chapter_{number}.md.
+Writes a specific chapter and saves it as `chapter_{number}.md`.
 
 #### write_and_review_chapter()
 
@@ -610,9 +610,3 @@ The ProjectManagerAgent implements comprehensive error handling:
 - **Timeout handling**: Configurable timeouts for LLM operations
 - **Memory efficiency**: Large projects are handled efficiently
 
-## See Also
-
-- [Settings API Documentation](settings-api.md)
-- [ProjectKnowledgeBase API Documentation](knowledge-base-api.md)
-- [LLM Client API Documentation](llm-client-api.md)
-- [AutoGen Integration Guide](autogen-integration.md)

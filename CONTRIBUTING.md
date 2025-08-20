@@ -41,6 +41,59 @@ We welcome contributions from the community!  Here's how you can help improve Li
       tlmgr install latexindent
       ```
 
+    * **Running GitHub Actions Locally with `act`**:
+      To test GitHub Actions workflows locally, you can use `act`. This is a great way to verify your changes before pushing them to GitHub.
+
+      **Prerequisites:**
+      - You must have Docker installed and running on your system.
+
+      **Installation:**
+      - **macOS:**
+        ```bash
+        brew install act
+        ```
+      - **Linux:**
+        ```bash
+        curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+        ```
+      - **Windows (using Chocolatey):**
+        ```bash
+        choco install act-cli
+        ```
+      - **Windows (using Scoop):**
+        ```bash
+        scoop install act
+        ```
+
+      For other installation methods, please refer to the [official act documentation](https://github.com/nektos/act#installation).
+
+      **First-time setup:**
+      When you run `act` for the first time, it will prompt you to choose a default Docker image. The `medium` image is a good starting point for most workflows. If your workflow requires additional tools, you might need the `large` image.
+
+      **Basic Usage:**
+      - To run the default workflow (usually triggered by a `push` event):
+        ```bash
+        act
+        ```
+      - To list the available workflows and events from your `.github/workflows` files:
+        ```bash
+        act -l
+        ```
+      - To run a specific event (e.g., `pull_request`):
+        ```bash
+        act pull_request
+        ```
+      - To run a specific job from a workflow:
+        ```bash
+        act -j <job_id>
+        ```
+
+      **Handling Secrets:**
+      For workflows that require secrets, you can pass them to `act` using the `--secret` flag or by creating a `.secrets` file in your repository root. For more details, see the `act` documentation on handling secrets.
+
+      **Configuration:**
+      You can create a `.actrc` file in your repository's root or home directory to configure `act`'s behavior, such as setting a default image.
+
 2. **Create a branch:** Create a new branch for your changes:
 
     ```bash

@@ -255,8 +255,6 @@ class Agent(ABC):
         try:
             return await primary_method()
         except Exception as e:
-            # Log detailed error to file only (DEBUG level)
-            self.log_debug(f"Primary {error_context} failed: {e}")
             if fallback_method:
                 try:
                     return await fallback_method()

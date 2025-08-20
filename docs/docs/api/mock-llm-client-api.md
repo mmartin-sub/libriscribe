@@ -535,6 +535,5 @@ def generate_custom_response(self, prompt_type: str, **kwargs) -> str:
 ## See Also
 
 - [LLM Client API](llm-client-api.md)
-- [Testing Guide](../development/testing.md)
-- [Multi-Language Support](../user-guide/internationalization.md)
+- [Testing Guide](../development/ai-testing-best-practices.md)
 - [Configuration Guide](../user-guide/configuration.md)

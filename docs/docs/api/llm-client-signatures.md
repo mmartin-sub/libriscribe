@@ -530,6 +530,4 @@ class LLMClient:
 ## See Also
 
 - [LLM Client API Documentation](llm-client-api.md)
-- [Mock LLM Client Signatures](mock-llm-client-signatures.md)
 - [Settings Configuration](../user-guide/configuration.md)
-- [Error Handling Guide](../development/error-handling.md)

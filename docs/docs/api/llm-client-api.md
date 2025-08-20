@@ -558,5 +558,3 @@ content = await client.generate_content("prompt", prompt_type="general")
 
 - [Settings Configuration](../user-guide/configuration.md)
 - [Mock LLM Client](mock-llm-client-api.md)
-- [Error Handling Guide](../development/error-handling.md)
-- [Performance Optimization](../development/performance.md)
