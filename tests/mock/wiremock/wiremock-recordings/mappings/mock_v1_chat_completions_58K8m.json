@@ -1,0 +1,22 @@
+{
+  "name": "mock_v1_chat_completions_58K8m",
+  "priority": 5,
+  "request": {
+    "url": "/v1/chat/completions",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"messages\":[{\"role\":\"user\",\"content\":\"\\nCreate detailed character profiles for a Hero's journey book titled \\\"The 37th Parallel\\\" which is categorized as fiction.\\nThe book is written in US-English.\\n\\nBook Description: Dr. Isa Mendoza and Park Caro—estranged half-sisters who once shared a childhood lullaby—are violently reunited when their children are kidnapped at 14:37 on a Tuesday. A single video shows the kids bound in a freight container, a seven-day countdown ticking beneath bilingual fragments of that lullaby. To save them, Isa and Caro must trace the 37th parallel east across Europe and Asia, solving cryptic clues that resurrect every buried betrayal between them. With the help of a guilt-ridden German pilot and a K-pop logistics prodigy, they race through the Rhine, Neckar, Danube, and the steppes to Vladivostok, guided by their own daughters hacking the chase from inside the container. At the final coordinate—a derelict Soviet listening post on the Russian-Korean border—they face an impossible lever: expose a wartime atrocity that will destroy their reputations and families, or lose the children forever. In the end, the question is not how far they will travel, but how much of themselves they are willing to surrender to the river of secrets that once divided them.\\n\\nThe book requires the following number of main characters: 8\\n\\nFor EACH character, include the following in the profile (return as a JSON array of character objects):\\n\\nName: (Suggest a suitable name appropriate for the language and cultural context of the book)\\n\\nAge:\\n\\nPhysical Description: (Detailed, including appearance, clothing style, etc.)\\n\\nPersonality Traits: (Provide at least 3-5 distinct personality traits as a comma-separated string, for example: \\\"Brave, Loyal, Impulsive, Intelligent, Compassionate\\\")\\n\\nBackground/Backstory: (Detailed, explaining their past and how it shapes them)\\n\\nMotivations: (What drives them? What are their goals?)\\n\\nRelationships with other characters: (Describe their connections to other characters, creating new characters if necessary to complete the story.)\\n\\nRole in the story: (Protagonist, antagonist, supporting character, etc.)\\n\\nInternal Conflicts: (What struggles do they face within themselves?)\\n\\nExternal Conflicts: (What external challenges do they face?)\\n\\nCharacter Arc: (How do they change throughout the story? Provide a brief description)\\n\\nReturn the character profiles in JSON format. IMPORTANT: Ensure personality_traits is a simple comma-separated string, not an array or list.\\n\\nIMPORTANT: The content should be written entirely in US-English.\\n\"}]}",
+        "ignoreExtraElements": true,
+        "ignoreArrayOrder": true
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "mock_v1_chat_completions_58K8m_body.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

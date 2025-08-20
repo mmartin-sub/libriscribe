@@ -1,0 +1,22 @@
+{
+  "name": "mock_v1_chat_completions_nlNr7",
+  "priority": 5,
+  "request": {
+    "url": "/v1/chat/completions",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"messages\":[{\"role\":\"user\",\"content\":\"\\nWrite Scene 1 of 7 for Chapter 3: The Lever at the River’s End of the Hero's journey fiction book \\\"The 37th Parallel\\\".\\nThe book is written in US-English.\\n\\nChapter Summary:\\nDawn breaks iron-gray over the Russian-Korean border. The container sits inside a rusted listening post, antennae like dead trees. Inside, Luna and Min are wired to a pressure-plate bomb; a single laptop displays the final lullaby line—“피는 물보다 진하다, mais l’eau efface tout”—and two buttons: UPLOAD or ABANDON. The upload is the complete 1996 Red Cross report, implicating Isa in suppressing evidence of a civilian massacre to protect MSF neutrality, and naming Caro’s grandfather as a collaborator with North Korean units. If released, Pyongyang will blacklist every Park descendant; Interpol will revoke Isa’s medical license. The kidnapper steps from the shadows: their mother’s former interpreter, left for dead in 1996, now seeking poetic justice. Isa and Caro argue in the snow, voices hoarse, until Luna whispers through the container wall: “We’re not bargaining chips. Do what you couldn’t do before—choose us.” In the end, Caro’s hand covers Isa’s on the lever. They press UPLOAD together. The bomb disarms; the doors swing open. The report goes public as they carry the children across the frozen Tumen River. Behind them, the listening post burns, taking the lullaby with it. They walk forward, not as saviors or sinners, but as sisters who finally let the river carry their secrets out to sea.\\n\\nScene Details:\\n- Summary: Isa and Caro arrive at the derelict Soviet listening post, the Tumen River glinting under a harsh dawn. The structure looms like a tomb, its rusted antennae clawing at the sky.\\n- Characters: Dr. Isa Mendoza, Park Caro\\n- Setting: Exterior of the Soviet listening post, Russian-Korean border; icy, snow-blanketed ground\\n- Goal: Establish the final, bleak destination and the urgency of the deadline\\n- Emotional Beat: Dread\\n\\nInstructions:\\n- Write a vivid, engaging scene that captures these elements.\\n- Include descriptive details and sensory information about the setting.\\n- Show character emotions and development through actions and dialogue.\\n- Advance the story according to the scene's goal and emotional beat.\\n- Make the scene flow naturally and avoid unnecessary exposition.\\n- Ensure the scene ends in a way that connects smoothly to the next scene.\\n- Use language and style appropriate for the genre.\\n\\nImportant: Focus on showing rather than telling. Create an immersive experience that brings the scene to life.\\n\\nIMPORTANT: The content should be written entirely in US-English.\\n\\n\\nIMPORTANT: Begin the scene with the title: ## Scene 1: Isa and Caro arrive at the derelict Soviet listening post, the Tumen River glinting under a harsh dawn. The structure looms like a tomb, its rusted antennae clawing at the sky. (as a Markdown heading, not bold, not triple #, no extra formatting)\"}]}",
+        "ignoreExtraElements": true,
+        "ignoreArrayOrder": true
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "mock_v1_chat_completions_nlNr7_body.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

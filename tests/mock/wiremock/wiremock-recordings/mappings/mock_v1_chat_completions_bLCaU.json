@@ -1,0 +1,22 @@
+{
+  "name": "mock_v1_chat_completions_bLCaU",
+  "priority": 5,
+  "request": {
+    "url": "/v1/chat/completions",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"messages\":[{\"role\":\"user\",\"content\":\"\\nWrite Scene 1 of 9 for Chapter 1: The Fracture at 14:37 of the Hero's journey fiction book \\\"The 37th Parallel\\\".\\nThe book is written in US-English.\\n\\nChapter Summary:\\nTuesday begins like any other for both sisters. Isa is mid-air in a Médecins Sans Frontières helicopter evacuating a pregnant teenager from Mosul to Ramstein when a surface-to-air missile clips the tail rotor; the chopper spins into the Black Forest. Simultaneously, in Seoul, Caro’s nine-year-old son Min is pulled off a jam-packed subway by silent men in surgical masks. At 14:37 exactly, both women receive the same encrypted video: Luna and Min bound, blindfolded, and breathing through straws inside a freight container. A distorted voice recites the first line of their childhood lullaby—“Dors, mon trésor, 자장가를 불러”—then demands they return to the river where they buried the truth. Isa crawls from the burning wreckage with a dislocated shoulder and a concussion; Caro drops a tray of orchids in a Gangnam penthouse, her perfectly manicured world cracking like porcelain. Both realize the distance they cultivated was never geographic at all.\\n\\nScene Details:\\n- Summary: *checks emotional beats* For Caro: calm → panic → despair Must show their parallel trauma despite physical distance. *verifies characters* *double-checks settings* *confirms emotional progression* *validates timing*\\n- Characters: None specified\\n- Setting: None specified\\n- Goal: None specified\\n- Emotional Beat: None specified\\n\\nInstructions:\\n- Write a vivid, engaging scene that captures these elements.\\n- Include descriptive details and sensory information about the setting.\\n- Show character emotions and development through actions and dialogue.\\n- Advance the story according to the scene's goal and emotional beat.\\n- Make the scene flow naturally and avoid unnecessary exposition.\\n- Ensure the scene ends in a way that connects smoothly to the next scene.\\n- Use language and style appropriate for the genre.\\n\\nImportant: Focus on showing rather than telling. Create an immersive experience that brings the scene to life.\\n\\nIMPORTANT: The content should be written entirely in US-English.\\n\\n\\nIMPORTANT: Begin the scene with the title: ## Scene 1: *checks emotional beats* For Caro: calm → panic → despair Must show their parallel trauma despite physical distance. *verifies characters* *double-checks settings* *confirms emotional progression* *validates timing* (as a Markdown heading, not bold, not triple #, no extra formatting)\"}]}",
+        "ignoreExtraElements": true,
+        "ignoreArrayOrder": true
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "mock_v1_chat_completions_bLCaU_body.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
