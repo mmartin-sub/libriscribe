@@ -99,7 +99,6 @@ class EnvironmentConfig:
             "num_chapters": "NUM_CHAPTERS",
             "hide_generated_by": "HIDE_GENERATED_BY",
             "log_llm_output": "LOG_LLM_OUTPUT",
-            "llm_timeout": "LLM_TIMEOUT",
         }
 
         for config_key, env_var in env_mapping.items():

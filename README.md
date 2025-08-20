@@ -205,13 +205,13 @@ When adding new test secrets or handling false positives with detect-secrets, fo
 1. **Scan for secrets in the codebase:**
 
    ```bash
-   hatch run detect-secrets scan --baseline .secrets.baseline
+   hatch run detect-secrets-scan
    ```
 
 2. **Audit the detected secrets to identify false positives:**
 
    ```bash
-   hatch run detect-secrets audit .secrets.baseline
+   hatch run detect-secrets-audit
    ```
 
 3. **Commit the updated baseline file:**

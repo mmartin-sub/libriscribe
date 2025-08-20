@@ -118,7 +118,7 @@ class TestSettings:
                 "research": "custom-research-model",
                 "scene": "custom-scene-model",
                 "keyword_generation": "custom-keyword-model",
-            }
+            },
         }
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
@@ -148,7 +148,6 @@ class TestSettings:
         finally:
             # Cleanup
             Path(config_path).unlink(missing_ok=True)
-
 
     def test_get_model_config_with_invalid_file(self):
         """Test get_model_config with invalid config file."""

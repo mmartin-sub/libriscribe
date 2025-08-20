@@ -171,7 +171,7 @@ dead-code = "vulture src tests"
 
 # --- Package Management (uv) ---
 check-updates = "uv pip list --outdated"
-detect-secrets-scan = "detect-secrets scan --baseline .secrets.baseline"
+detect-secrets-scan = "detect-secrets scan --baseline .secrets.baseline --exclude-files '^tests/mock/wiremock/.*\\.json$'"
 detect-secrets-audit = "detect-secrets audit .secrets.baseline"
 
 # --- RUFF CONFIGURATION ---
@@ -325,7 +325,7 @@ norecursedirs = ["tests/utils"]
 
 # --- BANDIT CONFIGURATION ---
 [tool.bandit]
-exclude_dirs = ["tests", ".venv"]
+exclude_dirs = ["tests", ".venv", "tests/mock/wiremock/wiremock-recordings/"]
 skips = ["B101"]
 
 

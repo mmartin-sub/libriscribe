@@ -19,6 +19,7 @@ class TestConfigurationLoading:
     def teardown_method(self):
         """Clean up environment variables after each test."""
         import os
+
         env_vars_to_clear = [
             "PROJECTS_DIR",
             "DEFAULT_LLM",
@@ -182,7 +183,7 @@ class TestConfigurationLoading:
                 "research": "integration-research-model",
                 "scene": "integration-scene-model",
                 "keyword_generation": "integration-keyword-model",
-            }
+            },
         }
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
