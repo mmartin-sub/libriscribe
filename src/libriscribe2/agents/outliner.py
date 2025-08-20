@@ -191,11 +191,19 @@ class OutlinerAgent(Agent):
     async def generate_scene_outline(self, project_knowledge_base: ProjectKnowledgeBase, chapter: Chapter) -> bool:
         """Generates the scene outline for a single chapter."""
         try:
-            # Generate random scene count for this chapter
+            # Generate scene count for this chapter
             from libriscribe2.utils.validation_mixin import ValidationMixin
 
             scene_range = getattr(project_knowledge_base, "scenes_per_chapter", "3-6")
-            scene_count = ValidationMixin.generate_random_scene_count(scene_range)
+            scene_count = 0
+            if project_knowledge_base.scenes_per_chapter_list:
+                if chapter.chapter_number - 1 < len(project_knowledge_base.scenes_per_chapter_list):
+                    scene_count = project_knowledge_base.scenes_per_chapter_list[chapter.chapter_number - 1]
+                else:
+                    # Fallback to default if list is too short
+                    scene_count = ValidationMixin.generate_random_scene_count(scene_range)
+            else:
+                scene_count = ValidationMixin.generate_random_scene_count(scene_range)
 
             logger.info(f"Chapter {chapter.chapter_number}: Generating {scene_count} scenes (range: {scene_range})")
 

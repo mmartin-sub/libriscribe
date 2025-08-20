@@ -62,7 +62,8 @@ class Settings(BaseSettings):
     concept_prompt_max_len: int = Field(default=5000)
     concept_prompt_min_len: int = Field(default=800)
     max_prompt_length: int = Field(default=8000)
-    concept_json_max_len: int = Field(default=2000)
+    # With a lower value, the description is truncated and the critique is based on incomplete information
+    concept_json_max_len: int = Field(default=9999)
 
     # LiteLLM settings
     send_litellm_tags: bool = Field(default=False, description="Send x-litellm-tags header")
@@ -103,6 +104,7 @@ class Settings(BaseSettings):
     content_dump_threshold: int = Field(
         default=400, description="Maximum content length to dump in logs (longer content goes to files)"
     )
+    log_llm_output: bool = Field(default=False, description="Log LLM input and output to a file")
 
     # Configuration file
     config_file: str | None = Field(default=None, description="Path to configuration file")

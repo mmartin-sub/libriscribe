@@ -257,8 +257,10 @@ class TestAgentBase:
             import json
 
             with open(expected_file) as f:
-                data = json.load(f)
-            assert data["raw_content"] == content
+                content = f.read()
+                assert content
+                data = json.loads(content)
+            assert data["raw_content"] == "Test content"
             assert data["content_type"] == content_type
 
         finally:

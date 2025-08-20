@@ -52,7 +52,7 @@ class CharacterGeneratorAgent(Agent):
             self._dump_raw_response(character_response, output_path, "character")
 
             # Use the safe JSON extraction from base class
-            characters_data = self.safe_extract_json_list(character_response, "character response")
+            characters_data = self.safe_extract_json_list(character_response, "character response", output_path)
             if not characters_data:
                 error_msg = "Failed to parse character data - JSON decode error"
                 self.log_error(error_msg)

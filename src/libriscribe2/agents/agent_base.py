@@ -6,7 +6,6 @@ This module provides the base classes and interfaces for all LibriScribe agents.
 It defines the common structure and behavior that all agents should implement.
 """
 
-import json
 import logging
 import re
 import time
@@ -15,6 +14,8 @@ from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Protocol, TypeVar
+
+import pyjson5 as json
 
 from ..settings import Settings
 from ..utils.llm_client import LLMClient
@@ -121,7 +122,7 @@ class Agent(ABC):
 
             # Write the debug file
             with open(debug_file, "w", encoding="utf-8") as f:
-                json.dump(debug_data, f, indent=2, ensure_ascii=False)
+                f.write(json.dumps(debug_data, indent=2, ensure_ascii=False))
 
             self.log_debug(f"Raw {content_type} response dumped to: {debug_file}")
 
@@ -160,7 +161,9 @@ class Agent(ABC):
             # Don't log ERROR level here since the calling code will handle it
             return None
 
-    def safe_extract_json(self, content: str, content_type: str) -> dict[str, Any] | None:
+    def safe_extract_json(
+        self, content: str, content_type: str, output_path: str | None = None
+    ) -> dict[str, Any] | None:
         """Safely extract JSON from content with error handling."""
         try:
             # Try to find JSON in the content
@@ -182,14 +185,21 @@ class Agent(ABC):
             else:
                 self.log_debug(f"Expected dict from {content_type}, got {type(result)}")  # Log to file only
                 return None
-        except json.JSONDecodeError as e:
-            self.log_debug(f"JSON decode error in {content_type}: {e}")  # Log to file only
+        except ValueError as e:
+            self.log_error(f"Failed to parse {content_type} data - JSON decode error: {e}")
+            if output_path:
+                issue_path = Path(output_path).parent / f"{content_type}.json.issue"
+                with open(issue_path, "w", encoding="utf-8") as f:
+                    f.write(content)
+                self.log_error(f"Problematic JSON content saved to: {issue_path.as_uri()}")
             return None
         except Exception as e:
             self.log_debug(f"Error extracting JSON from {content_type}: {e}")  # Log to file only
             return None
 
-    def safe_extract_json_list(self, content: str, content_type: str) -> list[Any] | None:
+    def safe_extract_json_list(
+        self, content: str, content_type: str, output_path: str | None = None
+    ) -> list[Any] | None:
         """Safely extract JSON list from content with error handling."""
         try:
             # Try to find JSON array in the content
@@ -223,13 +233,13 @@ class Agent(ABC):
             else:
                 self.log_debug(f"Expected list from {content_type}, got {type(result)}")  # Log to file only
                 return None
-        except json.JSONDecodeError as e:
-            self.log_debug(f"JSON decode error in {content_type}: {e}")  # Log to file only
-            # Log the problematic content for debugging
-            self.log_debug(f"Problematic content: {content[:500]}...")
-
-            # Try to dump the problematic content to a file if we have an output path
-            # This will be called from the character generator with output_path
+        except ValueError as e:
+            self.log_error(f"Failed to parse {content_type} data - JSON decode error: {e}")
+            if output_path:
+                issue_path = Path(output_path).parent / f"{content_type}.json.issue"
+                with open(issue_path, "w", encoding="utf-8") as f:
+                    f.write(content)
+                self.log_error(f"Problematic JSON content saved to: {issue_path.as_uri()}")
             return None
         except Exception as e:
             self.log_debug(f"Error extracting JSON list from {content_type}: {e}")  # Log to file only

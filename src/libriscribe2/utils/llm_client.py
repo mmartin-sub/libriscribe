@@ -6,12 +6,14 @@ This module provides a client for interacting with Large Language Models.
 """
 
 import asyncio
+import json
 import logging
 import os
 import re
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any, Protocol, TypeVar
 
 import aiohttp
@@ -488,6 +490,15 @@ Write directly without introductions."""
             self._logged_url = current_url
 
         try:
+            if self.settings.log_llm_output:
+                from .timestamp_utils import format_timestamp_for_filename
+
+                project_dir = Path(self.settings.projects_dir) / self.project_name
+                project_dir.mkdir(parents=True, exist_ok=True)
+                log_file = project_dir / f"llm_output_{format_timestamp_for_filename()}.log"
+                with open(log_file, "a", encoding="utf-8") as f:
+                    f.write(f"--- PROMPT ---\n{prompt}\n\n")
+
             async with ClientSession() as session:
                 async with session.post(
                     f"{base_url}/chat/completions",
@@ -497,6 +508,10 @@ Write directly without introductions."""
                 ) as response:
                     if response.status == 200:
                         data: dict[str, Any] = await response.json()
+                        if self.settings.log_llm_output:
+                            with open(log_file, "a", encoding="utf-8") as f:
+                                f.write(f"--- RESPONSE ---\n{json.dumps(data, indent=2, ensure_ascii=False)}\n\n")
+
                         if "choices" not in data or not data["choices"]:
                             raise LLMClientError(
                                 f"Invalid response format: no choices in response. Response: {data}",

@@ -16,6 +16,21 @@ from libriscribe2.settings import Settings
 class TestConfigurationLoading:
     """Integration tests for configuration loading."""
 
+    def teardown_method(self):
+        """Clean up environment variables after each test."""
+        import os
+        env_vars_to_clear = [
+            "PROJECTS_DIR",
+            "DEFAULT_LLM",
+            "LLM_TIMEOUT",
+            "OPENAI_API_KEY",
+            "OPENAI_BASE_URL",
+            "OPENAI_DEFAULT_MODEL",
+        ]
+        for var in env_vars_to_clear:
+            if var in os.environ:
+                del os.environ[var]
+
     def test_book_creator_with_config_file(self):
         """Test BookCreatorService with configuration file."""
         # Arrange
@@ -152,6 +167,8 @@ class TestConfigurationLoading:
         """Test that Settings properly loads model configuration from config file."""
         # Arrange
         config_data = {
+            "openai_api_key": "test-key",
+            "default_llm": "test-llm",
             "models": {
                 "default": "integration-test-model",
                 "concept": "integration-concept-model",

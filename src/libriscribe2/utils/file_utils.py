@@ -1,12 +1,12 @@
 # src/libriscribe2/utils/file_utils.py
 
 import hashlib
-import json
 import logging
 import os
 from pathlib import Path
 from typing import Any, TypeVar
 
+import pyjson5 as json
 from pydantic import BaseModel, ValidationError  # Import ValidationError
 
 from .markdown_formatter import ensure_header_spacing
@@ -60,30 +60,27 @@ def read_json_file(file_path: str, model: type[BaseModel] | None = None) -> dict
     """Reads a JSON file, optionally validating it against a Pydantic model."""
     try:
         with open(file_path, encoding="utf-8") as f:
-            data = json.load(f)
-            if model:
-                try:
-                    # Call model_validate as a class method
-                    validated_data = model.model_validate(data)
-                    return validated_data
-                except ValidationError as e:
-                    logger.error(f"JSON validation error in {file_path}: {e}")
-                    print(f"ERROR: Invalid JSON data in {file_path}. See log for details.")
-                    return None  # Or raise, or return a default instance of the model
-            # Cast to dict[str, Any] since json.load() returns Any but we expect dict
-            if isinstance(data, dict):
-                result: dict[str, Any] = data
-                return result
-            else:
-                # Handle non-dict return from json.load
-                return None
+            content = f.read()
+        data = json.loads(content)
+        if model:
+            try:
+                # Call model_validate as a class method
+                validated_data = model.model_validate(data)
+                return validated_data
+            except ValidationError as e:
+                logger.error(f"JSON validation error in {file_path}: {e}")
+                print(f"ERROR: Invalid JSON data in {file_path}. See log for details.")
+                return None  # Or raise, or return a default instance of the model
+        # Cast to dict[str, Any] since json.load() returns Any but we expect dict
+        if isinstance(data, dict):
+            result: dict[str, Any] = data
+            return result
+        else:
+            # Handle non-dict return from json.load
+            return None
     except FileNotFoundError:
         logger.error(f"File not found: {file_path}")
         print(f"ERROR: File not found: {file_path}")
-        return None
-    except json.JSONDecodeError:
-        logger.exception(f"Invalid JSON in {file_path}")
-        print(f"ERROR: Invalid JSON in {file_path}")
         return None
     except Exception as e:
         logger.exception(f"Error reading JSON file {file_path}: {e}")
@@ -240,8 +237,6 @@ def extract_json_from_markdown(
         result = json.loads(json_str)
         return result if isinstance(result, dict | list) else None
 
-    except json.JSONDecodeError:
-        return None
     except Exception as e:
         logger.exception(f"Error extracting JSON from Markdown: {e}")
         print("Error extracting JSON.")

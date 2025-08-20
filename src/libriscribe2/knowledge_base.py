@@ -127,6 +127,7 @@ class ProjectKnowledgeBase(BaseModel):
     num_chapters_str: str = ""  # Keep for advanced
     chapters_str: str = ""  # Store original chapters specification (e.g., "8-12")
     scenes_per_chapter: str = "3-6"  # Scene range per chapter (e.g., "3-6", "2-4")
+    scenes_per_chapter_list: list[int] | None = None  # For fixed scenes per chapter
     config_file: str = "config.json"  # Name of the configuration file used
     dynamic_questions: dict[str, str] = {}  # Keep for advanced
     keywords: list[str] = Field(default_factory=list, description="A list of keywords for the book.")

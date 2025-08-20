@@ -1,7 +1,7 @@
-import json
 import logging
 from typing import Any
 
+import pyjson5 as json
 import typer
 from rich.console import Console
 
@@ -105,7 +105,7 @@ async def generate_questions_with_llm(category: str, genre: str, llm_client: LLM
         try:
             questions = json.loads(json_str)
             return questions if isinstance(questions, dict) else {}
-        except json.JSONDecodeError:
+        except ValueError:
             # If it fails, create a minimal set of questions as fallback
             console.print("[yellow]Could not parse LLM response. Using default questions.[/yellow]")
             return {

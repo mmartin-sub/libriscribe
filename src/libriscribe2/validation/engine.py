@@ -396,7 +396,7 @@ class ValidationEngineImpl(ValidationEngine):
                 if config_path.endswith(".json"):
                     import json
 
-                    json.dump(config_dict, f, indent=2)
+                    json.dump(config_dict, f, indent=2, ensure_ascii=False)
                 else:
                     yaml.dump(config_dict, f, default_flow_style=False, indent=2)
 
