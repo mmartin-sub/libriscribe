@@ -1,0 +1,21 @@
+{
+  "name": "mock_v1_chat_completions_TZVyg",
+  "request": {
+    "url": "/v1/chat/completions",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"messages\":[{\"role\":\"user\",\"content\":\"\\nCreate a structured outline for a Hero's journey book titled \\\"The Latitude of Forgiveness\\\" which is categorized as fiction.\\nThe book is written in US-English.\\n\\nDescription: Once upon a time, in a sagging farmhouse outside Dayton, Isa and Caro raised their kids on apples, thrift-store dresses, and stories they invented together after lights-out. Geography and resentment did what time alone could not: Isa took a dream job in a Strasbourg NICU, perfecting the art of saving other people’s babies; Caro followed her husband’s tech transfer to Seoul and, in the vacuum of trailing-spouse loneliness, stopped painting. Years of unanswered voice mails hardened into silence.\\n\\nNow, at thirty-eight weeks, Isa’s daughter Harper lands in Seoul for a semester-abroad art show, crashes with Caro’s son Jun, and goes into sudden labor five weeks early. The Seoul hospital calls both mothers but reaches only Caro—Isa is unreachable somewhere between Germany and Siberia, riding the last leg of a train journey she started because flying still felt like giving up too fast.\\n\\nEach woman has four days to reach the hospital before the baby—or babies, the scans are inconclusive—requires the kind of high-risk consent only next of kin can give. Isa hops the Berlin-Moscow express, then the last Aeroflot connection to Incheon, carrying an envelope of unsent letters that have grown heavier with every mile. Caro, convinced she is to blame for every rupture, boards the overnight ferry to Fukuoka to intercept the only person who still remembers her art—Harper’s professor—then doubles back to Seoul on a budget flight she can barely afford.\\n\\nParallel journeys force the sisters to confront the men they left behind: Isa’s gentle but exhausted French husband who believes in second chances, and Caro’s Korean-American spouse who has kept her secrets but may not keep her marriage. Flashbacks to their communal life in Ohio—told from the POV of the husbands and the now-grown children—reveal a betrayal deeper than geography.\\n\\nWhen the sisters finally meet in a fluorescent NICU waiting room, the question is no longer whether they can forgive, but whether the fragile infant behind glass will live long enough for their apology to matter. The climax unfolds over one night in Seoul: two women, one incubator, and the latitude at which forgiveness stops being an idea and becomes a choice to speak the first honest sentence in fifteen years.\\n\\nIMPORTANT: Format your response EXACTLY as shown below, with consistent header formatting and numbering:\\nIf there's a book length: (high), adjust the number of chapters accordingly.\\n\\n# Book Summary\\n[Write a brief summary of the entire book here, 2-3 paragraphs]\\n\\n# Chapter List\\n[Total number of chapters, definitively stated. NO optional chapters.]\\n\\n# Chapter Details\\n\\n## Chapter 1: [Chapter Title]\\n### Summary\\n[Detailed chapter summary, 1-2 paragraphs]\\n\\n### Key Events\\n- [Event 1]\\n- [Event 2]\\n- [Event 3]\\n\\n## Chapter 2: [Chapter Title]\\n### Summary\\n[Detailed chapter summary, 1-2 paragraphs]\\n\\n### Key Events\\n- [Event 1]\\n- [Event 2]\\n- [Event 3]\\n\\n[Repeat the Chapter structure for each chapter, maintaining EXACT same formatting]\\n\\nNote: For short stories, use 1-2 chapters. For novellas, use 5-10 chapters. For novels, use 10+ chapters.\\nReturn the outline using this EXACT Markdown structure. Do not include any optional or conditional chapters.\\nCRITICALLY IMPORTANT: Add specific chapter numbers to each chapter (Chapter 1, Chapter 2, etc.)\\n\\nIMPORTANT: The content should be written entirely in US-English.\\n\\n\\nIMPORTANT: This is a BOOK (80-150 pages). Generate EXACTLY 3 chapters. Do not exceed this limit.\"}]}",
+        "ignoreExtraElements": true,
+        "ignoreArrayOrder": true
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "mock_v1_chat_completions_TZVyg_body.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

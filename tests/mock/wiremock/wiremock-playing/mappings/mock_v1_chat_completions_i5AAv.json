@@ -1,0 +1,21 @@
+{
+  "name": "mock_v1_chat_completions_i5AAv",
+  "request": {
+    "url": "/v1/chat/completions",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"messages\":[{\"role\":\"user\",\"content\":\"\\nWrite Scene 7 of 8 for Chapter 3: The Latitude of the Hero's journey fiction book \\\"The Latitude of Forgiveness\\\".\\nThe book is written in US-English.\\n\\nChapter Summary:\\nThe sisters meet at 2:47 a.m. in the NICU waiting room, separated by a wall of glass and the soft beeping of monitors. Caro arrives first, clutching the sketchbook she has not opened in fifteen years; Isa arrives barefoot, her shoes lost somewhere between Siberia and immigration. Over the next eight hours—while the infant’s lungs struggle and Harper sleeps off anesthesia—they speak in fragments, then paragraphs, then the full, unbearable truth: the fellowship, the unsent letters, the painting Caro abandoned, the babies Isa saved but could not carry. Their husbands arrive—Isa’s gentle Frenchman with espresso and apologies, Caro’s Korean-American spouse with divorce papers folded small—and the children, now grown, watch from the hallway. At 5:03 a.m., the baby stabilizes. Isa and Caro step outside into the first pale light of Seoul’s winter dawn, stand at the exact latitude where forgiveness stops being an idea and becomes the choice to speak the next sentence. The book ends with Caro opening her sketchbook to a fresh page, Isa handing her a pen, and the two of them beginning—at last—to draw the same line.\\n\\nScene Details:\\n- Summary: At 5:03 a.m., the infant stabilizes; Isa and Caro step outside onto the hospital's predawn terrace at exactly 37°33'N latitude, the first pale light revealing Seoul; Caro opens her sketchbook, Isa hands her a pen, and they begin drawing a single, shared line on the fresh page.\\n- Characters: Isa, Caro\\n- Setting: Hospital rooftop terrace, Seoul; winter dawn, biting cold, cityscape bathed in soft, pale light, the specific latitude subtly acknowledged.\\n- Goal: Deliver the thematic climax where forgiveness shifts from abstract concept to active, tangible choice through the symbolic act of collaborative creation.\\n- Emotional Beat: Quiet, hard-won hope and the fragile beginning of reconciliation.\\n\\nInstructions:\\n- Write a vivid, engaging scene that captures these elements.\\n- Include descriptive details and sensory information about the setting.\\n- Show character emotions and development through actions and dialogue.\\n- Advance the story according to the scene's goal and emotional beat.\\n- Make the scene flow naturally and avoid unnecessary exposition.\\n- Ensure the scene ends in a way that connects smoothly to the next scene.\\n- Use language and style appropriate for the genre.\\n\\nImportant: Focus on showing rather than telling. Create an immersive experience that brings the scene to life.\\n\\nIMPORTANT: The content should be written entirely in US-English.\\n\\n\\nIMPORTANT: Begin the scene with the title: ## Scene 7: At 5:03 a.m., the infant stabilizes; Isa and Caro step outside onto the hospital's predawn terrace at exactly 37°33'N latitude, the first pale light revealing Seoul; Caro opens her sketchbook, Isa hands her a pen, and they begin drawing a single, shared line on the fresh page. (as a Markdown heading, not bold, not triple #, no extra formatting)\"}]}",
+        "ignoreExtraElements": true,
+        "ignoreArrayOrder": true
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "mock_v1_chat_completions_i5AAv_body.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

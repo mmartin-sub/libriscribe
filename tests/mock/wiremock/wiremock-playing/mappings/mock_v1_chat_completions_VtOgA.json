@@ -1,0 +1,21 @@
+{
+  "name": "mock_v1_chat_completions_VtOgA",
+  "request": {
+    "url": "/v1/chat/completions",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"messages\":[{\"role\":\"user\",\"content\":\"\\n            Create a detailed outline for the scenes in Chapter 1: The Call\\n            of a Hero's journey book titled \\\"The Latitude of Forgiveness\\\"\\n            which is categorized as fiction.\\n            The book should be written in US-English.\\n\\n            Book Description: “The Latitude of Forgiveness” follows estranged sisters Isa and Caro as they race across continents to reach the Seoul NICU where Harper—Isa’s daughter and Caro’s niece—has delivered a dangerously premature child. Each woman carries the accumulated weight of fifteen years of silence, regret, and unspoken betrayal. Their parallel journeys—Isa on the Trans-Siberian and Caro on ferries and budget flights—force them to confront the men they left behind, the art they abandoned, and the moment their shared story cracked. When they finally meet in a glass-walled waiting room, the question is no longer who was right or wrong, but whether the flickering life inside an incubator will survive long enough for the first honest sentence in fifteen years to matter.\\nTold in shifting perspectives—Isa, Caro, their husbands, and the grown children—the novel braids past and present, Ohio and East Asia, painting and medicine, until the latitude at which forgiveness stops being an idea and becomes a choice is reached in the fluorescent hush of a Seoul hospital at 3:00 a.m.\\n\\n            Chapter Summary: At 4:12 a.m. in her Seoul apartment, Caro answers a call from Samsung Medical Center informing her that Harper—her niece, her sister’s daughter, the child she once painted as a strawberry-stained toddler—has gone into sudden labor at thirty-three weeks. The doctors need next-of-kin consent for an emergency C-section. Isa is unreachable, somewhere on a train between Berlin and the Russian frontier because she still refuses to board a plane. Caro, barefoot in her kitchen, promises to come, then realizes she has no idea how to tell Isa that Harper is even in Korea. The chapter alternates between Caro’s frantic preparations—grabbing her long-abandoned sketchbook as if it were a passport—and flashbacks to the night fifteen years earlier when Isa accepted the Strasbourg fellowship, the night their communal life in Ohio splintered. In the final pages, Caro boards the overnight ferry to Fukuoka, carrying nothing but the sketchbook, a prepaid phone, and the certainty that every rupture is her fault.\\n\\n            The outline should include a breakdown of EXACTLY 5 scenes for this chapter, with EACH scene having:\\n            * Scene Number: (e.g., Scene 1, Scene 2, etc.)\\n            * Summary: (A short description of what happens in the scene, 1-2 sentences)\\n            * Characters: (A list of the characters involved, separated by commas)\\n            * Setting: (Where the scene takes place)\\n            * Goal: (The purpose of the scene)\\n            * Emotional Beat: (The primary emotion conveyed in the scene)\\n\\n            IMPORTANT: Format the scene outline using Markdown bullet points, as shown below:\\n\\n            Scene 1:\\n                * Summary: [Scene summary here]\\n                * Characters: [Character 1, Character 2, ...]\\n                * Setting: [Scene setting]\\n                * Goal: [Scene goal]\\n                * Emotional Beat: [Scene emotional beat]\\n\\n            Scene 2:\\n                * Summary: [Scene summary here]\\n                * Characters: [Character 1, Character 2, ...]\\n                * Setting: [Scene setting]\\n                * Goal: [Scene goal]\\n                * Emotional Beat: [Scene emotional beat]\\n\\n            [Repeat for exactly 5 scenes, maintaining the exact same bullet point format]\\n\\n            Be sure to include all main characters relevant to this chapter and create a natural flow between scenes.\\n            \"}]}",
+        "ignoreExtraElements": true,
+        "ignoreArrayOrder": true
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "mock_v1_chat_completions_VtOgA_body.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

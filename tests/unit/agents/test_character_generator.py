@@ -161,6 +161,7 @@ class TestCharacterGeneratorAgent:
         """Test CharacterGeneratorAgent initialization."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
 
@@ -176,6 +177,7 @@ class TestCharacterGeneratorAgent:
         """Test basic character generation execution."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.return_value = generate_large_character_response()
@@ -194,6 +196,7 @@ class TestCharacterGeneratorAgent:
         """Test execution when LLM client raises an error."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.side_effect = Exception("LLM error")
@@ -211,6 +214,7 @@ class TestCharacterGeneratorAgent:
         """Test basic CharacterGeneratorAgent functionality."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = CharacterGeneratorAgent(mock_llm, settings)

@@ -52,6 +52,7 @@ class TestChapterWriterAgent:
         """Test ChapterWriterAgent initialization."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
 
@@ -67,6 +68,7 @@ class TestChapterWriterAgent:
         """Test basic chapter writing execution."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.return_value = generate_large_chapter_content()
@@ -87,6 +89,7 @@ class TestChapterWriterAgent:
         """Test execution when LLM client raises an error."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.side_effect = Exception("LLM error")
@@ -101,6 +104,7 @@ class TestChapterWriterAgent:
         """Test formatting scene content."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = ChapterWriterAgent(mock_llm, settings)
@@ -121,6 +125,7 @@ class TestChapterWriterAgent:
         """Test formatting scene content without heading."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = ChapterWriterAgent(mock_llm, settings)
@@ -139,6 +144,7 @@ class TestChapterWriterAgent:
         """Test formatting scene content with variant heading format."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = ChapterWriterAgent(mock_llm, settings)
@@ -160,6 +166,7 @@ class TestChapterWriterAgent:
         """Test execution with invalid chapter number."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.return_value = generate_large_chapter_content()
@@ -179,6 +186,7 @@ class TestChapterWriterAgent:
         """Test execution with chapter that has no scenes."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.return_value = generate_large_chapter_content()

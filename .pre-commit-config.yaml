@@ -36,6 +36,19 @@ repos:
           exclude: service\.py$
         - id: debug-statements
 
+    - repo: https://github.com/scop/pre-commit-shfmt
+      rev: v3.12.0-2 # Use the latest stable version for shfmt
+      hooks:
+        - id: shfmt
+          args: ["-i", "2", "-ci", "-sr"] # Example args: 2-space indent, check indent, simplify redirects
+  #       # If you want shfmt to *write* changes and re-add them, you can uncomment this:
+          stages: [pre-commit] # run on commit
+  #       # If shfmt auto-formats, pre-commit will stage the changes for you.
+  #       # However, for pre-commit hooks, it's often preferred to just *check* for formatting issues
+  #       # rather than auto-fixing, as it can sometimes lead to an empty commit if you just fix formatting.
+  #       # If you want it to just check (dry-run showing diff), remove the `stages` line and use `-d` arg.
+  #       # args: ["-d"] # Dry run, show diff
+
     - repo: https://github.com/whtsky/pre-commit-pretty-format-json5
       rev: 1.0.0 # Use a specific version tag
       hooks:
@@ -46,7 +59,7 @@ repos:
 
     # 2. CODE FORMATTING & LINTING (Ruff) - REORDERED FOR OPTIMAL EXECUTION
     - repo: https://github.com/astral-sh/ruff-pre-commit
-      rev: v0.12.8 # Updated version
+      rev: v0.12.9 # Updated version
       hooks:
         - id: ruff-format
           name: "Format with Ruff"
@@ -91,7 +104,7 @@ repos:
       hooks:
         - id: detect-secrets
           args: ['--baseline', '.secrets.baseline']
-          exclude: \.secrets\.baseline$ # Simplified exclude regex
+          exclude: '(\.secrets\.baseline$|^tests/mock/wiremock/.*\.json$)'
 
     # 5. DEAD CODE DETECTION (Vulture) - RE-ENABLED WITH PYTHON VERSION DETECTION
     - repo: https://github.com/jendrikseipp/vulture

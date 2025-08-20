@@ -39,6 +39,7 @@ class TestCharacterGeneratorRefactored:
     def test_character_generator_initialization(self, mock_llm_client):
         """Test that CharacterGeneratorAgent initializes correctly."""
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = CharacterGeneratorAgent(mock_llm_client, settings)
         assert agent.name == "CharacterGeneratorAgent"
@@ -70,6 +71,7 @@ class TestCharacterGeneratorRefactored:
         mock_llm_client.generate_content.return_value = mock_response
 
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = CharacterGeneratorAgent(mock_llm_client, settings)
         output_path = str(tmp_path / "characters.json")
@@ -90,6 +92,7 @@ class TestCharacterGeneratorRefactored:
         mock_llm_client.generate_content.return_value = None
 
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = CharacterGeneratorAgent(mock_llm_client, settings)
         initial_count = len(sample_knowledge_base.characters)
@@ -105,6 +108,7 @@ class TestCharacterGeneratorRefactored:
         mock_llm_client.generate_content.return_value = "Invalid JSON response"
 
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = CharacterGeneratorAgent(mock_llm_client, settings)
         initial_count = len(sample_knowledge_base.characters)
@@ -121,6 +125,7 @@ class TestCharacterGeneratorRefactored:
         mock_llm_client.generate_content.return_value = mock_response
 
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = CharacterGeneratorAgent(mock_llm_client, settings)
         initial_count = len(sample_knowledge_base.characters)
@@ -146,6 +151,7 @@ class TestCharacterGeneratorRefactored:
         mock_llm_client.generate_content.return_value = mock_response
 
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = CharacterGeneratorAgent(mock_llm_client, settings)
 
@@ -175,6 +181,7 @@ class TestCharacterGeneratorRefactored:
         mock_llm_client.generate_content.return_value = mock_response
 
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = CharacterGeneratorAgent(mock_llm_client, settings)
         output_path = str(tmp_path / "test_characters.json")
@@ -192,6 +199,7 @@ class TestCharacterGeneratorRefactored:
         mock_llm_client.generate_content.side_effect = Exception("LLM Error")
 
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = CharacterGeneratorAgent(mock_llm_client, settings)
         initial_count = len(sample_knowledge_base.characters)
@@ -218,6 +226,7 @@ class TestCharacterGeneratorRefactored:
         mock_llm_client.generate_content.return_value = mock_response
 
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = CharacterGeneratorAgent(mock_llm_client, settings)
 
@@ -244,6 +253,7 @@ class TestCharacterGeneratorRefactored:
         mock_llm_client.generate_content.return_value = mock_response
 
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = CharacterGeneratorAgent(mock_llm_client, settings)
 

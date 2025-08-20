@@ -1,5 +1,6 @@
 {
   "priority": 20,
+  "name": "Catch-All Proxy Fallback",
   "request": {
     "method": "ANY",
     "urlPathPattern": "/v1/.*"
@@ -8,7 +9,7 @@
     "proxyBaseUrl": "{{systemValue type='ENVIRONMENT' key='TARGET_API_URL'}}",
     "transformers": ["response-template"],
     "additionalProxyRequestHeaders": {
-      "Host": "openrouter.ai",
+      "Host": "{{systemValue type='ENVIRONMENT' key='TARGET_HOST'}}",
       "Authorization": "Bearer {{systemValue type='ENVIRONMENT' key='API_BEARER_TOKEN'}}",
       "X-Debug-Proxied-URL": "{{request.url}}",
       "X-Debug-Headers": "{{request.headers}}"

@@ -1,0 +1,21 @@
+{
+  "name": "mock_v1_chat_completions_4GsTG",
+  "request": {
+    "url": "/v1/chat/completions",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"messages\":[{\"role\":\"user\",\"content\":\"Generate a book concept for a Hero's journey fiction book (80-150 pages).\\n                The book should be written in US-English.\\n\\n                Initial ideas: 2 sisters Isa and Caro, both mothers of a boy and a girl, have been separated by their and their husbands ' varying geographical assignments. One is a nurse in Strasbourg, the other is a stay at home mom in Seoul. Will they meet again?.\\n\\n                Return a JSON object within a Markdown code block. Include:\\n                - \\\"title\\\": A compelling title.\\n                - \\\"logline\\\": A one-sentence summary.\\n                - \\\"description\\\": A description (around 180-220 words).\\n\\n                ```json\\n                {\\n                    \\\"title\\\": \\\"...\\\",\\n                    \\\"logline\\\": \\\"...\\\",\\n                    \\\"description\\\": \\\"...\\\"\\n                }\\n                ```\"}]}",
+        "ignoreExtraElements": true,
+        "ignoreArrayOrder": true
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "mock_v1_chat_completions_4GsTG_body.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

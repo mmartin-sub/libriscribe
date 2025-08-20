@@ -1,5 +1,5 @@
 """
-Pytest configuration for LibriScribe tests.
+Pytest configuration for LibriScribe2 tests.
 
 This file sets up test-specific configurations and fixtures.
 """

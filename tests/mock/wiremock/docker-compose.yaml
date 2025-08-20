@@ -1,0 +1,11 @@
+version: '3.8'
+# Replay service
+services:
+  wiremock:
+    image: wiremock/wiremock:latest
+    ports:
+      - "2793:8080"
+    volumes:
+      - ./wiremock-playing:/home/wiremock
+    command: --global-response-templating --verbose
+    container_name: wiremock

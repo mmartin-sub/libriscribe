@@ -29,7 +29,9 @@
         "dist",
         "**/*.pyc",
         "**/__pycache__",
-        "stubs"
+        "stubs",
+        "logs",
+        "tests/mock/**/*.json"
     ],
     "ignoreRegExpList": [
         "/https?://[^\\s]+/",

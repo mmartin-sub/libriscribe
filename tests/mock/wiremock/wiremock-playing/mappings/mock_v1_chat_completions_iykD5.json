@@ -1,0 +1,21 @@
+{
+  "name": "mock_v1_chat_completions_iykD5",
+  "request": {
+    "url": "/v1/chat/completions",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"messages\":[{\"role\":\"user\",\"content\":\"\\nCreate detailed character profiles for a Hero's journey book titled \\\"The Latitude of Forgiveness\\\" which is categorized as fiction.\\nThe book is written in US-English.\\n\\nBook Description: “The Latitude of Forgiveness” follows estranged sisters Isa and Caro as they race across continents to reach the Seoul NICU where Harper—Isa’s daughter and Caro’s niece—has delivered a dangerously premature child. Each woman carries the accumulated weight of fifteen years of silence, regret, and unspoken betrayal. Their parallel journeys—Isa on the Trans-Siberian and Caro on ferries and budget flights—force them to confront the men they left behind, the art they abandoned, and the moment their shared story cracked. When they finally meet in a glass-walled waiting room, the question is no longer who was right or wrong, but whether the flickering life inside an incubator will survive long enough for the first honest sentence in fifteen years to matter.\\nTold in shifting perspectives—Isa, Caro, their husbands, and the grown children—the novel braids past and present, Ohio and East Asia, painting and medicine, until the latitude at which forgiveness stops being an idea and becomes a choice is reached in the fluorescent hush of a Seoul hospital at 3:00 a.m.\\n\\nThe book requires the following number of main characters: 8\\n\\nFor EACH character, include the following in the profile (return as a JSON array of character objects):\\n\\nName: (Suggest a suitable name appropriate for the language and cultural context of the book)\\n\\nAge:\\n\\nPhysical Description: (Detailed, including appearance, clothing style, etc.)\\n\\nPersonality Traits: (Provide at least 3-5 distinct personality traits as a comma-separated string, for example: \\\"Brave, Loyal, Impulsive, Intelligent, Compassionate\\\")\\n\\nBackground/Backstory: (Detailed, explaining their past and how it shapes them)\\n\\nMotivations: (What drives them? What are their goals?)\\n\\nRelationships with other characters: (Describe their connections to other characters, creating new characters if necessary to complete the story.)\\n\\nRole in the story: (Protagonist, antagonist, supporting character, etc.)\\n\\nInternal Conflicts: (What struggles do they face within themselves?)\\n\\nExternal Conflicts: (What external challenges do they face?)\\n\\nCharacter Arc: (How do they change throughout the story? Provide a brief description)\\n\\nReturn the character profiles in JSON format. IMPORTANT: Ensure personality_traits is a simple comma-separated string, not an array or list.\\n\\nIMPORTANT: The content should be written entirely in US-English.\\n\"}]}",
+        "ignoreExtraElements": true,
+        "ignoreArrayOrder": true
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "mock_v1_chat_completions_iykD5_body.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

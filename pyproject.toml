@@ -178,7 +178,7 @@ detect-secrets-audit = "detect-secrets audit .secrets.baseline"
 [tool.ruff]
 target-version = "py312"
 line-length = 120
-extend-exclude = [".history", "stubs"]
+extend-exclude = [".history", "stubs","tests/mock/wiremock/"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "B", "C4", "UP", "RUF"]

@@ -20,6 +20,7 @@ class TestFactCheckerAgent:
     async def test_check_claim_with_valid_response(self, mock_llm_client):
         """Test that check_claim returns a dictionary with the correct keys."""
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm_client.generate_content.return_value = (
             '```json\n{"result": "True", "explanation": "It is true.", "sources": ["http://example.com"]}\n```'
@@ -35,6 +36,7 @@ class TestFactCheckerAgent:
     async def test_check_claim_with_invalid_response(self, mock_llm_client):
         """Test that check_claim returns an error dictionary."""
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm_client.generate_content.return_value = "not a valid json"
         agent = FactCheckerAgent(mock_llm_client, settings)
@@ -48,6 +50,7 @@ class TestFactCheckerAgent:
     async def test_execute_with_valid_chapter(self, mock_write_json, mock_read_markdown, mock_llm_client, tmp_path):
         """Test the execute method with a valid chapter."""
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm_client.generate_content.side_effect = [
             '```json\n["claim 1", "claim 2"]\n```',
@@ -69,6 +72,7 @@ class TestFactCheckerAgent:
     async def test_execute_with_no_chapter_path(self, mock_llm_client):
         """Test that execute logs an error when no chapter_path is provided."""
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = FactCheckerAgent(mock_llm_client, settings)
         with patch("rich.console.Console.print") as mock_print:
@@ -80,6 +84,7 @@ class TestFactCheckerAgent:
     async def test_execute_with_empty_chapter(self, mock_read_markdown, mock_llm_client):
         """Test that execute handles an empty chapter."""
         from libriscribe2.settings import Settings
+
         settings = Settings()
         agent = FactCheckerAgent(mock_llm_client, settings)
         with patch("builtins.print") as mock_print:

@@ -1,0 +1,21 @@
+{
+  "name": "mock_v1_chat_completions_U1ZfQ",
+  "request": {
+    "url": "/v1/chat/completions",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"messages\":[{\"role\":\"user\",\"content\":\"\\nWrite Scene 3 of 5 for Chapter 1: The Call of the Hero's journey fiction book \\\"The Latitude of Forgiveness\\\".\\nThe book is written in US-English.\\n\\nChapter Summary:\\nAt 4:12 a.m. in her Seoul apartment, Caro answers a call from Samsung Medical Center informing her that Harper—her niece, her sister’s daughter, the child she once painted as a strawberry-stained toddler—has gone into sudden labor at thirty-three weeks. The doctors need next-of-kin consent for an emergency C-section. Isa is unreachable, somewhere on a train between Berlin and the Russian frontier because she still refuses to board a plane. Caro, barefoot in her kitchen, promises to come, then realizes she has no idea how to tell Isa that Harper is even in Korea. The chapter alternates between Caro’s frantic preparations—grabbing her long-abandoned sketchbook as if it were a passport—and flashbacks to the night fifteen years earlier when Isa accepted the Strasbourg fellowship, the night their communal life in Ohio splintered. In the final pages, Caro boards the overnight ferry to Fukuoka, carrying nothing but the sketchbook, a prepaid phone, and the certainty that every rupture is her fault.\\n\\nScene Details:\\n- Summary: Triggered by finding Harper’s childhood portrait in her sketchbook, Caro flashes back to the Ohio studio fifteen years earlier, where a younger Isa tearfully accepted a prestigious Strasbourg fellowship while Caro silently shattered inside, refusing to beg her to stay. The memory crystallizes the moment their sisterhood fractured over unspoken resentment.\\n- Characters: Young Caro, Young Isa (flashback)\\n- Setting: Flashback to a sun-drenched, paint-splattered shared art studio in Columbus, Ohio (2010)\\n- Goal: Expose the root cause of the sisters’ estrangement through a pivotal past confrontation\\n- Emotional Beat: Numb devastation and lingering betrayal\\n\\nInstructions:\\n- Write a vivid, engaging scene that captures these elements.\\n- Include descriptive details and sensory information about the setting.\\n- Show character emotions and development through actions and dialogue.\\n- Advance the story according to the scene's goal and emotional beat.\\n- Make the scene flow naturally and avoid unnecessary exposition.\\n- Ensure the scene ends in a way that connects smoothly to the next scene.\\n- Use language and style appropriate for the genre.\\n\\nImportant: Focus on showing rather than telling. Create an immersive experience that brings the scene to life.\\n\\nIMPORTANT: The content should be written entirely in US-English.\\n\\n\\nIMPORTANT: Begin the scene with the title: ## Scene 3: Triggered by finding Harper’s childhood portrait in her sketchbook, Caro flashes back to the Ohio studio fifteen years earlier, where a younger Isa tearfully accepted a prestigious Strasbourg fellowship while Caro silently shattered inside, refusing to beg her to stay. The memory crystallizes the moment their sisterhood fractured over unspoken resentment. (as a Markdown heading, not bold, not triple #, no extra formatting)\"}]}",
+        "ignoreExtraElements": true,
+        "ignoreArrayOrder": true
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "mock_v1_chat_completions_U1ZfQ_body.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

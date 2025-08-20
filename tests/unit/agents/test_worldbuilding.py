@@ -30,6 +30,7 @@ class TestWorldbuildingAgent:
         """Test WorldbuildingAgent initialization."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
 
@@ -45,6 +46,7 @@ class TestWorldbuildingAgent:
         """Test basic worldbuilding generation execution."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.return_value = generate_large_worldbuilding_response()
@@ -68,6 +70,7 @@ class TestWorldbuildingAgent:
         """Test execution when LLM client raises an error."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = AsyncMock()
         mock_llm.generate_content.side_effect = Exception("LLM error")
@@ -90,6 +93,7 @@ class TestWorldbuildingAgent:
         """Test parsing valid worldbuilding response."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = WorldbuildingAgent(mock_llm, settings)
@@ -106,6 +110,7 @@ class TestWorldbuildingAgent:
         """Test parsing invalid worldbuilding response."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = WorldbuildingAgent(mock_llm, settings)
@@ -121,6 +126,7 @@ class TestWorldbuildingAgent:
         """Test validation of valid worldbuilding data."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = WorldbuildingAgent(mock_llm, settings)
@@ -141,6 +147,7 @@ class TestWorldbuildingAgent:
         """Test validation of worldbuilding data missing setting."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = WorldbuildingAgent(mock_llm, settings)
@@ -158,6 +165,7 @@ class TestWorldbuildingAgent:
         """Test creating Worldbuilding object from data."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = WorldbuildingAgent(mock_llm, settings)
@@ -178,6 +186,7 @@ class TestWorldbuildingAgent:
         """Test saving worldbuilding to knowledge base."""
         # Arrange
         from libriscribe2.settings import Settings
+
         settings = Settings()
         mock_llm = MagicMock()
         agent = WorldbuildingAgent(mock_llm, settings)
