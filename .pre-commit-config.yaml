@@ -43,6 +43,7 @@ repos:
         - id: shfmt
           args: ["-i", "2", "-ci", "-sr"] # Example args: 2-space indent, check indent, simplify redirects
   #       # If you want shfmt to *write* changes and re-add them, you can uncomment this:
+          verbose: false                         # reduce pre-commit output verbosity
           stages: [pre-commit] # run on commit
   #       # If shfmt auto-formats, pre-commit will stage the changes for you.
   #       # However, for pre-commit hooks, it's often preferred to just *check* for formatting issues

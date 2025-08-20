@@ -1,1 +1,0 @@
-{"error":{"message":"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day","code":429,"metadata":{"headers":{"X-RateLimit-Limit":"50","X-RateLimit-Remaining":"0","X-RateLimit-Reset":"1755734400000"},"provider_name":null}},"user_id":"user_2YFnsACJJeDXDVWRXgB9R73ipz7"}

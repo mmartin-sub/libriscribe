@@ -16,7 +16,11 @@ services:
       - TARGET_API_URL=${WIREMOCK_TARGET_URL}
       - API_BEARER_TOKEN=${WIREMOCK_LLM_TOKEN}
       - TARGET_HOST=${WIREMOCK_TARGET_HOST}
-    command: --global-response-templating --verbose --record-mappings
+    command: >
+      --global-response-templating
+      --verbose
+      --record-mappings
+      --permitted-system-keys=TARGET_API_URL,TARGET_HOST,API_BEARER_TOKEN
     # --record-mappings if we want to record also, not only proxy
     container_name: wiremock
     deploy:
