@@ -47,3 +47,5 @@ direnv
 pypackages
 excepthook
 logline
+bcolors
+wiremock

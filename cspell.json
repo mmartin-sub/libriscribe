@@ -31,7 +31,8 @@
         "**/__pycache__",
         "stubs",
         "logs",
-        "tests/mock/**/*.json"
+        "tests/mock/**/*.json",
+        "./.trunk/custom-dictionary.txt"
     ],
     "ignoreRegExpList": [
         "/https?://[^\\s]+/",
