@@ -1,0 +1,28 @@
+{
+  "id" : "802295c3-3de5-3712-a352-7301ad7a2659",
+  "request" : {
+    "url" : "/v1/chat/completions",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToJson" : "{\"model\": \"moonshotai/kimi-k2:free\", \"messages\": [{\"role\": \"user\", \"content\": \"Generate relevant keywords for this book concept:\\n\\n        ```json\\n        {\\\"title\\\":\\\"The 37th Parallel\\\",\\\"logline\\\":\\\"When a single orchestrated incident snatches both their children, estranged Franco-Korean sisters\\\\u2014an exhausted trauma surgeon and a Seoul house-manager\\\\u2014have seven days to trade their buried wartime secret for the kids\\\\u2019 lives, following a trail of bilingual lullabies along the 37th meridian.\\\",\\\"description\\\":\\\"For fifteen years Dr. Isa Mendoza has patched bodies in M\\\\u00e9decins Sans Fronti\\\\u00e8res tents from Mosul to Mariupol; her half-sister Park Caro has kept Seoul\\\\u2019s wealthiest families in calm, fragrant order. They have not spoken since their joint wedding dissolved in competing vows: one to the Hippocratic oath, the other to filial duty. The sisters have convinced themselves the distance is purely geographic.\\\\n\\\\nThat illusion shatters at 14:37 on a Tuesday. Isa\\\\u2019s med-evac is shot down over the Black Forest; Caro\\\\u2019s son is yanked from a Seoul subway at the exact same minute. A video arrives on both their phones: the children bound and blindfolded inside a freight container, coordinates ticking down seven days. The kidnapper signs off with one line of their childhood lullaby\\\\u2014French and Korean in a single breath\\\\u2014and a demand: \\\\u201cRevisit the river where you buried the truth.\\\\u201d\\\\n\\\\nTo secure international transit in hours, not days, the sisters accept clandestine help: a shell-shocked German pilot who owes Isa his life and Caro\\\\u2019s ex-roommate, now a K-pop tour logistics wizard. The chase runs along the 37th parallel east\\\\u2014Rhine, Neckar, Danube, across the steppes to Vladivostok\\\\u2014each checkpoint revealed by solving bilingual fragments of the lullaby they once sang together. Luna, Isa\\\\u2019s eleven-year-old, guides them through dark-web maps; Hana, Caro\\\\u2019s nine-year-old coding prodigy, feeds them real-time CCTV hacks from inside the container.\\\\n\\\\nOld resentments surface in hard specifics: Isa\\\\u2019s guilt over dodging Korean conscription law that punished Caro\\\\u2019s brother; Caro\\\\u2019s fury at Isa\\\\u2019s casual dismissal of han\\\\u2014Korean grief that never ends. Yet the same cultural chords that divide them become the code that keeps their children alive.\\\\n\\\\nAt the final coordinate\\\\u2014an abandoned Soviet listening post on the Russian-Korean border\\\\u2014the sisters face a literal switch: release the children by uploading a classified wartime atrocity report that will ruin Isa\\\\u2019s reputation and put Caro\\\\u2019s entire family on a Pyongyang watch-list. Or walk away with their names intact and never see the kids again. The choice is no longer metaphor but a cold, mechanical lever.\\\\n\\\\nOnly one question remains: is blood thicker than the river of secrets they once poured it into?\\\"}\\n        ```\\n\\n        The book should be written in US-English.\\n\\n        Return a JSON object with:\\n        - \\\"primary_keywords\\\": List of main themes/topics\\n        - \\\"secondary_keywords\\\": List of supporting themes\\n        - \\\"genre_keywords\\\": List of genre-specific terms\\n\\n        ```json\\n        {\\n            \\\"primary_keywords\\\": [\\\"keyword1\\\", \\\"keyword2\\\"],\\n            \\\"secondary_keywords\\\": [\\\"keyword3\\\", \\\"keyword4\\\"],\\n            \\\"genre_keywords\\\": [\\\"keyword5\\\", \\\"keyword6\\\"]\\n        }\\n        ```\"}], \"temperature\": 0.7, \"timeout\": 360.0}",
+      "ignoreArrayOrder" : true,
+      "ignoreExtraElements" : true
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-v1-chat-completions-gCsdI.json",
+    "headers" : {
+      "Referrer-Policy" : "no-referrer, strict-origin-when-cross-origin",
+      "CF-RAY" : "9720ec698990a43d-ZRH",
+      "Server" : "cloudflare",
+      "Access-Control-Allow-Origin" : "*",
+      "X-Content-Type-Options" : "nosniff",
+      "Permissions-Policy" : "payment=(self \"https://checkout.stripe.com\" \"https://connect-js.stripe.com\" \"https://js.stripe.com\" \"https://*.js.stripe.com\" \"https://hooks.stripe.com\")",
+      "Vary" : "Accept-Encoding",
+      "Date" : "Wed, 20 Aug 2025 09:39:27 GMT",
+      "Content-Type" : "application/json"
+    }
+  },
+  "uuid" : "802295c3-3de5-3712-a352-7301ad7a2659"
+}

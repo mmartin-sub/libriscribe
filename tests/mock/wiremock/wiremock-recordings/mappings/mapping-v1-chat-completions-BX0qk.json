@@ -1,0 +1,28 @@
+{
+  "id" : "ed5bf885-a09f-3ad4-8d1a-0bc8476662e0",
+  "request" : {
+    "url" : "/v1/chat/completions",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToJson" : "{\"model\": \"qwen/qwen3-235b-a22b:free\", \"messages\": [{\"role\": \"user\", \"content\": \"\\n            Create a detailed outline for the scenes in Chapter 1: 03:07 Strasbourg / 11:07 Seoul\\n            of a Hero's journey book titled \\\"The Invisible Thread\\\"\\n            which is categorized as fiction.\\n            The book should be written in US-English.\\n\\n            Book Description: Isa Mendoza-Weber, a night-charge nurse in Strasbourg, and Carolina \\u201cCaro\\u201d Mendoza-Kim, a former Army linguist homeschooling in Seoul, haven\\u2019t spoken since their grandmother\\u2019s funeral ten years ago. When an urgent email from Grandmother Sun-ja arrives\\u2014bearing GPS coordinates to the abandoned DMZ peace garden and a cryptic warning to \\u201ccome before the 29th\\u201d\\u2014the sisters race across 5,500 miles to save the land that once anchored their family. Over the next forty-eight hours, blizzards, quarantine lines, and a single Uber ride force them to confront the literal and emotional baggage they\\u2019ve carried since the funeral blow-up over a gold locket and the blame it carried. The garden is scheduled for demolition at noon on the 29th, leaving Isa and Caro one frozen night to decide whether the past is worth saving or burying forever.\\n\\n            Chapter Summary: At 3:07 a.m. CET, Isa finishes a code-blue in Strasbourg and finds Grandmother Sun-ja\\u2019s email on her cracked phone. The JPEG of ten- and twelve-year-old arms linked in the DMZ peace garden stings more than the locket-shaped scar on her palm. By 3:55 she has booked the last seat on the Seoul-bound flight that lifts off at dawn. Meanwhile, in Songpa, Caro wakes to the same email; her JAG husband is unreachable in a UN bunker, so she stuffs passports, twins, and half of the gold locket into backpacks and boards the eastbound KTX at 12:20 p.m. KST. Both sisters carry the weight of a decade-long silence, unaware their parallel journeys are already tangled by the blizzard barreling toward the Korean peninsula.\\n\\n            The outline should include a breakdown of EXACTLY 7 scenes for this chapter, with EACH scene having:\\n            * Scene Number: (e.g., Scene 1, Scene 2, etc.)\\n            * Summary: (A short description of what happens in the scene, 1-2 sentences)\\n            * Characters: (A list of the characters involved, separated by commas)\\n            * Setting: (Where the scene takes place)\\n            * Goal: (The purpose of the scene)\\n            * Emotional Beat: (The primary emotion conveyed in the scene)\\n\\n            IMPORTANT: Format the scene outline using Markdown bullet points, as shown below:\\n\\n            Scene 1:\\n                * Summary: [Scene summary here]\\n                * Characters: [Character 1, Character 2, ...]\\n                * Setting: [Scene setting]\\n                * Goal: [Scene goal]\\n                * Emotional Beat: [Scene emotional beat]\\n\\n            Scene 2:\\n                * Summary: [Scene summary here]\\n                * Characters: [Character 1, Character 2, ...]\\n                * Setting: [Scene setting]\\n                * Goal: [Scene goal]\\n                * Emotional Beat: [Scene emotional beat]\\n\\n            [Repeat for exactly 7 scenes, maintaining the exact same bullet point format]\\n\\n            Be sure to include all main characters relevant to this chapter and create a natural flow between scenes.\\n            \"}], \"temperature\": 0.5, \"timeout\": 360.0}",
+      "ignoreArrayOrder" : true,
+      "ignoreExtraElements" : true
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-v1-chat-completions-BX0qk.json",
+    "headers" : {
+      "Referrer-Policy" : "no-referrer, strict-origin-when-cross-origin",
+      "CF-RAY" : "972083f3cc85be5e-ZRH",
+      "Server" : "cloudflare",
+      "Access-Control-Allow-Origin" : "*",
+      "X-Content-Type-Options" : "nosniff",
+      "Permissions-Policy" : "payment=(self \"https://checkout.stripe.com\" \"https://connect-js.stripe.com\" \"https://js.stripe.com\" \"https://*.js.stripe.com\" \"https://hooks.stripe.com\")",
+      "Vary" : "Accept-Encoding",
+      "Date" : "Wed, 20 Aug 2025 08:28:10 GMT",
+      "Content-Type" : "application/json"
+    }
+  },
+  "uuid" : "ed5bf885-a09f-3ad4-8d1a-0bc8476662e0"
+}

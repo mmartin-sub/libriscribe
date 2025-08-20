@@ -22,8 +22,9 @@ repos:
       rev: v6.0.0  # Updated version
       hooks:
         - id: trailing-whitespace
-          exclude: ^stubs/.*
+          exclude: (^stubs/|tests/mock/wiremock/)
         - id: end-of-file-fixer
+          exclude: (^stubs/|tests/mock/wiremock/)
         - id: check-yaml
         - id: check-toml
         - id: check-json

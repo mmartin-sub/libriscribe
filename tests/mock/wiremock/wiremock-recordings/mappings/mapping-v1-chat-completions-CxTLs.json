@@ -1,0 +1,28 @@
+{
+  "id" : "6b88899a-355d-329b-ad12-59dd0672a897",
+  "request" : {
+    "url" : "/v1/chat/completions",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToJson" : "{\"model\": \"moonshotai/kimi-k2:free\", \"messages\": [{\"role\": \"user\", \"content\": \"Generate relevant keywords for this book concept:\\n\\n        ```json\\n        {\\\"title\\\":\\\"The Invisible Thread\\\",\\\"logline\\\":\\\"When a dying grandmother\\\\u2019s one-line email\\\\u2014\\\\u2018Come before the 29th, or lose everything\\\\u2019\\\\u2014triggers a 48-hour countdown, estranged sisters Isa and Caro race toward the shuttered DMZ peace garden to claim the land deed hidden inside their torn family locket\\\\u2014if they can stand to meet in the middle.\\\",\\\"description\\\":\\\"Isa Mendoza-Weber, night-charge nurse in Strasbourg, has spent seven years translating love into milligrams and shift-swaps, raising her kids on FaceTime. Half a world away, Carolina \\\\\\\"Caro\\\\\\\" Mendoza-Kim, former Army linguist turned homeschool mom in Seoul\\\\u2019s Songpa district, measures safety in subway stops and security drills while her JAG husband serves yet another UN rotation. They haven\\\\u2019t spoken since a funeral blow-up over who got the locket and who got blamed.\\\\n\\\\nGrandmother Sun-ja\\\\u2019s email lands at 3:07 a.m. Strasbourg time\\\\u2014subject line: 29th, nothing else. Attached: a JPEG of the sisters at age ten and twelve, arms linked in the now-abandoned DMZ peace garden that was Sun-ja\\\\u2019s lifelong project, plus GPS coordinates and a scanned deed last registered in Sun-ja\\\\u2019s name. The body reads only: Come before the 29th, or lose everything. \\\\n\\\\nIsa books the last seat on a Seoul-bound flight; Caro boards the eastbound KTX with the twins in tow. Each carries half of the gold locket that once held the deed\\\\u2019s microfilm. Between them lie 5,500 miles, a sudden Seoul blizzard, and a South Korean government notice that the garden will be razed for a new rail line\\\\u2014on the 29th at noon. \\\\n\\\\nTold in alternating, time-stamped chapters that close the physical gap in real time, The Invisible Thread is a 30,000-word contemporary novella about the forty-eight hours it takes to cross an ocean and a decade of silence. As Isa and Caro navigate airport quarantine lines, midnight K-pop buskers, and a single shared Uber that can\\\\u2019t fit their baggage\\\\u2014literal and emotional\\\\u2014they must decide whether the land that once anchored their family is worth the pain of facing each other, or if the only thing they\\\\u2019ll bury is the past itself.\\\"}\\n        ```\\n\\n        The book should be written in US-English.\\n\\n        Return a JSON object with:\\n        - \\\"primary_keywords\\\": List of main themes/topics\\n        - \\\"secondary_keywords\\\": List of supporting themes\\n        - \\\"genre_keywords\\\": List of genre-specific terms\\n\\n        ```json\\n        {\\n            \\\"primary_keywords\\\": [\\\"keyword1\\\", \\\"keyword2\\\"],\\n            \\\"secondary_keywords\\\": [\\\"keyword3\\\", \\\"keyword4\\\"],\\n            \\\"genre_keywords\\\": [\\\"keyword5\\\", \\\"keyword6\\\"]\\n        }\\n        ```\"}], \"temperature\": 0.7, \"timeout\": 360.0}",
+      "ignoreArrayOrder" : true,
+      "ignoreExtraElements" : true
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-v1-chat-completions-CxTLs.json",
+    "headers" : {
+      "Referrer-Policy" : "no-referrer, strict-origin-when-cross-origin",
+      "CF-RAY" : "9720830a6e00bab4-ZRH",
+      "Server" : "cloudflare",
+      "Access-Control-Allow-Origin" : "*",
+      "X-Content-Type-Options" : "nosniff",
+      "Permissions-Policy" : "payment=(self \"https://checkout.stripe.com\" \"https://connect-js.stripe.com\" \"https://js.stripe.com\" \"https://*.js.stripe.com\" \"https://hooks.stripe.com\")",
+      "Vary" : "Accept-Encoding",
+      "Date" : "Wed, 20 Aug 2025 08:27:31 GMT",
+      "Content-Type" : "application/json"
+    }
+  },
+  "uuid" : "6b88899a-355d-329b-ad12-59dd0672a897"
+}

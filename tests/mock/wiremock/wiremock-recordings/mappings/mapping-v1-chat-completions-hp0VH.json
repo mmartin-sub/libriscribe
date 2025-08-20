@@ -1,0 +1,28 @@
+{
+  "id" : "59bc06af-460e-30c6-ba1d-dbcf38d78366",
+  "request" : {
+    "url" : "/v1/chat/completions",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToJson" : "{\"model\": \"moonshotai/kimi-k2:free\", \"messages\": [{\"role\": \"user\", \"content\": \"\\nWrite Scene 6 of 7 for Chapter 3: The Lever at the River\\u2019s End of the Hero's journey fiction book \\\"The 37th Parallel\\\".\\nThe book is written in US-English.\\n\\nChapter Summary:\\nDawn breaks iron-gray over the Russian-Korean border. The container sits inside a rusted listening post, antennae like dead trees. Inside, Luna and Min are wired to a pressure-plate bomb; a single laptop displays the final lullaby line\\u2014\\u201c\\ud53c\\ub294 \\ubb3c\\ubcf4\\ub2e4 \\uc9c4\\ud558\\ub2e4, mais l\\u2019eau efface tout\\u201d\\u2014and two buttons: UPLOAD or ABANDON. The upload is the complete 1996 Red Cross report, implicating Isa in suppressing evidence of a civilian massacre to protect MSF neutrality, and naming Caro\\u2019s grandfather as a collaborator with North Korean units. If released, Pyongyang will blacklist every Park descendant; Interpol will revoke Isa\\u2019s medical license. The kidnapper steps from the shadows: their mother\\u2019s former interpreter, left for dead in 1996, now seeking poetic justice. Isa and Caro argue in the snow, voices hoarse, until Luna whispers through the container wall: \\u201cWe\\u2019re not bargaining chips. Do what you couldn\\u2019t do before\\u2014choose us.\\u201d In the end, Caro\\u2019s hand covers Isa\\u2019s on the lever. They press UPLOAD together. The bomb disarms; the doors swing open. The report goes public as they carry the children across the frozen Tumen River. Behind them, the listening post burns, taking the lullaby with it. They walk forward, not as saviors or sinners, but as sisters who finally let the river carry their secrets out to sea.\\n\\nScene Details:\\n- Summary: Isa and Caro press UPLOAD together, their hands trembling on the lever. The bomb deactivates with a hiss; the container doors grind open, revealing Min and Luna still bound.\\n- Characters: Dr. Isa Mendoza, Park Caro, Luna Mendoza, Min Park\\n- Setting: Listening post control room, then container interior\\n- Goal: Resolve the central choice and reunite the family\\n- Emotional Beat: Sacrifice\\n\\nInstructions:\\n- Write a vivid, engaging scene that captures these elements.\\n- Include descriptive details and sensory information about the setting.\\n- Show character emotions and development through actions and dialogue.\\n- Advance the story according to the scene's goal and emotional beat.\\n- Make the scene flow naturally and avoid unnecessary exposition.\\n- Ensure the scene ends in a way that connects smoothly to the next scene.\\n- Use language and style appropriate for the genre.\\n\\nImportant: Focus on showing rather than telling. Create an immersive experience that brings the scene to life.\\n\\nIMPORTANT: The content should be written entirely in US-English.\\n\\n\\nIMPORTANT: Begin the scene with the title: ## Scene 6: Isa and Caro press UPLOAD together, their hands trembling on the lever. The bomb deactivates with a hiss; the container doors grind open, revealing Min and Luna still bound. (as a Markdown heading, not bold, not triple #, no extra formatting)\"}], \"temperature\": 0.7, \"timeout\": 360.0}",
+      "ignoreArrayOrder" : true,
+      "ignoreExtraElements" : true
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-v1-chat-completions-hp0VH.json",
+    "headers" : {
+      "Referrer-Policy" : "no-referrer, strict-origin-when-cross-origin",
+      "CF-RAY" : "9720fe31cf71bc08-ZRH",
+      "Server" : "cloudflare",
+      "Access-Control-Allow-Origin" : "*",
+      "X-Content-Type-Options" : "nosniff",
+      "Permissions-Policy" : "payment=(self \"https://checkout.stripe.com\" \"https://connect-js.stripe.com\" \"https://js.stripe.com\" \"https://*.js.stripe.com\" \"https://hooks.stripe.com\")",
+      "Vary" : "Accept-Encoding",
+      "Date" : "Wed, 20 Aug 2025 09:51:36 GMT",
+      "Content-Type" : "application/json"
+    }
+  },
+  "uuid" : "59bc06af-460e-30c6-ba1d-dbcf38d78366"
+}

@@ -10,6 +10,8 @@
 # - Deletion of invalid files when using --move with the same input/output directory.
 # - Cleaner, less verbose logging using relative paths.
 # - Addition of a configurable priority to mapping files.
+# - A help option for usage instructions.
+# - An option to force the output directory to be the same as the input.
 #
 
 # --- Default Configuration ---
@@ -27,10 +29,61 @@ ERROR_COUNT=0
 INPUT_DIR=""
 OUTPUT_DIR=""
 PRIORITY=5 # Default priority for WireMock stubs
+OUTPUT_LIKE_INPUT=false
+
+# --- Helper Functions ---
+show_help() {
+  cat << EOF
+Usage: $(basename "$0") [OPTIONS]
+
+A script to reformat WireMock recordings into cleaner, more robust mock definitions.
+It reads from an input directory and writes to an output directory.
+
+Options:
+  --help, -h            Display this help message and exit.
+  --move                Move files from input to output. If input and output directories
+                        are the same, this will also delete invalid/unprocessed files.
+  --copy                Copy files (this is the default behavior).
+  --dry-run             Simulate the process without creating, moving, or deleting any files.
+  --input-dir DIR       Specify the input directory containing 'mappings' and '__files'.
+                        Default: "${DEFAULT_INPUT_DIR}"
+  --output-dir DIR      Specify the output directory for the reformatted mocks.
+                        This option is ignored if --output-like-input is used.
+                        Default: "${DEFAULT_OUTPUT_DIR}"
+  --output-like-input   Set the output directory to be the same as the input directory.
+                        This is useful for in-place modifications. Overrides --output-dir.
+  --priority=NUM        Set the priority for the generated WireMock stubs.
+                        Default: 5
+  --log=LEVEL           Set the log level. Only 'DEBUG' is currently supported to show
+                        more verbose output. Default: 'INFO'.
+  --max-error=NUM       Stop the script after a specified number of errors.
+                        A value of 0 means it will never stop on errors. Default: 0.
+
+Example for in-place modification:
+  $(basename "$0") --move --output-like-input --input-dir ./wiremock/stubs
+
+Example for reformatting to a different directory:
+  $(basename "$0") --copy --input-dir /tmp/raw-mocks --output-dir ./wiremock/stubs --priority=10
+EOF
+}
+
+log_debug() {
+  if [ "$LOG_LEVEL" == "DEBUG" ]; then
+    echo -e "\033[0;33m  - DEBUG: $1\033[0m"
+  fi
+}
+
+log_error() {
+    echo -e "\033[0;31m  - ERROR: $1\033[0m"
+}
 
 # A more robust argument parsing loop
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --help|-h)
+      show_help
+      exit 0
+      ;;
     --move)
       OPERATION="move"
       shift
@@ -41,6 +94,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --dry-run)
       DRY_RUN=true
+      shift
+      ;;
+    --output-like-input)
+      OUTPUT_LIKE_INPUT=true
       shift
       ;;
     --log=*)
@@ -59,12 +116,13 @@ while [[ $# -gt 0 ]]; do
       OUTPUT_DIR="$2"
       shift 2
       ;;
-    --priority=*) # New argument for priority
+    --priority=*)
       PRIORITY="${1#*=}"
       shift
       ;;
     *)
       echo "Unknown option: $1" >&2
+      show_help
       exit 1
       ;;
   esac
@@ -73,7 +131,13 @@ done
 # --- Path Resolution ---
 # Use command-line directories if provided, otherwise fall back to defaults.
 INPUT_BASE_DIR=${INPUT_DIR:-$DEFAULT_INPUT_DIR}
-OUTPUT_BASE_DIR=${OUTPUT_DIR:-$DEFAULT_OUTPUT_DIR}
+
+# If --output-like-input is used, force output dir to be the same as input dir.
+if [ "$OUTPUT_LIKE_INPUT" = true ]; then
+    OUTPUT_BASE_DIR=$INPUT_BASE_DIR
+else
+    OUTPUT_BASE_DIR=${OUTPUT_DIR:-$DEFAULT_OUTPUT_DIR}
+fi
 
 INPUT_MAPPINGS_DIR="${INPUT_BASE_DIR}/mappings"
 INPUT_FILES_DIR="${INPUT_BASE_DIR}/__files"
@@ -82,21 +146,11 @@ OUTPUT_FILES_DIR="${OUTPUT_BASE_DIR}/__files"
 
 # Determine if input and output directories are the same for the delete logic
 ARE_DIRS_SAME=false
-if [ "$(realpath "$INPUT_BASE_DIR")" == "$(realpath "$OUTPUT_BASE_DIR")" ]; then
+if [ -d "$INPUT_BASE_DIR" ] && [ -d "$OUTPUT_BASE_DIR" ] && \
+   [ "$(realpath "$INPUT_BASE_DIR")" == "$(realpath "$OUTPUT_BASE_DIR")" ]; then
   ARE_DIRS_SAME=true
 fi
 
-
-# --- Helper Functions ---
-log_debug() {
-  if [ "$LOG_LEVEL" == "DEBUG" ]; then
-    echo -e "\033[0;33m  - DEBUG: $1\033[0m"
-  fi
-}
-
-log_error() {
-    echo -e "\033[0;31m  - ERROR: $1\033[0m"
-}
 
 # Handles invalid files by logging the error and optionally deleting them.
 handle_invalid_file() {
@@ -144,7 +198,7 @@ if [ "$DRY_RUN" = true ]; then echo "--- Running in DRY RUN Mode ---"; fi
 echo "Input Path:  $(realpath --relative-to=. "$INPUT_BASE_DIR")"
 echo "Output Path: $(realpath --relative-to=. "$OUTPUT_BASE_DIR")"
 echo "Operation:   ${OPERATION}"
-echo "Priority:    ${PRIORITY}" # Display the priority being used
+echo "Priority:    ${PRIORITY}"
 log_debug "Log Level set to DEBUG"
 if [ "$MAX_ERRORS" -gt 0 ]; then echo "Will stop after $MAX_ERRORS error(s)."; fi
 echo "----------------------------------------"
@@ -175,7 +229,7 @@ for file in "${files_to_process[@]}"; do
       continue
   fi
 
-  # 2. NEW: Validate that the body file is not empty (ignoring whitespace)
+  # 2. Validate that the body file is not empty (ignoring whitespace)
   if ! grep -q '[^[:space:]]' "$original_body_filepath"; then
       handle_invalid_file "$file" "$original_body_filepath" "Body file is empty or contains only whitespace."
       echo "----------------------------------------"
@@ -207,14 +261,13 @@ for file in "${files_to_process[@]}"; do
     echo "  - [Dry Run] Would ${OPERATION} body file to: $new_body_filename_ref"
   else
     # A. Create the new, reformatted mapping file
-    # Updated jq command to include priority
     jq_output=$(jq --arg name "$new_mock_name" \
        --arg body_ref "$new_body_filename_ref" \
        --argjson priority "$PRIORITY" \
     '
       {
         "name": $name,
-        "priority": $priority, # <-- PRIORITY IS ADDED HERE
+        "priority": $priority,
         "request": {
           "url": .request.url,
           "method": .request.method,

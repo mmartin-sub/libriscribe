@@ -1,0 +1,28 @@
+{
+  "id" : "2fbcb9bb-b2d2-341e-8f13-81f0082173b0",
+  "request" : {
+    "url" : "/v1/chat/completions",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToJson" : "{\"model\": \"moonshotai/kimi-k2:free\", \"messages\": [{\"role\": \"user\", \"content\": \"Generate a book concept for a Hero's journey fiction book (80-150 pages).\\n                The book should be written in US-English.\\n\\n                Initial ideas: 2 sisters Isa and Caro, both mothers of a boy and a girl, have been separated by their and their husbands ' varying geographical assignments. One is a nurse in Strasbourg, the other is a stay at home mom in Seoul. Will they meet again?.\\n\\n                Return a JSON object within a Markdown code block. Include:\\n                - \\\"title\\\": A compelling title.\\n                - \\\"logline\\\": A one-sentence summary.\\n                - \\\"description\\\": A description (around 180-220 words).\\n\\n                ```json\\n                {\\n                    \\\"title\\\": \\\"...\\\",\\n                    \\\"logline\\\": \\\"...\\\",\\n                    \\\"description\\\": \\\"...\\\"\\n                }\\n                ```\"}], \"temperature\": 0.7, \"timeout\": 360.0}",
+      "ignoreArrayOrder" : true,
+      "ignoreExtraElements" : true
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-v1-chat-completions-1HwHJ.json",
+    "headers" : {
+      "Referrer-Policy" : "no-referrer, strict-origin-when-cross-origin",
+      "CF-RAY" : "9720eb295c6e9cec-ZRH",
+      "Server" : "cloudflare",
+      "Access-Control-Allow-Origin" : "*",
+      "X-Content-Type-Options" : "nosniff",
+      "Permissions-Policy" : "payment=(self \"https://checkout.stripe.com\" \"https://connect-js.stripe.com\" \"https://js.stripe.com\" \"https://*.js.stripe.com\" \"https://hooks.stripe.com\")",
+      "Vary" : "Accept-Encoding",
+      "Date" : "Wed, 20 Aug 2025 09:38:37 GMT",
+      "Content-Type" : "application/json"
+    }
+  },
+  "uuid" : "2fbcb9bb-b2d2-341e-8f13-81f0082173b0"
+}

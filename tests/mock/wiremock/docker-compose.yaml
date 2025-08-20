@@ -5,7 +5,25 @@ services:
     image: wiremock/wiremock:latest
     ports:
       - "2793:8080"
+    # This line dynamically reads the UID and GID from the shell
+    user: "${UID}:${GID}"
     volumes:
-      - ./wiremock-playing:/home/wiremock
-    command: --global-response-templating --verbose
+      # - ./wiremock-playing:/home/wiremock # only for replay mode, usefull for git actions
+      - ./wiremock-recordings:/home/wiremock
+#    env_file:
+#      - .env
+    environment:
+      - TARGET_API_URL=${WIREMOCK_TARGET_URL}
+      - API_BEARER_TOKEN=${WIREMOCK_LLM_TOKEN}
+      - TARGET_HOST=${WIREMOCK_TARGET_HOST}
+    command: --global-response-templating --verbose --record-mappings
+    # --record-mappings if we want to record also, not only proxy
     container_name: wiremock
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 256M

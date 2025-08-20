@@ -1,0 +1,28 @@
+{
+  "id" : "3c73583a-6bf8-38f2-a481-19ffac8b1cab",
+  "request" : {
+    "url" : "/v1/chat/completions",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToJson" : "{\"model\": \"qwen/qwen3-235b-a22b:free\", \"messages\": [{\"role\": \"user\", \"content\": \"\\n            Create a detailed outline for the scenes in Chapter 2: Along the 37th Parallel\\n            of a Hero's journey book titled \\\"The 37th Parallel\\\"\\n            which is categorized as fiction.\\n            The book should be written in US-English.\\n\\n            Book Description: Dr. Isa Mendoza and Park Caro\\u2014estranged half-sisters who once shared a childhood lullaby\\u2014are violently reunited when their children are kidnapped at 14:37 on a Tuesday. A single video shows the kids bound in a freight container, a seven-day countdown ticking beneath bilingual fragments of that lullaby. To save them, Isa and Caro must trace the 37th parallel east across Europe and Asia, solving cryptic clues that resurrect every buried betrayal between them. With the help of a guilt-ridden German pilot and a K-pop logistics prodigy, they race through the Rhine, Neckar, Danube, and the steppes to Vladivostok, guided by their own daughters hacking the chase from inside the container. At the final coordinate\\u2014a derelict Soviet listening post on the Russian-Korean border\\u2014they face an impossible lever: expose a wartime atrocity that will destroy their reputations and families, or lose the children forever. In the end, the question is not how far they will travel, but how much of themselves they are willing to surrender to the river of secrets that once divided them.\\n\\n            Chapter Summary: The sisters meet for the first time in fifteen years on a rain-slick tarmac at Frankfurt-Hahn, their reunion colder than the November wind. Klaus and Ji-eun broker an uneasy truce: one plane, one mission. The next clue\\u2014coordinates 49.4875\\u00b0 N, 8.4669\\u00b0 E\\u2014point to the Rhine at Mannheim, where they once scattered their mother\\u2019s ashes. There, wedged in the bridge\\u2019s lattice, they find a waterproof capsule containing a flash drive and a second lullaby fragment in Korean hanja. Luna, speaking through a dark-web voice scrambler, guides them: the drive holds a fragment of a 1996 Red Cross report on a massacre their mother witnessed. Each new coordinate forces them to confront old wounds: Isa\\u2019s forged medical exemption that let her dodge Korean conscription while Caro\\u2019s brother served and died; Caro\\u2019s refusal to forgive Isa for dismissing han as \\u201cself-indulgent grief.\\u201d Between checkpoints\\u2014Neckar River, Danube at Linz, across the Ukrainian steppes\\u2014the sisters translate the lullaby line by line, realizing the kidnapper knows every syllable of their shared past. Hana, Caro\\u2019s daughter, hacks into Russian rail cams to confirm the freight container is moving east on the Trans-Siberian line, destination Vladivostok.\\n\\n            The outline should include a breakdown of EXACTLY 5 scenes for this chapter, with EACH scene having:\\n            * Scene Number: (e.g., Scene 1, Scene 2, etc.)\\n            * Summary: (A short description of what happens in the scene, 1-2 sentences)\\n            * Characters: (A list of the characters involved, separated by commas)\\n            * Setting: (Where the scene takes place)\\n            * Goal: (The purpose of the scene)\\n            * Emotional Beat: (The primary emotion conveyed in the scene)\\n\\n            IMPORTANT: Format the scene outline using Markdown bullet points, as shown below:\\n\\n            Scene 1:\\n                * Summary: [Scene summary here]\\n                * Characters: [Character 1, Character 2, ...]\\n                * Setting: [Scene setting]\\n                * Goal: [Scene goal]\\n                * Emotional Beat: [Scene emotional beat]\\n\\n            Scene 2:\\n                * Summary: [Scene summary here]\\n                * Characters: [Character 1, Character 2, ...]\\n                * Setting: [Scene setting]\\n                * Goal: [Scene goal]\\n                * Emotional Beat: [Scene emotional beat]\\n\\n            [Repeat for exactly 5 scenes, maintaining the exact same bullet point format]\\n\\n            Be sure to include all main characters relevant to this chapter and create a natural flow between scenes.\\n            \"}], \"temperature\": 0.5, \"timeout\": 360.0}",
+      "ignoreArrayOrder" : true,
+      "ignoreExtraElements" : true
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-v1-chat-completions-Umy8D.json",
+    "headers" : {
+      "Referrer-Policy" : "no-referrer, strict-origin-when-cross-origin",
+      "CF-RAY" : "9720ee583aeb444c-ZRH",
+      "Server" : "cloudflare",
+      "Access-Control-Allow-Origin" : "*",
+      "X-Content-Type-Options" : "nosniff",
+      "Permissions-Policy" : "payment=(self \"https://checkout.stripe.com\" \"https://connect-js.stripe.com\" \"https://js.stripe.com\" \"https://*.js.stripe.com\" \"https://hooks.stripe.com\")",
+      "Vary" : "Accept-Encoding",
+      "Date" : "Wed, 20 Aug 2025 09:40:47 GMT",
+      "Content-Type" : "application/json"
+    }
+  },
+  "uuid" : "3c73583a-6bf8-38f2-a481-19ffac8b1cab"
+}

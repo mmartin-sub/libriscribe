@@ -24,8 +24,8 @@ docker run -it --rm \
   -p 2793:8080 \
   -v "$(pwd)/wiremock-recordings:/home/wiremock" \
   -e TARGET_API_URL="https://openrouter.ai/api" \
-  -e API_BEARER_TOKEN="${{ secrets.YOUR_SECRET_TOKEN }}" \
-  -e TARGET_HOST="${{ secrets.TARGET_HOST}}" \
+  -e API_BEARER_TOKEN="${{ secrets.WIREMOCK_LLM_TOKEN }}" \
+  -e TARGET_HOST="${{ secrets.WIREMOCK_TARGET_HOST }}" \
   wiremock/wiremock:latest \
   --global-response-templating
 ```

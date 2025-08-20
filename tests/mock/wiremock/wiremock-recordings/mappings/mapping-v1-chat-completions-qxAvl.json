@@ -1,0 +1,28 @@
+{
+  "id" : "4c9540e1-3855-31c1-9a29-c20e9570fc04",
+  "request" : {
+    "url" : "/v1/chat/completions",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToJson" : "{\"model\": \"moonshotai/kimi-k2:free\", \"messages\": [{\"role\": \"user\", \"content\": \"\\nWrite Scene 3 of 9 for Chapter 1: The Fracture at 14:37 of the Hero's journey fiction book \\\"The 37th Parallel\\\".\\nThe book is written in US-English.\\n\\nChapter Summary:\\nTuesday begins like any other for both sisters. Isa is mid-air in a M\\u00e9decins Sans Fronti\\u00e8res helicopter evacuating a pregnant teenager from Mosul to Ramstein when a surface-to-air missile clips the tail rotor; the chopper spins into the Black Forest. Simultaneously, in Seoul, Caro\\u2019s nine-year-old son Min is pulled off a jam-packed subway by silent men in surgical masks. At 14:37 exactly, both women receive the same encrypted video: Luna and Min bound, blindfolded, and breathing through straws inside a freight container. A distorted voice recites the first line of their childhood lullaby\\u2014\\u201cDors, mon tr\\u00e9sor, \\uc790\\uc7a5\\uac00\\ub97c \\ubd88\\ub7ec\\u201d\\u2014then demands they return to the river where they buried the truth. Isa crawls from the burning wreckage with a dislocated shoulder and a concussion; Caro drops a tray of orchids in a Gangnam penthouse, her perfectly manicured world cracking like porcelain. Both realize the distance they cultivated was never geographic at all.\\n\\nScene Details:\\n- Summary: *notes key details* Must include: - Isa's dislocated shoulder/concussion - Caro dropping orchids - Bilingual lullaby line - Surgical mask kidnappers - \\\"River where they buried truth\\\" clue *avoids pitfalls* *refines emotional beats* Final check: All user specs covered? \\u2713 US-English \\u2713 Fiction context \\u2713 Parallel structure for sisters \\u2713 14:37 pivotal moment \\u2713 Emotional arc from calm to crisis Ready to output in exact requested format. No fluff, just the structured outline. </think>\\n- Characters: None specified\\n- Setting: None specified\\n- Goal: None specified\\n- Emotional Beat: None specified\\n\\nInstructions:\\n- Write a vivid, engaging scene that captures these elements.\\n- Include descriptive details and sensory information about the setting.\\n- Show character emotions and development through actions and dialogue.\\n- Advance the story according to the scene's goal and emotional beat.\\n- Make the scene flow naturally and avoid unnecessary exposition.\\n- Ensure the scene ends in a way that connects smoothly to the next scene.\\n- Use language and style appropriate for the genre.\\n\\nImportant: Focus on showing rather than telling. Create an immersive experience that brings the scene to life.\\n\\nIMPORTANT: The content should be written entirely in US-English.\\n\\n\\nIMPORTANT: Begin the scene with the title: ## Scene 3: *notes key details* Must include: - Isa's dislocated shoulder/concussion - Caro dropping orchids - Bilingual lullaby line - Surgical mask kidnappers - \\\"River where they buried truth\\\" clue *avoids pitfalls* *refines emotional beats* Final check: All user specs covered? \\u2713 US-English \\u2713 Fiction context \\u2713 Parallel structure for sisters \\u2713 14:37 pivotal moment \\u2713 Emotional arc from calm to crisis Ready to output in exact requested format. No fluff, just the structured outline. </think> (as a Markdown heading, not bold, not triple #, no extra formatting)\"}], \"temperature\": 0.7, \"timeout\": 360.0}",
+      "ignoreArrayOrder" : true,
+      "ignoreExtraElements" : true
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-v1-chat-completions-qxAvl.json",
+    "headers" : {
+      "Referrer-Policy" : "no-referrer, strict-origin-when-cross-origin",
+      "CF-RAY" : "9720f453ac1d2830-ZRH",
+      "Server" : "cloudflare",
+      "Access-Control-Allow-Origin" : "*",
+      "X-Content-Type-Options" : "nosniff",
+      "Permissions-Policy" : "payment=(self \"https://checkout.stripe.com\" \"https://connect-js.stripe.com\" \"https://js.stripe.com\" \"https://*.js.stripe.com\" \"https://hooks.stripe.com\")",
+      "Vary" : "Accept-Encoding",
+      "Date" : "Wed, 20 Aug 2025 09:44:52 GMT",
+      "Content-Type" : "application/json"
+    }
+  },
+  "uuid" : "4c9540e1-3855-31c1-9a29-c20e9570fc04"
+}
