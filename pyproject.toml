@@ -171,6 +171,7 @@ dead-code = "vulture src tests"
 
 # --- Package Management (uv) ---
 check-updates = "uv pip list --outdated"
+docs-update-deps = "scripts/update_docs_deps.sh"
 detect-secrets-scan = "detect-secrets scan --baseline .secrets.baseline --exclude-files '^tests/mock/wiremock/.*\\.json$'"
 detect-secrets-audit = "detect-secrets audit .secrets.baseline"
 

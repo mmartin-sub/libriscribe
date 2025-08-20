@@ -56,3 +56,20 @@ Advanced Mode gives you granular control. Here's a breakdown of the commands you
 - `format`: Format the book into Markdown or PDF.
 
 In **Advanced Mode**, you'll run these commands interactively through the main `libriscribe` command, and you'll be prompted for any necessary arguments (like chapter numbers, file paths, etc.).
+
+## Non-Interactive Commands
+
+LibriScribe2 also provides non-interactive commands for scripting and automation.
+
+### `create-book`
+
+The `create-book` command allows you to create a book with a single command.
+
+**--skip-error**
+
+By default, the `create-book` command will exit if it encounters an error (e.g., a file cannot be written). You can use the `--skip-error` flag to force the command to continue even if an error occurs.
+
+Example:
+```bash
+libriscribe2 create-book --title "My Book" --all --skip-error
+```

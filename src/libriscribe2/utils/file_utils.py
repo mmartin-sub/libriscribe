@@ -89,18 +89,23 @@ def read_json_file(file_path: str, model: type[BaseModel] | None = None) -> dict
 
 
 def write_json_file(file_path: str, data: dict[str, Any] | BaseModel) -> None:
-    """Writes data (dict or Pydantic model) to a JSON file."""
+    """Writes data (dict or Pydantic model) to a JSON file.
+
+    Raises:
+        IOError: If the file cannot be written to.
+    """
     try:
         Path(file_path).parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, "w", encoding="utf-8") as f:
-            if isinstance(data, BaseModel):
-                json.dump(data.model_dump(), f, indent=4, ensure_ascii=False)  # Use model_dump for Pydantic models
-            else:
-                json.dump(data, f, indent=4, ensure_ascii=False)
+            data_to_dump = data.model_dump() if isinstance(data, BaseModel) else data
+            # Use dumps to get a string, then write to the file
+            json_str = json.dumps(data_to_dump, indent=4, ensure_ascii=False)
+            f.write(json_str)
         logger.info(f"Data written to {_get_relative_path(file_path)}")
     except Exception as e:
         logger.exception(f"Error writing to JSON file {file_path}: {e}")
-        print(f"ERROR: Failed to write to {file_path}. See log.")
+        # Re-raise as an IOError to be handled by the CLI
+        raise OSError(f"Failed to write to {file_path}") from e
 
 
 def write_markdown_file(file_path: str, content: str, *, validate: bool = True, format_headers: bool = True) -> None:
@@ -216,6 +221,42 @@ def dump_content_for_logging(
         logger.error(f"Failed to dump content to file: {e}")
         # Fallback: return truncated content
         return f"{content[:threshold]}... (truncated, failed to save to file)"
+
+
+def log_llm_error_exchange(
+    llm_input: str, llm_output: str, project_dir: str | None = None, process_name: str = "unknown"
+) -> str:
+    """Saves the input and output of a failed LLM call to a log file.
+
+    Args:
+        llm_input: The input sent to the LLM.
+        llm_output: The output received from the LLM.
+        project_dir: The directory of the current project.
+        process_name: The name of the process that made the LLM call.
+
+    Returns:
+        The path to the created log file.
+    """
+    timestamp = get_unix_timestamp_int()
+    content_to_hash = f"{llm_input}{llm_output}"
+    content_hash = hashlib.sha256(content_to_hash.encode()).hexdigest()[:8]
+    filename = f"llm_error_exchange_{timestamp}_{content_hash}.log"
+
+    log_dir = Path(project_dir) if project_dir else Path("logs")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    file_path = log_dir / filename
+
+    try:
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write("--- LLM INPUT ---\n")
+            f.write(llm_input)
+            f.write("\n\n--- LLM OUTPUT ---\n")
+            f.write(llm_output)
+        logger.info(f"LLM error exchange logged to: {file_path}")
+        return str(file_path)
+    except Exception as e:
+        logger.error(f"Failed to log LLM error exchange to {file_path}: {e}")
+        return ""
 
 
 def extract_json_from_markdown(

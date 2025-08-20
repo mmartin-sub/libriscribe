@@ -144,10 +144,19 @@ Use appropriate Markdown headings for title and author."""
                     formatted_markdown = await self.llm_client.generate_content(prompt, prompt_type="formatting")
 
                     if len(formatted_markdown) < min_expected_length:
-                        self.logger.error(
-                            f"Formatting failed: Output length {len(formatted_markdown)} is less than {self.settings.formatting_min_length_ratio * 100}% of input length {input_length}"
+                        from ..utils.file_utils import log_llm_error_exchange
+
+                        error_log_path = log_llm_error_exchange(
+                            llm_input=prompt,
+                            llm_output=formatted_markdown,
+                            project_dir=project_dir,
+                            process_name="formatting",
                         )
-                        console.print("[red]❌ Error: Formatting output too short after retry[/red]")
+                        error_message = f"Formatting failed: Output length {len(formatted_markdown)} is less than {self.settings.formatting_min_length_ratio * 100}% of input length {input_length}"
+                        self.logger.error(f"{error_message}. See details in: {error_log_path}")
+                        console.print(
+                            f"[red]❌ Error: Formatting output too short after retry. See {error_log_path}[/red]"
+                        )
                         # Hard fail so the CLI does not report success
                         raise RuntimeError("formatting_output_too_short")
 

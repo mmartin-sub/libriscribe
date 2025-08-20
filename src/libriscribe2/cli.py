@@ -276,6 +276,7 @@ def create_book(
         "INFO", "--log-level", help="Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL) [default: INFO]"
     ),
     mock: bool = typer.Option(False, "--mock", help="Use mock LLM provider for testing"),
+    skip_error: bool = typer.Option(False, "--skip-error", help="Continue execution even if an error occurs"),
     generate_concept: bool = typer.Option(False, "--generate-concept", help="Generate book concept"),
     generate_outline: bool = typer.Option(False, "--generate-outline", help="Generate book outline"),
     generate_characters: bool = typer.Option(False, "--generate-characters", help="Generate character profiles"),
@@ -376,6 +377,13 @@ def create_book(
             console.print("[red]Failed to create book.[/red]")
             return 5
 
+    except OSError as e:
+        console.print(f"[red]❌ File Error: {e!s}[/red]")
+        if not skip_error:
+            console.print("[yellow]Execution halted. Use --skip-error to continue on file errors.[/yellow]")
+            return 1
+        console.print("[yellow]--skip-error is enabled, continuing execution...[/yellow]")
+        return 0  # Continue execution
     except ValueError as e:
         console.print(f"[red]❌ Invalid input: {e!s}[/red]")
         console.print("💡 Check your command line arguments and try again.")
@@ -565,6 +573,19 @@ def book_stats(
                 chapter_stats.append((chapter_number, chapter.title, status))
         else:
             project_logger.info("No chapters recorded yet.")
+
+        # Log file links
+        project_logger.info("--- Associated Log Files ---")
+        project_logger.info(f"Main application log: {app_log_file.resolve()}")
+
+        # Find the latest llm_output log
+        llm_logs_dir = pm.project_dir
+        llm_log_files = list(llm_logs_dir.glob("llm_output_*.log"))
+        if llm_log_files:
+            latest_llm_log = max(llm_log_files, key=lambda f: f.stat().st_mtime)
+            project_logger.info(f"Latest LLM output log: {latest_llm_log.resolve()}")
+        else:
+            project_logger.info("No LLM output logs found in the project directory.")
 
         project_logger.info("=== END STATISTICS REPORT ===")
 

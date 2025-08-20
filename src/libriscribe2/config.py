@@ -118,7 +118,10 @@ class EnvironmentConfig:
                 else:
                     logger.info(f"Set {env_var} from config file: {config_value}")
             else:
-                logger.debug(f"Config key '{config_key}' not found in config data")
+                # Log the default value being used from settings
+                settings = Settings()
+                default_value = getattr(settings, config_key, "N/A")
+                logger.debug(f"Config key '{config_key}' not found, using default value: {default_value}")
 
     def get_model_config(self) -> dict[str, str]:
         """Get model configuration."""
