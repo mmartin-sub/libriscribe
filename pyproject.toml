@@ -8,7 +8,7 @@ name = "libriscribe2"
 dynamic = ["version"]
 description = "Modern book creation CLI with rich output and type safety."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 authors = [
     {name = "Michel Martin", email = "172776424+mmartin-sub@users.noreply.github.com"},
     ]
@@ -172,7 +172,11 @@ dead-code = "vulture src tests"
 # --- Package Management (uv) ---
 check-updates = "uv pip list --outdated"
 update-deps = "uv pip compile --upgrade pyproject.toml"
+
+# Docs
 docs-update-deps = "scripts/update_docs_deps.sh"
+
+# Detect secrets
 detect-secrets-scan = "detect-secrets scan --baseline .secrets.baseline --exclude-files '^tests/mock/wiremock/.*\\.json$'"
 detect-secrets-audit = "detect-secrets audit .secrets.baseline"
 
