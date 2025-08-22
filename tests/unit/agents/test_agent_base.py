@@ -13,6 +13,7 @@ import pytest
 
 from libriscribe2.agents.agent_base import Agent
 from libriscribe2.knowledge_base import ProjectKnowledgeBase
+from libriscribe2.utils.exceptions import LLMGenerationError
 from libriscribe2.utils.llm_client import LLMClient
 
 
@@ -120,11 +121,9 @@ class TestAgentBase:
         # Arrange
         self.mock_llm_client.generate_content.side_effect = Exception("LLM error")
 
-        # Act
-        result = await self.agent.safe_generate_content("Test prompt", "concept")
-
-        # Assert
-        assert result is None
+        # Act & Assert
+        with pytest.raises(LLMGenerationError):
+            await self.agent.safe_generate_content("Test prompt", "concept")
 
     def test_safe_extract_json_success(self):
         """Test safe_extract_json with valid JSON."""

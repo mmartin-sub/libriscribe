@@ -18,7 +18,8 @@ from typing import Any, Protocol, TypeVar
 import pyjson5 as json
 
 from ..settings import Settings
-from ..utils.llm_client import LLMClient
+from ..utils.exceptions import LLMGenerationError
+from ..utils.llm_client import LLMClient, LLMClientError
 from ..utils.timestamp_utils import get_iso8601_utc_timestamp
 
 T = TypeVar("T")
@@ -155,11 +156,15 @@ class Agent(ABC):
                 return await self.llm_client.generate_content(prompt, prompt_type=prompt_type, temperature=temp)
 
             return await self.execute_with_fallback(_generate)
-        except Exception as e:
+        except LLMClientError as e:
             # Log detailed error to file only (DEBUG level)
             self.log_debug(f"Content generation failed: {e}")
-            # Don't log ERROR level here since the calling code will handle it
-            return None
+            # Re-raise as a more specific exception for the agent layer
+            raise LLMGenerationError(f"Failed to generate content from LLM: {e}") from e
+        except Exception as e:
+            # Catch any other unexpected errors
+            self.log_debug(f"An unexpected error occurred during content generation: {e}")
+            raise LLMGenerationError(f"An unexpected error occurred: {e}") from e
 
     def safe_extract_json(
         self, content: str, content_type: str, output_path: str | None = None

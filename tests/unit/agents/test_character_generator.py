@@ -8,6 +8,7 @@ import pytest
 
 from libriscribe2.agents.character_generator import CharacterGeneratorAgent
 from libriscribe2.knowledge_base import ProjectKnowledgeBase
+from libriscribe2.utils.exceptions import LLMGenerationError
 
 
 def generate_large_character_response() -> str:
@@ -203,12 +204,9 @@ class TestCharacterGeneratorAgent:
         agent = CharacterGeneratorAgent(mock_llm, settings)
         kb = ProjectKnowledgeBase(project_name="test_project", title="Test Book")
 
-        # Act
-        await agent.execute(kb)
-
-        # Assert
-        # The agent should handle the error gracefully and not raise an exception
-        # The error should be logged but execution should continue
+        # Act & Assert
+        with pytest.raises(LLMGenerationError):
+            await agent.execute(kb)
 
     def test_basic_functionality(self):
         """Test basic CharacterGeneratorAgent functionality."""

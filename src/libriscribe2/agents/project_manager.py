@@ -10,6 +10,7 @@ from rich.console import Console
 from ..agent_frameworks.autogen import AutoGenConfigurationManager, AutoGenService
 from ..knowledge_base import ProjectKnowledgeBase
 from ..settings import Settings
+from ..utils.exceptions import LLMGenerationError
 from ..utils.llm_client import LLMClient
 from .chapter_writer import ChapterWriterAgent
 from .character_generator import CharacterGeneratorAgent
@@ -174,6 +175,10 @@ class ProjectManagerAgent:
                 error_msg = "Project knowledge base not initialized"
                 self.logger.error(error_msg)
                 raise ValueError(error_msg)
+        except LLMGenerationError:
+            # Re-raise without logging here to avoid duplicate tracebacks.
+            # The top-level handler in book_creator.py will log a clean message.
+            raise
         except Exception as e:
             # Log the detailed error to file only
             self.logger.exception(f"Error running agent {agent_name}")

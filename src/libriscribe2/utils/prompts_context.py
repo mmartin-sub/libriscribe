@@ -463,10 +463,7 @@ Important: Focus on showing rather than telling. Create an immersive experience 
 IMPORTANT: The content should be written entirely in {language}.
 """
 
-SCENE_TITLE_INSTRUCTION = (
-    "IMPORTANT: Begin the scene with the title: ## Scene {scene_number}: {scene_summary} "
-    "(as a Markdown heading, not bold, not triple #, no extra formatting)"
-)
+SCENE_TITLE_INSTRUCTION = "IMPORTANT: Begin the scene with the title: ## Scene {scene_number}: {scene_summary}"
 
 # KEYWORD_GENERATION_PROMPT
 # - Expected Output Length: 1 Markdown code block containing a JSON array of 5-10 strings.

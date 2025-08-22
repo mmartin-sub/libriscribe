@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from libriscribe2.agents.character_generator import CharacterGeneratorAgent
+from libriscribe2.utils.exceptions import LLMGenerationError
 
 
 class TestCharacterGeneratorRefactored:
@@ -204,8 +205,8 @@ class TestCharacterGeneratorRefactored:
         agent = CharacterGeneratorAgent(mock_llm_client, settings)
         initial_count = len(sample_knowledge_base.characters)
 
-        # Should not raise exception
-        await agent.execute(sample_knowledge_base)
+        with pytest.raises(LLMGenerationError):
+            await agent.execute(sample_knowledge_base)
 
         # Should not add any characters
         assert len(sample_knowledge_base.characters) == initial_count

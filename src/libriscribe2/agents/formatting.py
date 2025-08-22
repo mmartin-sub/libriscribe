@@ -179,6 +179,15 @@ Use appropriate Markdown headings for title and author."""
                 try:
                     validated_output_path = self._validate_output_path(output_path)
                     write_markdown_file(str(validated_output_path), formatted_markdown)
+
+                    # Also save to manuscript.md in the project directory
+                    manuscript_path = validated_project_dir / self.settings.manuscript_md_filename
+                    try:
+                        write_markdown_file(str(manuscript_path), formatted_markdown)
+                        self.log_info(f"Final manuscript saved to: {manuscript_path}")
+                    except Exception as e:
+                        self.log_error(f"Failed to save manuscript.md: {e}")
+
                 except ValueError as e:
                     console.print(f"[red]Error: {e}[/red]")
                     return

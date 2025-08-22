@@ -9,14 +9,16 @@ import pytest
 from aiohttp import ClientResponse, ClientSession, ClientTimeout
 
 
+@pytest.mark.skipif(
+    not os.path.exists(os.path.join("tests", ".config-test.json")),
+    reason="No test config found, skipping live LLM API test.",
+)
 @pytest.mark.asyncio
 async def test_api():
     """Test the API endpoint directly"""
 
     # Prefer test config if present
     config_path = os.path.join("tests", ".config-test.json")
-    if not os.path.exists(config_path):
-        pytest.skip("No test config found, skipping live LLM API test.")
 
     with open(config_path) as f:
         config = json.load(f)

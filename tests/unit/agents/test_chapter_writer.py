@@ -202,3 +202,41 @@ class TestChapterWriterAgent:
         # Assert
         # Should create a default scene and continue
         assert len(kb.chapters[0].scenes) == 1
+
+    @pytest.mark.asyncio
+    async def test_mock_scene_generation_is_clean(self, tmp_path):
+        """Test that mock scene generation does not include instructional text."""
+        from libriscribe2.settings import Settings
+        from libriscribe2.utils.mock_llm_client import MockLLMClient
+
+        settings = Settings()
+        # Use the actual mock client to test its behavior
+        mock_llm = MockLLMClient(settings=settings)
+
+        agent = ChapterWriterAgent(mock_llm, settings)
+
+        kb = ProjectKnowledgeBase(project_name="test_project", title="Test Book")
+        kb.project_dir = tmp_path
+
+        chapter = Chapter(chapter_number=1, title="The Adventure Begins")
+        from libriscribe2.knowledge_base import Scene
+        chapter.scenes.append(Scene(scene_number=1, summary="A hero is born"))
+        kb.add_chapter(chapter)
+
+        output_path = tmp_path / "chapter_1.md"
+
+        # Act
+        await agent.execute(kb, output_path=str(output_path), chapter_number=1)
+
+        # Assert
+        assert output_path.exists()
+        content = output_path.read_text()
+
+        # Check that the unwanted instructional text is not present
+        assert "(as a Markdown heading, not bold, not triple #, no extra formatting)" not in content
+
+        # Check that the chapter title is present
+        assert "# Chapter 1: The Adventure Begins" in content
+
+        # Check that some lorem ipsum content was generated
+        assert "lorem" in content.lower() or "ipsum" in content.lower() or "dolor" in content.lower()

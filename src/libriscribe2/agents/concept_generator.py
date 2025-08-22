@@ -8,6 +8,7 @@ import pyjson5 as json
 
 from ..knowledge_base import ProjectKnowledgeBase
 from ..settings import Settings
+from ..utils.exceptions import LLMGenerationError
 from ..utils.file_utils import write_json_file, write_markdown_file
 from ..utils.json_utils import JSONProcessor
 from ..utils.llm_client import LLMClient
@@ -131,26 +132,30 @@ class ConceptGeneratorAgent(Agent):
                 self.log_warning("Initial prompt too long, using simplified version")
                 initial_prompt = self._build_simple_prompt(project_knowledge_base)
 
-            # --- FIX STARTS HERE ---
-            # Added the initial generation call that was missing.
-            initial_concept_md = await self.safe_generate_content(
-                initial_prompt, prompt_type="concept", temperature=0.7
-            )
-            # --- FIX ENDS HERE ---
-
-            # If initial generation failed, try with simplified prompt
-            if not initial_concept_md:
-                self.log_info("Retrying with simplified prompt...")
-                simple_prompt = self._build_simple_prompt(project_knowledge_base)
+            initial_concept_md = None
+            try:
+                # First attempt
                 initial_concept_md = await self.safe_generate_content(
-                    simple_prompt, prompt_type="concept", temperature=0.7
+                    initial_prompt, prompt_type="concept", temperature=0.7
                 )
+            except LLMGenerationError as e:
+                self.log_info(f"Initial concept generation failed ({e}), retrying with simplified prompt...")
+                # Second attempt (fallback)
+                simple_prompt = self._build_simple_prompt(project_knowledge_base)
+                try:
+                    initial_concept_md = await self.safe_generate_content(
+                        simple_prompt, prompt_type="concept", temperature=0.7
+                    )
+                except LLMGenerationError as e2:
+                    error_msg = "Failed to generate book concept - no response from LLM"
+                    self.logger.error(f"Concept generation failed after retry: {e2}")
+                    self.log_error(error_msg)  # Log to file only
+                    raise RuntimeError(error_msg) from e2
 
-            # If both attempts failed, raise error before validation
+            # If we still don't have content (e.g., LLM returned empty string), raise error.
             if not initial_concept_md:
-                error_msg = "Failed to generate book concept - no response from LLM"
-                self.logger.error(f"Concept generation failed: prompt={initial_prompt[:100]}...")
-                self.log_error(error_msg)  # Log to file only
+                error_msg = "Failed to generate book concept - LLM returned an empty response."
+                self.log_error(error_msg)
                 raise RuntimeError(error_msg)
 
             # Only validate if we have content

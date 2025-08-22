@@ -14,6 +14,7 @@ from libriscribe2.agents.project_manager import ProjectManagerAgent
 from libriscribe2.knowledge_base import ProjectKnowledgeBase
 from libriscribe2.settings import Settings
 from libriscribe2.utils.content_exporters import export_characters_to_markdown, export_worldbuilding_to_markdown
+from libriscribe2.utils.exceptions import LLMGenerationError
 
 # Configure warnings to be treated as errors
 warnings.filterwarnings("error", category=RuntimeWarning)
@@ -650,6 +651,9 @@ class BookCreatorService:
             try:
                 await self.project_manager.generate_concept()
                 logger.info("✅ Book concept generated successfully")
+            except LLMGenerationError as e:
+                logger.error(f"Concept generation failed: {e}")
+                raise RuntimeError(f"Concept generation failed: LLM not reachable or API error.") from e
             except Exception as e:
                 # Log detailed error to file only
                 logger.exception("Failed to generate concept")

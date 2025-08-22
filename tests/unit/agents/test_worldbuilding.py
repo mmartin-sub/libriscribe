@@ -10,6 +10,7 @@ import pytest
 
 from libriscribe2.agents.worldbuilding import WorldbuildingAgent
 from libriscribe2.knowledge_base import ProjectKnowledgeBase, Worldbuilding
+from libriscribe2.utils.exceptions import LLMGenerationError
 
 
 def generate_large_worldbuilding_response() -> str:
@@ -83,11 +84,9 @@ class TestWorldbuildingAgent:
         kb.description = "A story about space exploration"
         kb.worldbuilding_needed = True  # Enable worldbuilding
 
-        # Act - The agent should handle the error gracefully and not raise an exception
-        await agent.execute(kb)
-
-        # Assert - The LLM should have been called, but the agent handled the error
-        mock_llm.generate_content.assert_called()
+        # Act & Assert
+        with pytest.raises(LLMGenerationError):
+            await agent.execute(kb)
 
     def test_parse_worldbuilding_response_valid(self):
         """Test parsing valid worldbuilding response."""

@@ -32,7 +32,7 @@ class FailingMockLLMClient(MockLLMClient):
         self.fail_after_calls = fail_after_calls
         self.call_count = 0
 
-    def generate_content(
+    async def generate_content(
         self,
         prompt: str,
         prompt_type: str = "default",
@@ -47,7 +47,7 @@ class FailingMockLLMClient(MockLLMClient):
             raise RuntimeError(f"Mock LLM client failed after {self.fail_after_calls} calls")
 
         # Return normal mock content for successful calls
-        return super().generate_content(
+        return await super().generate_content(
             prompt=prompt, prompt_type=prompt_type, temperature=temperature, language=language, timeout=timeout
         )
 
@@ -106,7 +106,7 @@ class TestMockFailureScenarios:
         async def mock_generate_side_effect(prompt, temperature, **kwargs):
             prompt_type = kwargs.get("prompt_type", "general")
             language = "English"
-            return failing_client.generate_content(prompt, prompt_type, temperature, language)
+            return await failing_client.generate_content(prompt, prompt_type, temperature, language)
 
         mock_generate_content.side_effect = mock_generate_side_effect
 
@@ -135,7 +135,7 @@ class TestMockFailureScenarios:
         async def mock_generate_side_effect(prompt, temperature, **kwargs):
             prompt_type = kwargs.get("prompt_type", "general")
             language = "English"
-            return normal_client.generate_content(prompt, prompt_type, temperature, language)
+            return await normal_client.generate_content(prompt, prompt_type, temperature, language)
 
         mock_generate_content.side_effect = mock_generate_side_effect
 
@@ -146,35 +146,37 @@ class TestMockFailureScenarios:
         await book_creator.acreate_book(self._create_book_args("-success"))
         assert normal_client.call_count >= 18
 
-    def test_failing_mock_client_call_counting(self):
+    @pytest.mark.asyncio
+    async def test_failing_mock_client_call_counting(self):
         """Test that the FailingMockLLMClient correctly counts calls."""
         client = FailingMockLLMClient(fail_after_calls=2)
 
         # First call should succeed
-        result1 = client.generate_content("test prompt 1")
+        result1 = await client.generate_content("test prompt 1")
         assert "Mock response" in result1
         assert client.call_count == 1
 
         # Second call should succeed
-        result2 = client.generate_content("test prompt 2")
+        result2 = await client.generate_content("test prompt 2")
         assert "Mock response" in result2
         assert client.call_count == 2
 
         # Third call should fail
         with pytest.raises(RuntimeError, match="Mock LLM client failed after 2 calls"):
-            client.generate_content("test prompt 3")
+            await client.generate_content("test prompt 3")
         assert client.call_count == 3
 
-    def test_failing_mock_client_different_prompt_types(self):
+    @pytest.mark.asyncio
+    async def test_failing_mock_client_different_prompt_types(self):
         """Test that the FailingMockLLMClient fails regardless of prompt type."""
         client = FailingMockLLMClient(fail_after_calls=1)
 
         # First call with concept prompt should succeed
-        result = client.generate_content("test", prompt_type="concept")
+        result = await client.generate_content("test", prompt_type="concept")
         assert "Mock Concept Title" in result
         assert client.call_count == 1
 
         # Second call with different prompt type should fail
         with pytest.raises(RuntimeError, match="Mock LLM client failed after 1 calls"):
-            client.generate_content("test", prompt_type="outline")
+            await client.generate_content("test", prompt_type="outline")
         assert client.call_count == 2

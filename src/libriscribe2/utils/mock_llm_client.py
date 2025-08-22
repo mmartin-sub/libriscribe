@@ -286,7 +286,7 @@ class MockLLMClient:
         """Gets the specific model for a given prompt type, falling back to default."""
         return self.model_config.get(prompt_type, self.default_model)
 
-    def generate_content(
+    async def generate_content(
         self,
         prompt: str,
         prompt_type: str = "default",

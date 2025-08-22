@@ -641,7 +641,7 @@ Write directly without introductions."""
                     language = written_in_match.group(1)
 
         # Generate mock content using the MockLLMClient
-        return mock_client.generate_content(prompt, prompt_type, temperature, language)
+        return await mock_client.generate_content(prompt, prompt_type, temperature, language)
 
     async def _generate_openai_streaming(
         self, prompt: str, temperature: float, max_tokens: int | None, **kwargs: Any
