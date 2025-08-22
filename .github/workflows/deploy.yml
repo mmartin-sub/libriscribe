@@ -5,14 +5,16 @@ on:
   push:
     branches:
       - main
+    # To save resources, this workflow only runs if files in the docs folder have changed.
     paths:
       - 'docs/**'
 
 jobs:
   deploy:
+    name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write # Allows the action to push to the gh-pages branch
       pages: write
       id-token: write
 
@@ -20,34 +22,37 @@ jobs:
       group: "pages"
       cancel-in-progress: false
 
-    # This default is still correct for your 'run' steps (npm install, npm build)
+    # These defaults run subsequent 'run' commands within the './docs' directory
     defaults:
       run:
         working-directory: ./docs
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      # Use the latest major version of the checkout action
+      uses: actions/checkout@v4
 
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      # Use the latest major version of the setup-node action
+      uses: actions/setup-node@v4
       with:
         node-version: '22'
         cache: 'npm'
-        # FIX: Provide the full path to the lock file from the repository root
+        # The path is relative to the repository root, so this is correct
         cache-dependency-path: docs/package-lock.json
 
     - name: Install dependencies
-      # This runs in './docs' because of the 'defaults' setting
-      run: npm install
+      # Using 'npm ci' is faster and more secure in CI environments than 'npm install'
+      run: npm ci
 
     - name: Build website
-      # This also runs in './docs'
       run: npm run build
 
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+      # This is the key fix: This step is skipped when using the local 'act' runner
+      if: ${{ env.ACT != 'true' }}
+      uses: peaceiris/actions-gh-pages@v4 # Use the latest major version
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        # This path is relative to the REPOSITORY root, so it's correct
+        # This path is relative to the REPOSITORY root, which is correct
         publish_dir: ./docs/build

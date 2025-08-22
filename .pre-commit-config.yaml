@@ -61,7 +61,7 @@ repos:
 
     # 2. CODE FORMATTING & LINTING (Ruff) - REORDERED FOR OPTIMAL EXECUTION
     - repo: https://github.com/astral-sh/ruff-pre-commit
-      rev: v0.12.9 # Updated version
+      rev: v0.12.10 # Updated version
       hooks:
         - id: ruff-format
           name: "Format with Ruff"
@@ -159,3 +159,15 @@ repos:
           types: [python]
           pass_filenames: true
           description: "Prevent Pydantic v1 syntax from being committed"
+
+    - repo: https://github.com/astral-sh/uv-pre-commit
+      rev: '0.8.13'
+      hooks:
+      # Update the uv lockfile
+      - id: uv-lock
+        name: Check that uv.lock is up-to-date
+        # These arguments MUST match the command you use to generate the lock file
+        # args: [--all-extras]
+        # This hook should only run when the files that affect dependencies change
+        files: ^(pyproject\.toml|uv\.lock)$
+        # language_version: python3.12
