@@ -3,7 +3,7 @@ Unit tests for FormattingAgent.
 """
 
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -241,3 +241,58 @@ class TestFormattingAgent:
         # Assert
         assert "Test Book" in title_page
         assert "Fiction" in title_page
+
+    @pytest.mark.asyncio
+    async def test_execute_mock_mode_with_title_page(self, tmp_path):
+        """Test that mock mode execution correctly adds a title page when enabled."""
+        from libriscribe2.settings import Settings
+        from libriscribe2.utils.mock_llm_client import MockLLMClient
+
+        # Arrange
+        settings = Settings()
+        settings.formatting_add_title_page = True  # Enable title page
+
+        mock_llm = MockLLMClient(settings=settings)
+        agent = FormattingAgent(mock_llm, settings)
+
+        # Create project structure in a temporary directory
+        project_dir = tmp_path / "projects" / "test_project_mock_title"
+        project_dir.mkdir(parents=True, exist_ok=True)
+
+        kb = ProjectKnowledgeBase(
+            project_name="test_project_mock_title",
+            title="Mock Title",
+            author="Mock Author",
+            genre="Sci-Fi"
+        )
+        kb.project_dir = project_dir
+
+        # Create a dummy chapter file
+        (project_dir / "chapter_1.md").write_text("# Chapter 1\n\nHello world.")
+
+        # Create a dummy project data file
+        (project_dir / "project_data.json").write_text(kb.to_json())
+
+        output_path = project_dir / "formatted_book.md"
+
+        # Act
+        with patch.object(agent, '_validate_project_path', side_effect=lambda x: Path(x)), \
+             patch.object(agent, '_validate_output_path', side_effect=lambda x: Path(x)):
+            print(f"Test project dir: {project_dir}")
+            print(f"Files in dir: {list(project_dir.iterdir())}")
+            await agent.execute(kb, output_path=str(output_path))
+
+        # Assert
+        assert output_path.exists()
+        content = output_path.read_text()
+        print(f"Final content:\n{content}")
+
+        # Check for YAML frontmatter from the title page
+        assert "---" in content
+        assert 'title: "Mock Title"' in content
+        assert 'author: "Mock Author"' in content
+        assert 'genre: "Sci-Fi"' in content
+
+        # Check for chapter content
+        assert "# Chapter 1" in content
+        assert "Hello world." in content

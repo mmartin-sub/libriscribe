@@ -235,8 +235,8 @@ class TestChapterWriterAgent:
         # Check that the unwanted instructional text is not present
         assert "(as a Markdown heading, not bold, not triple #, no extra formatting)" not in content
 
-        # Check that the chapter title is present
-        assert "# Chapter 1: The Adventure Begins" in content
+        # Check that the chapter title is present and followed by a blank line
+        assert "# Chapter 1: The Adventure Begins\n\n" in content
 
         # Check that some lorem ipsum content was generated
         assert "lorem" in content.lower() or "ipsum" in content.lower() or "dolor" in content.lower()

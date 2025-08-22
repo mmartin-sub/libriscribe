@@ -91,8 +91,8 @@ class Settings(BaseSettings):
     mock: bool = Field(default=False, description="Use mock LLM provider")
 
     # Formatting settings
-    formatting_add_title_page: bool = Field(default=False, description="Add title page to formatted manuscript")
-    formatting_add_toc: bool = Field(default=False, description="Add table of contents to formatted manuscript")
+    formatting_add_title_page: bool = Field(default=True, description="Add title page to formatted manuscript")
+    formatting_add_toc: bool = Field(default=True, description="Add table of contents to formatted manuscript")
     formatting_min_length_ratio: float = Field(
         default=0.9, description="Minimum length ratio for formatted output vs input"
     )

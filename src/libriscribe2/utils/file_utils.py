@@ -3,6 +3,7 @@
 import hashlib
 import logging
 import os
+import re
 from pathlib import Path
 from typing import Any, TypeVar
 
@@ -161,8 +162,14 @@ def get_chapter_files(project_dir: str) -> list[str]:
         if filename.startswith("chapter_") and filename.endswith(".md") and "_scene_" not in filename:
             chapter_files.append(os.path.join(project_dir, filename))
     # Sort by chapter number, with error handling
+    def get_chapter_number(filename):
+        match = re.search(r'chapter_(\d+)\.md', filename)
+        if match:
+            return int(match.group(1))
+        return -1 # Should not happen if the file matched the startswith/endswith checks
+
     try:
-        chapter_files.sort(key=lambda x: int(x.split("_")[1].split(".")[0]))
+        chapter_files.sort(key=get_chapter_number)
     except (ValueError, IndexError) as e:
         logger.warning(f"Error sorting chapter files: {e}. Returning unsorted list.")
         # Return unsorted list if sorting fails

@@ -583,6 +583,16 @@ class BookCreatorService:
         self.console.print(f"  [bold]Review Preference:[/bold] {kb.review_preference}")
         self.console.print(f"  [bold]Description:[/bold] {kb.description[:100]}...")  # Truncate for display
 
+        # Calculate and display word and character count
+        if self.project_manager.project_dir:
+            manuscript_path = self.project_manager.project_dir / self.settings.manuscript_md_filename
+            if manuscript_path.exists():
+                content = manuscript_path.read_text(encoding="utf-8")
+                word_count = len(content.split())
+                char_count = len(content)
+                self.console.print(f"  [bold]Word Count:[/bold] {word_count}")
+                self.console.print(f"  [bold]Character Count:[/bold] {char_count}")
+
         # Display dynamic questions and answers
         if kb.dynamic_questions:
             self.console.print(Panel("[bold blue]Dynamic Questions & Answers[/bold blue]", expand=False))

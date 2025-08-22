@@ -114,3 +114,40 @@ class TestBookCreatorService:
             result = await service.acreate_book(args)
             assert result is True
             mock_execute.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_display_book_statistics_with_counts(self, tmp_path):
+        """Test that _display_book_statistics includes word and character counts."""
+        from libriscribe2.knowledge_base import ProjectKnowledgeBase
+
+        service = BookCreatorService()
+
+        # Setup a mock project manager and knowledge base
+        pm = MagicMock()
+        pm.project_dir = tmp_path
+        kb = ProjectKnowledgeBase(project_name="test_stats", title="Stats Book")
+        pm.project_knowledge_base = kb
+        service.project_manager = pm
+
+        # Create a dummy manuscript file
+        manuscript_content = "Hello world, this is a test."
+        (tmp_path / "manuscript.md").write_text(manuscript_content)
+
+        with patch.object(service.console, "print") as mock_print:
+            # Act
+            service._display_book_statistics()
+
+            # Assert
+            output = ""
+            for call in mock_print.call_args_list:
+                arg = call.args[0]
+                if hasattr(arg, "renderable"):
+                    output += str(arg.renderable)
+                else:
+                    output += str(arg)
+
+            assert "Word Count:" in output
+            assert "Character Count:" in output
+            # 6 words, 29 characters
+            assert "6" in output
+            assert "28" in output

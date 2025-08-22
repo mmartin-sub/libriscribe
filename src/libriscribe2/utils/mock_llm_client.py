@@ -168,6 +168,7 @@ class MockLLMClient:
         user: str | None = None,
         mock_config: MockConfig | None = None,
     ):
+        self.provider = llm_provider
         self.llm_provider = llm_provider
         self.settings = settings or Settings()
         self.model_config = model_config if model_config is not None else {}
