@@ -161,12 +161,13 @@ def get_chapter_files(project_dir: str) -> list[str]:
         # Exclude scene files like 'chapter_01_scene_01.md'
         if filename.startswith("chapter_") and filename.endswith(".md") and "_scene_" not in filename:
             chapter_files.append(os.path.join(project_dir, filename))
+
     # Sort by chapter number, with error handling
     def get_chapter_number(filename):
-        match = re.search(r'chapter_(\d+)\.md', filename)
+        match = re.search(r"chapter_(\d+)\.md", filename)
         if match:
             return int(match.group(1))
-        return -1 # Should not happen if the file matched the startswith/endswith checks
+        return -1  # Should not happen if the file matched the startswith/endswith checks
 
     try:
         chapter_files.sort(key=get_chapter_number)

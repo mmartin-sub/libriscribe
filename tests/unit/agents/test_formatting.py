@@ -260,10 +260,7 @@ class TestFormattingAgent:
         project_dir.mkdir(parents=True, exist_ok=True)
 
         kb = ProjectKnowledgeBase(
-            project_name="test_project_mock_title",
-            title="Mock Title",
-            author="Mock Author",
-            genre="Sci-Fi"
+            project_name="test_project_mock_title", title="Mock Title", author="Mock Author", genre="Sci-Fi"
         )
         kb.project_dir = project_dir
 
@@ -276,8 +273,10 @@ class TestFormattingAgent:
         output_path = project_dir / "formatted_book.md"
 
         # Act
-        with patch.object(agent, '_validate_project_path', side_effect=lambda x: Path(x)), \
-             patch.object(agent, '_validate_output_path', side_effect=lambda x: Path(x)):
+        with (
+            patch.object(agent, "_validate_project_path", side_effect=lambda x: Path(x)),
+            patch.object(agent, "_validate_output_path", side_effect=lambda x: Path(x)),
+        ):
             print(f"Test project dir: {project_dir}")
             print(f"Files in dir: {list(project_dir.iterdir())}")
             await agent.execute(kb, output_path=str(output_path))

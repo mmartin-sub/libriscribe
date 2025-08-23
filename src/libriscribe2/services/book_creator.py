@@ -663,7 +663,7 @@ class BookCreatorService:
                 logger.info("✅ Book concept generated successfully")
             except LLMGenerationError as e:
                 logger.error(f"Concept generation failed: {e}")
-                raise RuntimeError(f"Concept generation failed: LLM not reachable or API error.") from e
+                raise RuntimeError("Concept generation failed: LLM not reachable or API error.") from e
             except Exception as e:
                 # Log detailed error to file only
                 logger.exception("Failed to generate concept")

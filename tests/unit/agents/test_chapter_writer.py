@@ -220,6 +220,7 @@ class TestChapterWriterAgent:
 
         chapter = Chapter(chapter_number=1, title="The Adventure Begins")
         from libriscribe2.knowledge_base import Scene
+
         chapter.scenes.append(Scene(scene_number=1, summary="A hero is born"))
         kb.add_chapter(chapter)
 
