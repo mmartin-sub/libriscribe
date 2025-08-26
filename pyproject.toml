@@ -80,6 +80,8 @@ dev = [
     # Future-facing Type Checker
     "pyright",
     "mypy",
+    "validate-pyproject[all]",
+
     # Type Stubs
     "types-PyYAML",
     "types-requests",
@@ -181,10 +183,13 @@ detect-secrets-scan = "detect-secrets scan --baseline .secrets.baseline --exclud
 detect-secrets-audit = "detect-secrets audit .secrets.baseline"
 
 # WireMock for AI llm (see docker-compose.yaml
+wiremock-docker-up = "docker-compose -f ./tests/mock/wiremock/docker-compose.yaml up -d"
+wiremock-docker-down = "docker-compose -f ./tests/mock/wiremock/docker-compose.yaml down"
+
 wiremock-clean = "./tests/mock/wiremock/reformat_mappings.sh --move --output-like-input"
 wiremock-dry = "./tests/mock/wiremock/reformat_mappings.sh --move --output-like-input --dry-run"
 # check and delete files with errors in response
-wiremock-check = "./tests/mock/wiremock/check_wiremock_responses.sh -d ests/mock/wiremock/wiremock-recordings --errors-only --delete --force"
+wiremock-check = "./tests/mock/wiremock/check_wiremock_responses.sh -d tests/mock/wiremock/wiremock-recordings --errors-only --delete --force"
 wiremock-clean-prompt = "python convert_mock.py './wiremock-recordings/mappings/m*.json'"
 
 # --- RUFF CONFIGURATION ---

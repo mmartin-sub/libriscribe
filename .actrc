@@ -1,0 +1,3 @@
+--concurrent-jobs=1
+--container-options --memory=1g
+--container-options --cpus=0.2

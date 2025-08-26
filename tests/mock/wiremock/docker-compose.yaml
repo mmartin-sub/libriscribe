@@ -1,28 +1,43 @@
 version: '3.8'
-# Replay service
+
+# Define a private network for inter-service communication
+networks:
+  internal-network:
+    driver: bridge
+
 services:
   wiremock:
+    # v3 is ok, v4 in beta with key changes
     image: wiremock/wiremock:latest
     ports:
       - "2793:8080"
-    # This line dynamically reads the UID and GID from the shell
-    user: "${UID:-1000}:${GID:-1000}"
     volumes:
-      # - ./wiremock-playing:/home/wiremock # only for replay mode, usefull for git actions
+      # This volume mounts the local directory into the container
+      # where WireMock looks for mapping files.
       - ./wiremock-recordings:/home/wiremock
-#    env_file:
-#      - .env
+      # - ./log4j2.xml:/var/wiremock/log4j2.xml   # custom logging config (LEGACY)
+      - ./logback.xml:/var/wiremock/logback.xml
+
+
+    env_file:
+      - .env
     environment:
-      - TARGET_API_URL=${WIREMOCK_TARGET_URL}
+      #  --print-all-network-traffic : only print what is received by wiremock
+      # --disable-gzip
+      - WIREMOCK_OPTIONS=--global-response-templating --verbose --record-mappings --permitted-system-keys=TARGET_API_URL,TARGET_HOST,API_BEARER_TOKEN
+      #- TARGET_API_URL=${WIREMOCK_TARGET_URL}
+      #- TARGET_API_URL=http://mitmproxy:8080/api
+      #- TARGET_API_URL=http://webhook-listener:8090
+      - TARGET_API_URL=http://http-capture:9001
       - API_BEARER_TOKEN=${WIREMOCK_LLM_TOKEN}
       - TARGET_HOST=${WIREMOCK_TARGET_HOST}
-    command: >
-      --global-response-templating
-      --verbose
-      --record-mappings
-      --permitted-system-keys=TARGET_API_URL,TARGET_HOST,API_BEARER_TOKEN
-    # --record-mappings if we want to record also, not only proxy
+      #- JAVA_OPTS=-Dlog4j.configurationFile=/var/wiremock/log4j2.xml
+      - JAVA_OPTS=-Dlogback.configurationFile=/var/wiremock/logback.xml -Djdk.httpclient.HttpClient.log=all
+
+
     container_name: wiremock
+    networks:
+      - internal-network
     deploy:
       resources:
         limits:
@@ -31,3 +46,62 @@ services:
         reservations:
           cpus: '0.1'
           memory: 256M
+
+# not needed any more, we keep it in case
+  webhook-listener:
+    image: alpine/socat
+    volumes:
+      - ./captured-requests:/data   # store logs on host
+
+    # ENTRYPOINT is already ["socat"]; we pass only the two addresses below
+    command:
+      - "TCP-LISTEN:8090,fork,reuseaddr"
+      - "EXEC:/bin/sh -c 'cat >> /data/requests.log'"
+
+    container_name: webhook-listener
+    networks:
+      - internal-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+
+  mitmproxy:
+    image: mitmproxy/mitmproxy
+    command: mitmweb --mode reverse:https://openrouter.ai
+    ports:
+      - "8081:8080" # check http://localhost:8081 to see the flow
+    networks:
+      - internal-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+
+  http-capture:
+    image: ealen/echo-server
+  # image: kennethreitz/httpbin
+
+    networks:
+      - internal-network
+    ports:
+      - "9001:80"
+    volumes:
+      - ./captured-requests:/data
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M

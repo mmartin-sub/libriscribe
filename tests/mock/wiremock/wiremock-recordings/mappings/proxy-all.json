@@ -1,6 +1,6 @@
 {
   "priority": 20,
-  "name": "Catch-All Proxy Fallback",
+  "name": "Catch-All Proxy Fallback with Debug Webhook",
   "request": {
     "method": "ANY",
     "urlPathPattern": "/v1/.*"
@@ -11,8 +11,7 @@
     "additionalProxyRequestHeaders": {
       "Host": "{{systemValue type='ENVIRONMENT' key='TARGET_HOST'}}",
       "Authorization": "Bearer {{systemValue type='ENVIRONMENT' key='API_BEARER_TOKEN'}}",
-      "X-Debug-Proxied-URL": "{{request.url}}",
-      "X-Debug-Headers": "{{request.headers}}"
+      "X-Debug-Proxied-URL": "{{request.url}}"
     }
   }
 }

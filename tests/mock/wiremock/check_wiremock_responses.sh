@@ -1,18 +1,30 @@
 #!/bin/bash
 
-# A script to find and classify duplicate WireMock recordings.
-# It can identify:
-# - Full duplicates (identical request and response body)
-# - Partial duplicates (identical request, but different response bodies)
+# A script to find and optionally delete "buggy" WireMock recordings.
+# A recording is considered buggy if:
+# 1. The HTTP response status is not 200.
+# 2. The associated response body file is empty or contains only whitespace.
+# 3. The response body file contains specific error-indicating keywords.
 
 # --- Default Configuration ---
 ROOT_DIR="."
 
 # --- Script Flags ---
 SHOW_HELP=false
-DELETE_FILES=false
+DELETE_FILES=false # Dry-run mode is active by default
 FORCE_DELETE=false
-declare -a EXCLUDE_PATTERNS=("proxy*.json") # Array of patterns to exclude
+
+# --- User-Configurable Error Patterns ---
+# Add or remove case-insensitive keywords to this list to customize what
+# is considered an error message within a response body.
+declare -a ERROR_PATTERNS=(
+    "Bad Request"
+    "cloudflare"
+    "forbidden"
+    "unauthorized"
+    "server error"
+    "upstream connect error"
+)
 
 # --- Color Definitions ---
 COLOR_RESET='\033[0m'
@@ -20,26 +32,29 @@ COLOR_GREEN='\033[0;32m'
 COLOR_YELLOW='\033[0;33m'
 COLOR_RED='\033[0;31m'
 COLOR_CYAN='\033[0;36m'
+COLOR_GRAY='\033[0;90m'
 
 # --- Function Definitions ---
 
 show_help() {
-    echo "WireMock Duplicate Scanner"
+    echo "WireMock Buggy Response Scanner"
     echo
-    echo "Usage: ./find_wiremock_duplicates.sh [OPTIONS]"
+    echo "Usage: ./check_wiremock_responses.sh [OPTIONS]"
     echo
-    echo "Scans WireMock mappings to find full and partial duplicates."
+    echo "Scans for WireMock mappings that are considered buggy. A mapping is buggy if it has:"
+    echo "  - A non-200 HTTP response status."
+    echo "  - An empty or whitespace-only body file."
+    echo "  - A body file containing error keywords (e.g., 'Bad Request', 'cloudflare')."
+    echo
+    echo "By default, it runs in 'dry-run' mode, only reporting what it would delete."
     echo
     echo "Options:"
     echo "  -d, --directory PATH    Specify the root directory where 'mappings' and '__files'"
-    echo "                          are located (e.g., 'wiremock-recordings')."
-    echo "  --delete                Delete all but one file from each duplicate group found."
+    echo "                          are located (default: '.')."
+    echo "  --delete                Enable deletion mode. This will delete the identified"
+    echo "                          mapping files and their associated body files."
     echo "  -f, --force             Use with --delete to bypass the confirmation prompt."
     echo "  --help                  Display this help message and exit."
-    echo
-    echo "Exclusions:"
-    echo "  By default, files matching 'proxy*.json' are excluded. This can be"
-    echo "  changed by editing the EXCLUDE_PATTERNS array in the script."
 }
 
 # --- Argument Parsing ---
@@ -50,14 +65,15 @@ while [[ "$#" -gt 0 ]]; do
         --delete) DELETE_FILES=true ;;
         -f|--force) FORCE_DELETE=true ;;
         --help) SHOW_HELP=true ;;
-        *) echo "Unknown parameter: $1"; show_help; exit 1 ;;
+        *) echo -e "${COLOR_RED}Unknown parameter: $1${COLOR_RESET}"; show_help; exit 1 ;;
     esac
     shift
 done
 
 if [ "$SHOW_HELP" = true ]; then show_help; exit 0; fi
 if [ "$FORCE_DELETE" = true ] && [ "$DELETE_FILES" = false ]; then
-    echo -e "${COLOR_RED}Error: The --force flag can only be used with the --delete flag.${COLOR_RESET}" >&2; exit 1;
+    echo -e "${COLOR_RED}Error: The --force flag can only be used with the --delete flag.${COLOR_RESET}" >&2
+    exit 1
 fi
 
 # --- Dynamic Path Configuration ---
@@ -65,126 +81,123 @@ MAPPINGS_DIR="$ROOT_DIR/mappings"
 FILES_DIR="$ROOT_DIR/__files"
 
 # --- Pre-flight Checks ---
-if ! command -v jq &> /dev/null; then echo -e "${COLOR_RED}Error: 'jq' is not installed.${COLOR_RESET}" >&2; exit 1; fi
-if [ ! -d "$MAPPINGS_DIR" ]; then echo -e "${COLOR_RED}Error: Directory '$MAPPINGS_DIR' not found.${COLOR_RESET}" >&2; exit 1; fi
+if ! command -v jq &> /dev/null; then
+    echo -e "${COLOR_RED}Error: 'jq' is not installed. Please install it to continue.${COLOR_RESET}" >&2
+    exit 1
+fi
+if [ ! -d "$MAPPINGS_DIR" ]; then
+    echo -e "${COLOR_RED}Error: Directory '$MAPPINGS_DIR' not found.${COLOR_RESET}" >&2
+    exit 1
+fi
 
 # --- Confirmation for Deletion ---
 if [ "$DELETE_FILES" = true ] && [ "$FORCE_DELETE" = false ]; then
-    echo -e "${COLOR_YELLOW}⚠️  WARNING: The --delete flag is active.${COLOR_RESET}"
-    echo "This will permanently remove all but the first file in each duplicate group."
-    read -p "Are you sure you want to continue? [y/N] " -n 1 -r; echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then echo "Aborting."; exit 1; fi
+    echo -e "${COLOR_YELLOW}⚠️  WARNING: Deletion mode is active.${COLOR_RESET}"
+    echo "This will permanently remove buggy mappings and their associated body files."
+    read -p "Are you sure you want to continue? [y/N] " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Aborting."
+        exit 1
+    fi
 fi
 
-echo "🔍 Scanning for duplicates in '$MAPPINGS_DIR'..."
-echo "================================================="
-
 # --- Main Logic ---
+if [ "$DELETE_FILES" = false ]; then
+    echo -e "🔍 ${COLOR_CYAN}[DRY RUN]${COLOR_RESET} Scanning for buggy responses in '$MAPPINGS_DIR'..."
+else
+    echo -e "🔥 ${COLOR_RED}[DELETE MODE]${COLOR_RESET} Scanning for buggy responses in '$MAPPINGS_DIR'..."
+fi
+echo "======================================================================"
+
+buggy_count=0
+deleted_mappings=0
+deleted_bodies=0
+
 find "$MAPPINGS_DIR" -name "*.json" | while read -r mapping_file; do
-    filename=$(basename "$mapping_file")
-    is_excluded=false
-    for pattern in "${EXCLUDE_PATTERNS[@]}"; do
-        if [[ $filename == $pattern ]]; then is_excluded=true; break; fi
-    done
-    if [ "$is_excluded" = true ]; then continue; fi
+    declare -a reasons=() # Use an array to store multiple reasons for failure
 
-    req_hash=$(jq -c ".request" "$mapping_file" | md5sum | cut -d' ' -f1)
-    if [[ "$req_hash" == "d41d8cd98f00b204e9800998ecf8427e" ]]; then continue; fi # MD5 of empty string
+    # --- Check 1: Non-200 Status ---
+    status=$(jq '.response.status' "$mapping_file")
+    if [[ "$status" =~ ^[0-9]+$ ]] && [ "$status" -ne 200 ]; then
+        reasons+=("Non-200 status: $status")
+    fi
 
+    # --- Body File Checks (only if a body file exists) ---
     body_filename=$(jq -r '.response.bodyFileName' "$mapping_file")
-    body_hash="NO_BODY_FILE"; body_path="N/A"
-
     if [[ -n "$body_filename" && "$body_filename" != "null" ]]; then
         body_path="$FILES_DIR/$body_filename"
         if [ -f "$body_path" ]; then
-            body_hash=$(md5sum "$body_path" | cut -d' ' -f1)
-        else
-            body_hash="MISSING_BODY_FILE"
+            # --- Check 2: Empty/Whitespace Body File ---
+            if [ -z "$(tr -d '[:space:]' < "$body_path")" ]; then
+                reasons+=("Empty body file")
+            else
+                # --- Check 3: Error Patterns in Body Content ---
+                for pattern in "${ERROR_PATTERNS[@]}"; do
+                    # Use grep -q (quiet) and -i (case-insensitive)
+                    if grep -q -i "$pattern" "$body_path"; then
+                        reasons+=("Body contains error text: '$pattern'")
+                        break # Found a match, no need to check other patterns
+                    fi
+                done
+            fi
         fi
     fi
-    echo "$req_hash|$body_hash|$mapping_file|$body_path"
 
-done | sort -t'|' -k1,2 | awk -v delete_mode="$DELETE_FILES" '
-BEGIN {
-    FS = "|"; OFS = "\t"; group_count = 0;
-    COLOR_RESET = "\033[0m"; COLOR_GREEN = "\033[0;32m"; COLOR_YELLOW = "\033[0;33m"; COLOR_CYAN = "\033[0;36m";
-}
+    # --- Process if any condition was met ---
+    if [ ${#reasons[@]} -gt 0 ]; then
+        buggy_count=$((buggy_count + 1))
 
-function process_group() {
-    if (count <= 1) return;
+        # Join the reasons with a comma for clean output
+        printf -v full_reason '%s, ' "${reasons[@]}"
+        full_reason="${full_reason%, }" # Removes trailing comma and space
 
-    group_count++;
-    print "-------------------------------------------------";
+        echo -e "----------------------------------------------------------------------"
+        echo -e "Found buggy recording. Reason(s): ${COLOR_YELLOW}${full_reason}${COLOR_RESET}"
+        echo -e "  ${COLOR_GRAY}Mapping:${COLOR_RESET}\t$mapping_file"
 
-    is_full_duplicate = 1;
-    for (i = 2; i <= count; i++) {
-        if (group_body_hash[1] != group_body_hash[i]) {
-            is_full_duplicate = 0;
-            break;
-        }
-    }
+        # Report or delete the mapping file
+        if [ "$DELETE_FILES" = true ]; then
+            if rm "$mapping_file"; then
+                echo -e "  ${COLOR_RED}DELETED MAPPING${COLOR_RESET}"
+                deleted_mappings=$((deleted_mappings + 1))
+            else
+                echo -e "  ${COLOR_RED}ERROR: Failed to delete mapping file.${COLOR_RESET}"
+            fi
+        else
+            echo -e "  ${COLOR_CYAN}[DRY RUN] Would delete mapping file.${COLOR_RESET}"
+        fi
 
-    if (is_full_duplicate) {
-        print COLOR_GREEN "Found Full Duplicate Group (Identical Request and Response):" COLOR_RESET;
-    } else {
-        print COLOR_YELLOW "Found Partial Duplicate Group (Identical Request, Different Responses):" COLOR_RESET;
-    }
+        # Check for and handle the body file
+        if [[ -n "$body_filename" && "$body_filename" != "null" ]]; then
+            echo -e "  ${COLOR_GRAY}Body File:${COLOR_RESET}\t$body_path"
+            if [ -f "$body_path" ]; then
+                if [ "$DELETE_FILES" = true ]; then
+                    if rm "$body_path"; then
+                        echo -e "  ${COLOR_RED}DELETED BODY FILE${COLOR_RESET}"
+                        deleted_bodies=$((deleted_bodies + 1))
+                    else
+                         echo -e "  ${COLOR_RED}ERROR: Failed to delete body file.${COLOR_RESET}"
+                    fi
+                else
+                    echo -e "  ${COLOR_CYAN}[DRY RUN] Would delete body file.${COLOR_RESET}"
+                fi
+            else
+                echo -e "  ${COLOR_YELLOW}WARNING: Body file not found at expected path.${COLOR_RESET}"
+            fi
+        else
+             echo -e "  ${COLOR_GRAY}Body File:${COLOR_RESET}\t(None specified)"
+        fi
+    fi
+done
 
-    for (i = 1; i <= count; i++) {
-        print ""; # Add spacing
-        print "    Mapping: " group_file[i];
-        if (group_body_path[i] == "N/A") {
-            print "    Body:    " group_body_path[i];
-        } else {
-            print "    Body:    " group_body_path[i] " (" COLOR_CYAN "Hash: " group_body_hash[i] COLOR_RESET ")";
-        }
-    }
-
-    # ##################################################################
-    # ### CRITICAL FIX HERE ###
-    # ##################################################################
-    # The condition now explicitly checks if delete_mode is the string "true".
-    if (delete_mode == "true") {
-        print "";
-        for (i = 2; i <= count; i++) {
-            mapping_to_delete = group_file[i];
-            body_to_delete = group_body_path[i];
-
-            system("rm \"" mapping_to_delete "\"");
-            print "  -> " COLOR_YELLOW "DELETED MAPPING: " mapping_to_delete COLOR_RESET;
-
-            if (body_to_delete != "N/A" && group_body_hash[i] != "MISSING_BODY_FILE") {
-                system("rm \"" body_to_delete "\"");
-                print "  -> " COLOR_YELLOW "DELETED BODY:    " body_to_delete COLOR_RESET;
-            }
-        }
-    }
-}
-
-# Main loop
-{
-    req_hash = $1;
-    if (req_hash != prev_req_hash && NR > 1) {
-        process_group();
-        count = 0;
-        delete group_file; delete group_body_hash; delete group_body_path;
-    }
-
-    count++;
-    group_file[count] = $3;
-    group_body_hash[count] = $2;
-    group_body_path[count] = $4;
-    prev_req_hash = req_hash;
-}
-
-# END block
-END {
-    process_group();
-    print "=================================================";
-    if (group_count == 0) {
-        print COLOR_GREEN "✅ Scan complete. No duplicate mappings found." COLOR_RESET;
-    } else {
-        print COLOR_YELLOW "⚠️  Scan complete. Found " group_count " duplicate group(s)." COLOR_RESET;
-    }
-}
-'
+# --- Final Summary ---
+echo "======================================================================"
+if [ "$buggy_count" -eq 0 ]; then
+    echo -e "${COLOR_GREEN}✅ Scan complete. No buggy recordings found.${COLOR_RESET}"
+else
+    echo -e "⚠️  Scan complete. Found ${buggy_count} buggy recording(s)."
+    if [ "$DELETE_FILES" = true ]; then
+        echo -e "${COLOR_RED}Deleted ${deleted_mappings} mapping file(s) and ${deleted_bodies} body file(s).${COLOR_RESET}"
+    fi
+fi

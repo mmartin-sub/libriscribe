@@ -171,3 +171,8 @@ repos:
         # This hook should only run when the files that affect dependencies change
         files: ^(pyproject\.toml|uv\.lock)$
         # language_version: python3.12
+
+    - repo: https://github.com/abravalheri/validate-pyproject
+      rev: v0.24.1
+      hooks:
+      - id: validate-pyproject
