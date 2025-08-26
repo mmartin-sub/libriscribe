@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+# Add this permissions block
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest

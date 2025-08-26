@@ -29,7 +29,7 @@ async def test_api():
 
     print(f"Testing API: {base_url}")
     print(f"Model: {model}")
-    print(f"API Key: {api_key[:10]}...")
+    print(f"API Key: {api_key[:5]}...")
 
     payload = {
         "model": model,
