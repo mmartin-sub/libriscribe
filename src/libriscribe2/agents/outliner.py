@@ -1,6 +1,7 @@
 # src/libriscribe2/agents/outliner.py
 
 import logging
+import re
 from pathlib import Path
 from typing import Any
 
@@ -357,37 +358,25 @@ class OutlinerAgent(Agent):
                 # If extraction fails, use the default
                 pass
 
-        # Process each line to extract scene components
-        for line in lines:
-            line = line.strip()
+        # Use regex to find all key-value pairs, ignoring case and handling whitespace
+        patterns = {
+            "summary": r"\*?\s*Summary:\s*(.*)",
+            "characters": r"\*?\s*Characters:\s*(.*)",
+            "setting": r"\*?\s*Setting:\s*(.*)",
+            "goal": r"\*?\s*Goal:\s*(.*)",
+            "emotional_beat": r"\*?\s*Emotional Beat:\s*(.*)",
+        }
 
-            # Skip empty lines and headers
-            if not line or line.startswith("Scene"):
-                continue
-
-            # Extract data based on bullet points or similar markers
-            for field, marker in [
-                ("summary", "Summary:"),
-                ("characters", "Characters:"),
-                ("setting", "Setting:"),
-                ("goal", "Goal:"),
-                ("emotional_beat", "Emotional Beat:"),
-            ]:
-                if marker.lower() in line.lower():
-                    # Find the position of the marker, case-insensitive
-                    marker_pos = line.lower().find(marker.lower())
-                    # Get the content after the marker
-                    content = line[marker_pos + len(marker) :].strip()
-
-                    # Clean up the content (remove bullets, asterisks, brackets)
-                    content = content.lstrip("*-[]").strip()
-
-                    if field == "characters":
-                        # Split by commas and clean each character name
-                        characters = [name.strip() for name in content.split(",") if name.strip()]
-                        scene_data["characters"] = characters
+        for line in scene_section.split("\n"):
+            for key, pattern in patterns.items():
+                match = re.search(pattern, line.strip(), re.IGNORECASE)
+                if match:
+                    content = match.group(1).strip()
+                    if key == "characters":
+                        scene_data[key] = [name.strip() for name in content.split(",") if name.strip()]
                     else:
-                        scene_data[field] = content
+                        scene_data[key] = content
+                    break
 
         # Ensure we at least have a summary
         if not scene_data["summary"]:
@@ -617,7 +606,8 @@ class OutlinerAgent(Agent):
                 continue
 
             # Chapter header detection (more robust pattern matching)
-            if "Chapter" in line and (line.startswith("Chapter") or "##" in line or "**" in line):
+            match = re.search(r"^(#+\s*|\*\*\s*)Chapter\s+(\d+)", line, re.IGNORECASE)
+            if match:
                 # If we've reached the maximum number of chapters, stop processing
                 if chapter_count >= max_chapters:
                     break
@@ -639,8 +629,6 @@ class OutlinerAgent(Agent):
                         chapter_num_str, chapter_title = chapter_parts.split("-", 1)
                     else:
                         # Try to extract just the number
-                        import re
-
                         match = re.match(r"(\d+)\s*(.*)", chapter_parts)
                         if match:
                             chapter_num_str, chapter_title = match.groups()
@@ -661,7 +649,7 @@ class OutlinerAgent(Agent):
                     )
                     project_knowledge_base.add_chapter(current_chapter)
                     chapter_count += 1
-                    current_section = None
+                    current_section = "summary"
                     current_content = []
 
                 except Exception as e:
@@ -716,8 +704,6 @@ class OutlinerAgent(Agent):
                     next_line = lines[i + 1] if i + 1 < len(lines) else ""
                     if next_line:
                         # Look for digits in the line after "Chapter List"
-                        import re
-
                         digits = re.findall(r"\d+", next_line)
                         if digits:
                             total_chapters = int(digits[0])
@@ -767,8 +753,6 @@ class OutlinerAgent(Agent):
                 full_text = outline_markdown.lower()
                 if "chapter list" in full_text:
                     # Look for text like "10 chapters" or "Total chapters: 8"
-                    import re
-
                     chapter_count_patterns = [
                         r"(\d+)\s+chapters",
                         r"total\s+chapters:\s*(\d+)",

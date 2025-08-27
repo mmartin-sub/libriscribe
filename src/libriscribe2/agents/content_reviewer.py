@@ -9,7 +9,7 @@ from libriscribe2.knowledge_base import ProjectKnowledgeBase
 
 from ..settings import Settings
 from ..utils.file_utils import read_markdown_file
-from ..utils.llm_client import LLMClient
+from ..utils.llm_client_protocol import LLMClientProtocol
 from .agent_base import Agent
 
 console = Console()
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class ContentReviewerAgent(Agent):
     """Reviews chapter content for consistency and clarity."""
 
-    def __init__(self, llm_client: LLMClient, settings: Settings):
+    def __init__(self, llm_client: LLMClientProtocol, settings: Settings):
         super().__init__("ContentReviewerAgent", llm_client)
         self.llm_client = llm_client
         self.settings = settings

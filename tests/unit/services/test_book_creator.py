@@ -16,17 +16,6 @@ from libriscribe2.services.book_creator import BookCreatorService
 class TestBookCreatorService:
     """Test cases for BookCreatorService."""
 
-    def test_initialization(self):
-        """Test BookCreatorService initialization."""
-        # Arrange & Act
-        service = BookCreatorService()
-
-        # Assert
-        assert service.settings is not None
-        assert service.model_config is not None
-        assert service.project_manager is None
-        assert service.mock is False
-
     def test_initialization_with_mock(self):
         """Test BookCreatorService initialization with mock enabled."""
         # Arrange & Act

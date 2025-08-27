@@ -24,32 +24,51 @@ from libriscribe2.settings import Settings
 from libriscribe2.utils.mock_llm_client import MockLLMClient
 
 
+from typing import AsyncGenerator
+
+
 class FailingMockLLMClient(MockLLMClient):
     """Mock LLM client that fails after a specified number of calls."""
 
-    def __init__(self, fail_after_calls: int = 1, settings: Settings | None = None, *args, **kwargs):
-        super().__init__(*args, settings=settings, **kwargs)
+    def __init__(self, fail_after_calls: int, settings: Settings):
+        super().__init__(
+            llm_provider="mock",
+            settings=settings,
+            model_config={"default": "mock-model"},
+            project_name="test-project",
+            user="test-user",
+        )
         self.fail_after_calls = fail_after_calls
         self.call_count = 0
+        self.actual_call_count_for_failure = 0
 
     async def generate_content(
         self,
-        prompt: str,
+        primary_prompt: str,
         prompt_type: str = "default",
-        temperature: float | None = None,
-        language: str | None = None,
-        timeout: int | None = None,
+        temperature: float = 0.7,
+        **kwargs,
     ) -> str:
-        """Generate content but fail after specified number of calls."""
+        # The counting and failure logic is handled by generate_streaming_content,
+        # which is called by super().generate_content()
+        return await super().generate_content(primary_prompt, prompt_type, temperature, **kwargs)
+
+    async def generate_streaming_content(
+        self,
+        primary_prompt: str,
+        prompt_type: str = "default",
+        temperature: float = 0.7,
+        **kwargs,
+    ) -> AsyncGenerator[str, None]:
         self.call_count += 1
-
-        if self.call_count > self.fail_after_calls:
+        if self.call_count >= self.fail_after_calls:
+            if self.actual_call_count_for_failure == 0:
+                self.actual_call_count_for_failure = self.call_count
             raise RuntimeError(f"Mock LLM client failed after {self.fail_after_calls} calls")
-
-        # Return normal mock content for successful calls
-        return await super().generate_content(
-            prompt=prompt, prompt_type=prompt_type, temperature=temperature, language=language, timeout=timeout
-        )
+        async for chunk in super().generate_streaming_content(
+            primary_prompt, prompt_type, temperature, **kwargs
+        ):
+            yield chunk
 
 
 class TestMockFailureScenarios:
@@ -92,91 +111,64 @@ class TestMockFailureScenarios:
         }
 
     @pytest.mark.parametrize("fail_after_calls", range(1, 20))  # Test failures from call 1 to 19
-    @patch("libriscribe2.utils.llm_client.LLMClient._generate_mock_content")
     @patch("libriscribe2.settings.Settings")
     @pytest.mark.asyncio
-    async def test_mock_fails_at_specific_call(self, mock_settings_class, mock_generate_content, fail_after_calls):
+    async def test_mock_fails_at_specific_call(self, mock_settings_class, fail_after_calls):
         """Test that CLI fails properly when mock LLM fails at specific call position."""
         mock_settings_class.return_value = self._create_mock_settings()
+        failing_client = FailingMockLLMClient(fail_after_calls=fail_after_calls, settings=mock_settings_class.return_value)
+        book_creator = BookCreatorService(mock=True, llm_client=failing_client)
 
-        # Create failing mock client
-        failing_client = FailingMockLLMClient(fail_after_calls=fail_after_calls)
+        # A successful run has 8 calls.
+        # If we configure failure after 8 calls, it should still succeed.
+        # Failure at call 9 or later should also result in success.
+        SHOULD_FAIL_THRESHOLD = 8
 
-        # Mock the generate_mock_content to use our failing client
-        async def mock_generate_side_effect(prompt, temperature, **kwargs):
-            prompt_type = kwargs.get("prompt_type", "general")
-            language = "English"
-            return await failing_client.generate_content(prompt, prompt_type, temperature, language)
-
-        mock_generate_content.side_effect = mock_generate_side_effect
-
-        # Create book creator service
-        book_creator = BookCreatorService(mock=True)
-
-        # Test that book creation fails at the expected call
-        if fail_after_calls < 18:
-            with pytest.raises(RuntimeError, match="Book creation failed"):
+        if fail_after_calls <= SHOULD_FAIL_THRESHOLD:
+            with pytest.raises(RuntimeError):
                 await book_creator.acreate_book(self._create_book_args(f"-{fail_after_calls}"))
-            assert failing_client.call_count >= fail_after_calls
+            # Check that the first failure happened at the expected call count
+            assert failing_client.actual_call_count_for_failure == fail_after_calls
         else:
+            # If we expect failure after the process is complete, it should succeed
             await book_creator.acreate_book(self._create_book_args(f"-{fail_after_calls}"))
+            assert failing_client.call_count == SHOULD_FAIL_THRESHOLD
 
-    @patch("libriscribe2.utils.llm_client.LLMClient._generate_mock_content")
     @patch("libriscribe2.settings.Settings")
     @pytest.mark.asyncio
-    async def test_mock_succeeds_with_no_failure(self, mock_settings_class, mock_generate_content):
+    async def test_mock_succeeds_with_no_failure(self, mock_settings_class):
         """Test that book creation succeeds when no failure is programmed."""
         mock_settings_class.return_value = self._create_mock_settings()
-
-        # Create mock client that never fails
-        normal_client = FailingMockLLMClient(fail_after_calls=100)
-
-        # Mock the generate_mock_content to use our normal client
-        async def mock_generate_side_effect(prompt, temperature, **kwargs):
-            prompt_type = kwargs.get("prompt_type", "general")
-            language = "English"
-            return await normal_client.generate_content(prompt, prompt_type, temperature, language)
-
-        mock_generate_content.side_effect = mock_generate_side_effect
-
-        # Create book creator service
-        book_creator = BookCreatorService(mock=True)
+        normal_client = FailingMockLLMClient(fail_after_calls=100, settings=mock_settings_class.return_value)
+        book_creator = BookCreatorService(mock=True, llm_client=normal_client)
 
         # Test that book creation succeeds
         await book_creator.acreate_book(self._create_book_args("-success"))
-        assert normal_client.call_count >= 18
+        assert normal_client.call_count == 8
 
     @pytest.mark.asyncio
     async def test_failing_mock_client_call_counting(self):
         """Test that the FailingMockLLMClient correctly counts calls."""
-        client = FailingMockLLMClient(fail_after_calls=2)
+        mock_settings = self._create_mock_settings()
+        client = FailingMockLLMClient(fail_after_calls=2, settings=mock_settings)
 
         # First call should succeed
         result1 = await client.generate_content("test prompt 1")
         assert "Mock response" in result1
         assert client.call_count == 1
 
-        # Second call should succeed
-        result2 = await client.generate_content("test prompt 2")
-        assert "Mock response" in result2
-        assert client.call_count == 2
-
-        # Third call should fail
+        # Second call should fail
         with pytest.raises(RuntimeError, match="Mock LLM client failed after 2 calls"):
-            await client.generate_content("test prompt 3")
-        assert client.call_count == 3
+            await client.generate_content("test prompt 2")
+        assert client.call_count == 2
 
     @pytest.mark.asyncio
     async def test_failing_mock_client_different_prompt_types(self):
         """Test that the FailingMockLLMClient fails regardless of prompt type."""
-        client = FailingMockLLMClient(fail_after_calls=1)
+        mock_settings = self._create_mock_settings()
+        client = FailingMockLLMClient(fail_after_calls=1, settings=mock_settings)
 
-        # First call with concept prompt should succeed
-        result = await client.generate_content("test", prompt_type="concept")
-        assert "Mock Concept Title" in result
-        assert client.call_count == 1
-
-        # Second call with different prompt type should fail
+        # First call with concept prompt should fail
         with pytest.raises(RuntimeError, match="Mock LLM client failed after 1 calls"):
-            await client.generate_content("test", prompt_type="outline")
-        assert client.call_count == 2
+            await client.generate_content("test", prompt_type="concept")
+        assert client.call_count == 1

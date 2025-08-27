@@ -15,6 +15,7 @@ from libriscribe2.knowledge_base import ProjectKnowledgeBase
 from libriscribe2.settings import Settings
 from libriscribe2.utils.content_exporters import export_characters_to_markdown, export_worldbuilding_to_markdown
 from libriscribe2.utils.exceptions import LLMGenerationError
+from ..utils.llm_client_protocol import LLMClientProtocol
 
 # Configure warnings to be treated as errors
 warnings.filterwarnings("error", category=RuntimeWarning)
@@ -31,6 +32,7 @@ class BookCreatorService:
         mock: bool = False,
         log_file: str | None = None,
         log_level: str = "INFO",
+        llm_client: LLMClientProtocol | None = None,
     ):
         """
         Initialize the BookCreatorService.
@@ -40,6 +42,7 @@ class BookCreatorService:
             mock: Whether to use mock LLM provider
             log_file: Path to log file
             log_level: Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+            llm_client: Optional pre-configured LLM client
         """
         self.settings = Settings(config_file=config_file)
         self.config: dict[str, Any] = {}  # Config is now handled by Settings
@@ -47,6 +50,7 @@ class BookCreatorService:
         self.mock = mock
         self.project_manager: ProjectManagerAgent | None = None
         self.log_file = log_file
+        self.llm_client = llm_client
         self.log_level = self._validate_log_level(log_level)
         self.console = Console()
 
@@ -260,17 +264,18 @@ class BookCreatorService:
             kb = self._create_knowledge_base(args, project_name)
 
             # Initialize project manager with model configuration
-            self.project_manager = ProjectManagerAgent(settings=self.settings, model_config=self.model_config)
+            self.project_manager = ProjectManagerAgent(settings=self.settings, model_config=self.model_config, llm_client=self.llm_client)
 
-            # Initialize LLM client and agents
-            # Use mock provider if mock flag is set, otherwise use specified LLM or default
-            if self.mock:
-                llm_provider = "mock"
-            else:
-                llm_provider = args.get("llm") or self.settings.default_llm
-            # Get user from args if provided
-            user = args.get("user")
-            self.project_manager.initialize_llm_client(llm_provider, user)
+            if not self.llm_client:
+                # Initialize LLM client and agents
+                # Use mock provider if mock flag is set, otherwise use specified LLM or default
+                if self.mock:
+                    llm_provider = "mock"
+                else:
+                    llm_provider = args.get("llm") or self.settings.default_llm
+                # Get user from args if provided
+                user = args.get("user")
+                self.project_manager.initialize_llm_client(llm_provider, user)
 
             # Create the project
             if self.project_manager:

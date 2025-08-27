@@ -13,7 +13,7 @@ from ..utils import prompts_context as prompts
 from ..utils.file_utils import (
     write_markdown_file,
 )
-from ..utils.llm_client import LLMClient
+from ..utils.llm_client_protocol import LLMClientProtocol
 from ..utils.markdown_processor import format_chapter_filename, format_scene_filename
 from .agent_base import Agent
 
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 class ChapterWriterAgent(Agent):
     """Writes chapters."""
 
-    def __init__(self, llm_client: LLMClient, settings: Settings):
+    def __init__(self, llm_client: LLMClientProtocol, settings: Settings):
         super().__init__("ChapterWriterAgent", llm_client, settings)
 
     def format_scene(self, scene_title: str, scene_content: str) -> str:

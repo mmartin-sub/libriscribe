@@ -139,6 +139,40 @@ hatch env show
 hatch env remove default
 ```
 
+### Architecture Overview
+
+LibriScribe2's architecture is designed to be modular and testable. At the core of this design is the `LLMClientProtocol` and the use of dependency injection.
+
+#### The `LLMClientProtocol`
+
+The `LLMClientProtocol` (located in `libriscribe2.utils.llm_client_protocol`) defines a standard interface for all Large Language Model (LLM) clients. This protocol ensures that any LLM client, whether it's the real `LLMClient` that connects to services like OpenAI or the `MockLLMClient` used for testing, behaves consistently.
+
+By programming to this interface rather than a concrete implementation, we can easily swap out LLM providers without changing the agents or services that use them.
+
+#### Dependency Injection
+
+All agents and services that need to interact with an LLM now receive an `LLMClientProtocol`-compliant client via their constructor. This is a form of dependency injection.
+
+For example, when creating a `BookCreatorService`, you can pass in a specific LLM client:
+
+```python
+# In production code
+from libriscribe2.services.book_creator import BookCreatorService
+from libriscribe2.utils.llm_client import LLMClient
+
+llm_client = LLMClient(...)
+book_creator = BookCreatorService(llm_client=llm_client)
+
+# In test code
+from libriscribe2.services.book_creator import BookCreatorService
+from libriscribe2.utils.mock_llm_client import MockLLMClient
+
+mock_llm_client = MockLLMClient(...)
+book_creator = BookCreatorService(mock=True, llm_client=mock_llm_client)
+```
+
+This pattern makes the system much easier to test, as we can inject mock clients to simulate various scenarios, including failures, without making real API calls. It also decouples our core application logic from the specifics of any single LLM provider.
+
 ### Testing
 
 ```bash

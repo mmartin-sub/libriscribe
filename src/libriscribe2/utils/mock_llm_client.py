@@ -1,12 +1,15 @@
 # src/libriscribe2/utils/mock_llm_client.py
 
+import asyncio
 import json
 import logging
 import re
 import secrets
-from typing import ClassVar, TypedDict
+from collections.abc import AsyncIterator
+from typing import Any, ClassVar, TypedDict
 
 from ..settings import Settings
+from .llm_client_protocol import LLMClientProtocol
 
 
 class MockConfig(TypedDict):
@@ -18,7 +21,7 @@ class MockConfig(TypedDict):
 logger = logging.getLogger(__name__)
 
 
-class MockLLMClient:
+class MockLLMClient(LLMClientProtocol):
     """
     A mock LLM client for testing purposes.
     Returns deterministic responses based on prompt type or a default.
@@ -287,7 +290,7 @@ class MockLLMClient:
         """Gets the specific model for a given prompt type, falling back to default."""
         return self.model_config.get(prompt_type, self.default_model)
 
-    async def generate_content(
+    async def _get_mock_response(
         self,
         prompt: str,
         prompt_type: str = "default",
@@ -296,7 +299,7 @@ class MockLLMClient:
         timeout: int | None = None,
     ) -> str:
         """
-        Generates mock content based on the prompt type.
+        Gets mock content based on the prompt type.
         """
         temperature = temperature or self.settings.default_temperature
         language = language or self.settings.default_language
@@ -669,7 +672,70 @@ class MockLLMClient:
         else:
             return f"Mock response for prompt type: {prompt_type}. Prompt: {prompt}"
 
-    def generate_content_with_json_repair(
+    async def generate_content(
+        self,
+        prompt: str,
+        prompt_type: str = "default",
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        language: str | None = None,
+        timeout: int | None = None,
+        **kwargs: Any,
+    ) -> str:
+        """
+        Generates mock content by consuming the streaming version.
+        """
+        chunks = [
+            chunk
+            async for chunk in self.generate_streaming_content(
+                prompt,
+                prompt_type=prompt_type,
+                temperature=temperature,
+                language=language,
+                timeout=timeout,
+                **kwargs,
+            )
+        ]
+        return "".join(chunks)
+
+    async def generate_streaming_content(
+        self,
+        prompt: str,
+        prompt_type: str = "default",
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        language: str | None = None,
+        timeout: int | None = None,
+        **kwargs: Any,
+    ) -> AsyncIterator[str]:
+        """Generate mock streaming content for testing."""
+        response = await self._get_mock_response(
+            prompt,
+            prompt_type=prompt_type,
+            temperature=temperature,
+            language=language,
+            timeout=timeout,
+        )
+        # For JSON-like responses, yield the whole content at once to avoid breaking it.
+        if prompt_type in {
+            "questions",
+            "concept",
+            "character",
+            "worldbuilding",
+            "refine",
+            "keywords",
+            "plagiarism_check",
+            "fact_check",
+        }:
+            yield response
+            return
+
+        words = response.split()
+        for word in words:
+            yield word + " "
+            await asyncio.sleep(0.01)
+
+    async def generate_content_with_json_repair(
         self,
         original_prompt: str,
         prompt_type: str = "default",
@@ -682,7 +748,20 @@ class MockLLMClient:
         logger.debug(f"MockLLMClient: Generating content with JSON repair for prompt_type={prompt_type}")
         # In a real mock, you might have a flag to simulate broken JSON and then repair it.
         # For now, we'll just return the valid mock content directly.
-        return self.generate_content(original_prompt, prompt_type, temperature)
+        return await self.generate_content(original_prompt, prompt_type, temperature)
+
+    async def generate_content_with_content_filtering_fallback(
+        self,
+        primary_prompt: str,
+        fallback_prompt: str | None = None,
+        prompt_type: str = "general",
+        temperature: float | None = None,
+        max_retries: int = 2,
+        **kwargs: Any,
+    ) -> str | None:
+        """Generate mock content with fallback for content filtering issues."""
+        # For the mock, we just generate content directly.
+        return await self.generate_content(primary_prompt, prompt_type, temperature, **kwargs)
 
     def _generate_french_lorem_ipsum(self, min_words: int, max_words: int) -> str:
         """

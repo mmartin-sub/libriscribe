@@ -19,7 +19,8 @@ import pyjson5 as json
 
 from ..settings import Settings
 from ..utils.exceptions import LLMGenerationError
-from ..utils.llm_client import LLMClient, LLMClientError
+from ..utils.llm_client import LLMClientError
+from ..utils.llm_client_protocol import LLMClientProtocol
 from ..utils.timestamp_utils import get_iso8601_utc_timestamp
 
 T = TypeVar("T")
@@ -66,7 +67,7 @@ class AgentExecutionError(Exception):
 class Agent(ABC):
     """Base agent class using Python 3.12 features."""
 
-    def __init__(self, name: str, llm_client: LLMClient, settings: Settings | None = None):
+    def __init__(self, name: str, llm_client: LLMClientProtocol, settings: Settings | None = None):
         self.name = name
         self.llm_client = llm_client
         self.settings = settings or Settings()

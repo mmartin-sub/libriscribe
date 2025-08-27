@@ -12,6 +12,7 @@ from ..knowledge_base import ProjectKnowledgeBase
 from ..settings import Settings
 from ..utils.exceptions import LLMGenerationError
 from ..utils.llm_client import LLMClient
+from ..utils.llm_client_protocol import LLMClientProtocol
 from .chapter_writer import ChapterWriterAgent
 from .character_generator import CharacterGeneratorAgent
 from .concept_generator import ConceptGeneratorAgent
@@ -36,7 +37,7 @@ class ProjectManagerAgent:
     def __init__(
         self,
         settings: Settings,
-        llm_client: LLMClient | None = None,
+        llm_client: LLMClientProtocol | None = None,
         model_config: dict[str, str] | None = None,
         use_autogen: bool = False,
     ):
@@ -44,7 +45,7 @@ class ProjectManagerAgent:
         self.model_config = model_config or {}
         self.project_knowledge_base: ProjectKnowledgeBase | None = None  # Use ProjectKnowledgeBase
         self.project_dir: Path | None = None
-        self.llm_client: LLMClient | None = llm_client  # Add LLMClient instance
+        self.llm_client: LLMClientProtocol | None = llm_client  # Add LLMClient instance
         self.agents: dict[str, Any] = {}  # Will be initialized after llm
         self.logger = logging.getLogger(__name__)
 
@@ -53,8 +54,15 @@ class ProjectManagerAgent:
         self.autogen_service: AutoGenService | None = None
         self.autogen_config_manager = AutoGenConfigurationManager()
 
+        if self.llm_client:
+            self._initialize_agents()
+
     def initialize_llm_client(self, llm_provider: str, user: str | None = None) -> None:
         """Initializes the LLMClient and agents."""
+        if self.llm_client:
+            self._initialize_agents()
+            return
+
         # Merge model config from constructor with settings
         combined_model_config = self.settings.get_model_config()
         combined_model_config.update(self.model_config)
@@ -75,6 +83,12 @@ class ProjectManagerAgent:
             user=user,
         )
 
+        self._initialize_agents()
+
+    def _initialize_agents(self) -> None:
+        """Initializes the agents."""
+        if not self.llm_client:
+            return
         # Initialize traditional agents
         self.agents = {
             "content_reviewer": ContentReviewerAgent(self.llm_client, self.settings),
