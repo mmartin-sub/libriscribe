@@ -29,3 +29,6 @@ jobs:
 
       - name: Run tests
         run: hatch run test
+
+      - name: Test Documentation Commands
+        run: ./scripts/test_docs.sh

@@ -1,37 +1,22 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Libriscribe Models Schema",
-  "description": "Schema for the models configuration file (models.json)",
+  "description": "Schema for the models configuration",
   "type": "object",
   "properties": {
-    "default": {
-      "type": "string",
-      "description": "The default model to use."
-    },
-    "outline": {
-      "type": "string",
-      "description": "The model to use for generating outlines."
-    },
-    "worldbuilding": {
-      "type": "string",
-      "description": "The model to use for worldbuilding."
-    },
-    "chapter": {
-      "type": "string",
-      "description": "The model to use for writing chapters."
-    },
-    "formatting": {
-      "type": "string",
-      "description": "The model to use for formatting."
-    },
-    "concept": {
-      "type": "string",
-      "description": "The model to use for generating concepts."
-    },
-    "character": {
-      "type": "string",
-      "description": "The model to use for generating characters."
-    }
+    "default": { "type": "string", "description": "The default model to use for all tasks unless overridden." },
+    "outline": { "type": "string", "description": "The model for generating the book outline." },
+    "worldbuilding": { "type": "string", "description": "The model for generating worldbuilding details." },
+    "chapter": { "type": "string", "description": "The model for writing individual chapters." },
+    "formatting": { "type": "string", "description": "The model for formatting the final manuscript." },
+    "concept": { "type": "string", "description": "The model for generating the initial book concept." },
+    "character": { "type": "string", "description": "The model for generating character profiles." },
+    "scene_outline": { "type": "string", "description": "The model for generating scene-by-scene outlines within a chapter." },
+    "editor": { "type": "string", "description": "The model for reviewing and editing content." },
+    "research": { "type": "string", "description": "The model for research-related tasks." },
+    "scene": { "type": "string", "description": "The model for writing individual scenes." },
+    "keyword_generation": { "type": "string", "description": "The model for generating keywords from the concept." },
+    "title_generation": { "type": "string", "description": "The model for generating alternative titles." }
   },
   "required": ["default"]
 }

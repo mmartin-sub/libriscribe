@@ -8,7 +8,7 @@ name = "libriscribe2"
 dynamic = ["version"]
 description = "Modern book creation CLI with rich output and type safety."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 authors = [
     {name = "Michel Martin", email = "172776424+mmartin-sub@users.noreply.github.com"},
     ]
@@ -26,25 +26,25 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-    "rich",
-    "pydantic>=2.11.0",
-    "pydantic-settings",
-    "python-dotenv",
-    "langcodes",
-    "tenacity",
-    "openai>=1.97.0",
-    "typer",
-    "fpdf",
-    "pyjson5>=1.6", # for user input
-    "autogen-agentchat>=0.7.2",
+    "rich~=13.7",
+    "pydantic~=2.7",
+    "pydantic-settings~=2.2",
+    "python-dotenv~=1.0",
+    "langcodes~=3.3",
+    "tenacity~=8.2",
+    "openai~=1.30",
+    "typer~=0.12",
+    "fpdf2~=2.7",
+    "pyjson5~=1.6",
+    "autogen-agentchat~=0.7",
     "autogen-ext[openai]",
-    "pyyaml>=6.0.2",
-    "requests>=2.32.4",
-    "beautifulsoup4>=4.13.4",
-    "aiohttp>=3.12.0",
-    "mistletoe>=1.4.0",
-    "jinja2",
-    "jsonschema",
+    "pyyaml~=6.0",
+    "requests~=2.32",
+    "beautifulsoup4~=4.13",
+    "aiohttp~=3.9",
+    "mistletoe~=1.4",
+    "jinja2~=3.1",
+    "jsonschema~=4.22",
 ]
 
 [project.urls]
@@ -145,6 +145,9 @@ check = [
 # Run all tests with coverage
 test = "pytest {args:tests/}"
 test-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=src {args:tests/}"
+
+# Health check
+health-check = "libriscribe2 --version"
 
 # --- Formatting & Linting (Ruff) ---
 format = "ruff format {args:.}"

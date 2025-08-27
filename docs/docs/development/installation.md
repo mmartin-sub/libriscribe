@@ -36,7 +36,7 @@ hatch run test
 - **Check code style:** `hatch run lint:style`
 - **Run linting:** `hatch run lint:lint`
 - **Run type checking:** `hatch run lint:typing`
-- **Auto-format code:** `hatch run black .`
+- **Auto-format code:** `hatch run format`
 
 ### 5. Pre-commit Hooks (Optional but Recommended)
 

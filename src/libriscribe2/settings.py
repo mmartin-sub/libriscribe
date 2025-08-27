@@ -2,7 +2,7 @@
 
 
 import logging
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -75,17 +75,29 @@ class Settings(BaseSettings):
     environment: str = Field(default="production", description="Environment for LiteLLM tags")
 
     # API keys
-    openai_api_key: str | None = Field(default=None, description="OpenAI API key")
+    openai_api_key: str | None = Field(
+        default=None, description="Your main OpenAI API token. This is the primary key for authentication."
+    )
     openai_base_url: str | None = Field(default=None, description="OpenAI base URL")
     openai_default_model: str | None = Field(default=None, description="OpenAI default model")
 
     # Project type and automatic sizing
-    project_type: str = Field(default="novel", description="Project type (short_story, novella, novel, epic)")
-    auto_size: bool = Field(default=True, description="Automatically size chapters/scenes based on project type")
+    project_type: Literal["short_story", "novella", "book", "novel", "epic"] = Field(
+        default="novel", description="The type of project, which determines the default structure."
+    )
+    auto_size: bool = Field(
+        default=True,
+        description="When True, automatically uses the chapter and scene counts defined for the 'project_type'. When False, uses the manual overrides below.",
+    )
 
     # Manual overrides (only used if auto_size=False)
-    num_chapters: int = Field(default=15, description="Number of chapters (manual override)")
-    scenes_per_chapter: str = Field(default="3-6", description="Scene range per chapter (manual override)")
+    num_chapters: int = Field(
+        default=15,
+        description="Manually sets the number of chapters. This is only active when 'auto_size' is False. Ranges (e.g., '8-12') are handled at the CLI level and are not set here.",
+    )
+    scenes_per_chapter: str = Field(
+        default="3-6", description="Manually sets the range of scenes per chapter (e.g., '3-6'). Only active when 'auto_size' is False."
+    )
 
     # Mock settings
     mock: bool = Field(default=False, description="Use mock LLM provider")

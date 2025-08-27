@@ -25,17 +25,18 @@ Default model configurations are stored in `src/libriscribe2/settings.py` and in
 | Model Type | Description | Default Model |
 |------------|-------------|---------------|
 | `default` | Default model when none specified | `gpt-4o-mini` |
-| `outline` | For generating book outlines | `gpt-4o` |
-| `worldbuilding` | For worldbuilding content | `gpt-4o` |
-| `chapter` | For writing chapters | `gpt-4o-mini` |
-| `formatting` | For formatting tasks | `gpt-4o` |
 | `concept` | For generating book concepts | `gpt-4o-mini` |
+| `outline` | For generating book outlines | `gpt-4o` |
 | `character` | For character generation | `gpt-4o` |
+| `worldbuilding` | For worldbuilding content | `gpt-4o` |
 | `scene_outline` | For generating scene outlines | `gpt-4o-mini` |
-| `editor` | For editing and revision | `gpt-4o` |
-| `research` | For research tasks | `gpt-4o-mini` |
 | `scene` | For writing individual scenes | `gpt-4o-mini` |
+| `chapter` | For writing chapters | `gpt-4o-mini` |
+| `editor` | For editing and revision | `gpt-4o` |
+| `formatting` | For formatting tasks | `gpt-4o` |
 | `keyword_generation` | For generating keywords | `gpt-4o-mini` |
+| `research` | For research tasks | `gpt-4o-mini` |
+| `title_generation` | For generating alternative titles | `gpt-4o-mini` |
 
 ### Configuration Example
 
@@ -50,17 +51,18 @@ Default model configurations are stored in `src/libriscribe2/settings.py` and in
   "projects_dir": "./projects",
   "models": {
     "default": "gpt-4o-mini",
-    "outline": "gpt-4o",
-    "worldbuilding": "gpt-4o",
-    "chapter": "gpt-4o-mini",
-    "formatting": "gpt-4o",
     "concept": "gpt-4o-mini",
+    "outline": "gpt-4o",
     "character": "gpt-4o",
+    "worldbuilding": "gpt-4o",
     "scene_outline": "gpt-4o-mini",
-    "editor": "gpt-4o",
-    "research": "gpt-4o-mini",
     "scene": "gpt-4o-mini",
-    "keyword_generation": "gpt-4o-mini"
+    "chapter": "gpt-4o-mini",
+    "editor": "gpt-4o",
+    "formatting": "gpt-4o",
+    "keyword_generation": "gpt-4o-mini",
+    "research": "gpt-4o-mini",
+    "title_generation": "gpt-4o-mini"
   }
 }
 ```
@@ -79,18 +81,19 @@ projects_dir: "./projects"
 
 # Model Configuration
 models:
-  default: "gpt-4o-mini"      # Default model when none specified
-  outline: "gpt-4o"          # For generating book outlines
-  worldbuilding: "gpt-4o"    # For worldbuilding content
-  chapter: "gpt-4o-mini"     # For writing chapters
-  formatting: "gpt-4o"       # For formatting tasks
-  concept: "gpt-4o-mini"     # For generating book concepts
-  character: "gpt-4o"        # For character generation
-  scene_outline: "gpt-4o-mini"  # For generating scene outlines
-  editor: "gpt-4o"           # For editing and revision
-  research: "gpt-4o-mini"    # For research tasks
-  scene: "gpt-4o-mini"       # For writing individual scenes
-  keyword_generation: "gpt-4o-mini"  # For generating keywords
+  default: "gpt-4o-mini"
+  concept: "gpt-4o-mini"
+  outline: "gpt-4o"
+  character: "gpt-4o"
+  worldbuilding: "gpt-4o"
+  scene_outline: "gpt-4o-mini"
+  scene: "gpt-4o-mini"
+  chapter: "gpt-4o-mini"
+  editor: "gpt-4o"
+  formatting: "gpt-4o"
+  keyword_generation: "gpt-4o-mini"
+  research: "gpt-4o-mini"
+  title_generation: "gpt-4o-mini"
 ```
 
 ## Model Selection Strategy
