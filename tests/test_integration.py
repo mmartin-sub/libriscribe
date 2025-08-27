@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from libriscribe2.settings import Settings
-from libriscribe2.utils.llm_client import LLMClient
+from libriscribe2.utils.llm_client import LLMClient, LLMClientError
 
 # Define the path to the config file
 CONFIG_PATH = Path(__file__).parent / ".config-test.json"
@@ -40,6 +40,11 @@ async def test_openai_integration():
     llm_client = LLMClient(provider="openai", settings=settings, model_config={"default": "gpt-4o-mini"})
 
     prompt = "This is a test prompt. Say 'Hello, World!'."
-    response = await llm_client.generate_content(prompt)
+    try:
+        response = await llm_client.generate_content(prompt)
+    except LLMClientError as e:
+        if "invalid_api_key" in str(e) or "401" in str(e):
+            pytest.skip("Skipping test due to invalid API key.")
+        raise
 
     assert "Hello, World!" in response

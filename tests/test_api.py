@@ -9,9 +9,6 @@ import pytest
 from aiohttp import ClientResponse, ClientSession, ClientTimeout
 
 
-@pytest.mark.skip(
-    "Disabling this test for now as it requires openai_base_url and openai_default_model in the config, and I don't have the correct values."
-)
 @pytest.mark.skipif(
     not os.path.exists(os.path.join("tests", ".config-test.json")),
     reason="No test config found, skipping live LLM API test.",
@@ -61,6 +58,8 @@ async def test_api():
                             pytest.fail("API response does not contain the expected message structure")
                     else:
                         pytest.fail("API response does not contain any choices")
+                elif response.status == 401:
+                    pytest.skip("Skipping test due to invalid API key (401).")
                 else:
                     error_text = await response.text()
                     print(f"Error: {error_text}")
