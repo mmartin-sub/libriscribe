@@ -20,9 +20,7 @@ class ContentReviewerAgent(Agent):
     """Reviews chapter content for consistency and clarity."""
 
     def __init__(self, llm_client: LLMClientProtocol, settings: Settings):
-        super().__init__("ContentReviewerAgent", llm_client)
-        self.llm_client = llm_client
-        self.settings = settings
+        super().__init__("ContentReviewerAgent", llm_client, settings)
 
     async def execute(self, project_knowledge_base: Any, output_path: str | None = None, **kwargs: Any) -> None:
         """Reviews a chapter for consistency, clarity, and plot holes.

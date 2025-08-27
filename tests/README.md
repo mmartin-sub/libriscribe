@@ -131,21 +131,69 @@ tests/
 
 ## Running Tests
 
+You can run tests using `hatch`, which handles the environment setup.
+
+### Running All Tests
+
+To run all tests (unit and integration):
+
 ```bash
-# Run all tests
-hatch run pytest
-
-# Run specific test categories
-hatch run pytest tests/unit/
-hatch run pytest tests/integration/
-hatch run pytest tests/commands/
-
-# Run with coverage
-hatch run pytest --cov=src/libriscribe2
-
-# Run specific module tests
-hatch run pytest tests/unit/agents/test_project_manager.py
+hatch run test
 ```
+
+### Running Tests with Markers
+
+We use `pytest` markers to categorize tests. You can use the `-m` flag to select or deselect tests based on their markers.
+
+**Running Only Unit Tests:**
+To run only the unit tests and skip integration tests (which require network access and API keys):
+
+```bash
+hatch run test -- -m "not integration"
+```
+
+**Running Only Integration Tests:**
+To run only the integration tests:
+
+```bash
+hatch run test -- -m "integration"
+```
+
+### Running Specific Test Files or Directories
+
+You can also run tests in a specific directory or file:
+
+```bash
+# Run all tests in the unit/agents directory
+hatch run test tests/unit/agents/
+
+# Run a specific test file
+hatch run test tests/unit/agents/test_project_manager.py
+```
+
+### Running with Coverage
+
+To run tests and generate a coverage report:
+
+```bash
+hatch run test-cov
+```
+
+## Integration Tests Configuration
+
+Integration tests interact with external services like the OpenAI API. To run these tests, you need to provide API keys in a `tests/config.json` file.
+
+1. **Create the config file:**
+    Copy the example file:
+
+    ```bash
+    cp tests/config.json.example tests/config.json
+    ```
+
+2. **Add your API keys:**
+    Edit `tests/config.json` and replace the placeholder values with your actual API keys. This file is in `.gitignore`, so your keys won't be committed.
+
+Integration tests will be skipped automatically if a valid `tests/config.json` with real API keys is not found.
 
 ## Test Data Management
 

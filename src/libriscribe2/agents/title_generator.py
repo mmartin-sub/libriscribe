@@ -11,6 +11,7 @@ from libriscribe2.agents.agent_base import Agent
 from libriscribe2.knowledge_base import ProjectKnowledgeBase
 from libriscribe2.settings import Settings
 from libriscribe2.utils.json_utils import JSONProcessor
+from libriscribe2.utils.llm_client_protocol import LLMClientProtocol
 
 logger = logging.getLogger(__name__)
 
@@ -18,9 +19,8 @@ logger = logging.getLogger(__name__)
 class TitleGeneratorAgent(Agent):
     """Generates book titles based on content and metadata."""
 
-    def __init__(self, llm_client, settings: Settings | None = None):
-        super().__init__("TitleGeneratorAgent", llm_client)
-        self.settings = settings or Settings()
+    def __init__(self, llm_client: LLMClientProtocol, settings: Settings | None = None):
+        super().__init__("TitleGeneratorAgent", llm_client, settings)
 
     async def execute(
         self,

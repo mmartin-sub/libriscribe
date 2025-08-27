@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 from ...agents.agent_base import Agent as LibriScribeAgent
 from ...settings import Settings
-from ...utils.llm_client import LLMClient
+from ...utils.llm_client_protocol import LLMClientProtocol
 from ..base import BaseFrameworkWrapper, FrameworkAgent
 
 # We avoid direct imports from autogen_agentchat to prevent mypy attr-defined errors
@@ -84,7 +84,7 @@ class AutoGenAgentWrapper(BaseFrameworkWrapper):
     and AutoGen's multi-agent conversation framework.
     """
 
-    def __init__(self, settings: Settings, llm_client: LLMClient):
+    def __init__(self, settings: Settings, llm_client: LLMClientProtocol):
         super().__init__(settings, llm_client)
         self.logger = logging.getLogger(__name__)
 

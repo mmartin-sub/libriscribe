@@ -8,7 +8,7 @@ from ..settings import Settings
 from ..utils import prompts_context as prompts
 from ..utils.file_utils import write_json_file
 from ..utils.json_utils import JSONProcessor
-from ..utils.llm_client import LLMClient
+from ..utils.llm_client_protocol import LLMClientProtocol
 from ..utils.prompts_context import get_worldbuilding_aspects
 from .agent_base import Agent
 
@@ -18,9 +18,8 @@ logger = logging.getLogger(__name__)
 class WorldbuildingAgent(Agent):
     """Generates worldbuilding details."""
 
-    def __init__(self, llm_client: LLMClient, settings: Settings):
-        super().__init__("WorldbuildingAgent", llm_client)
-        self.settings = settings
+    def __init__(self, llm_client: LLMClientProtocol, settings: Settings):
+        super().__init__("WorldbuildingAgent", llm_client, settings)
 
     async def execute(
         self,

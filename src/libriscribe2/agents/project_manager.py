@@ -422,6 +422,10 @@ class ProjectManagerAgent:
             logger.error("Project knowledge base not initialized")
             return False
 
+        if not self.llm_client:
+            logger.error("LLM client not initialized")
+            return False
+
         try:
             from libriscribe2.agents.title_generator import TitleGeneratorAgent
 

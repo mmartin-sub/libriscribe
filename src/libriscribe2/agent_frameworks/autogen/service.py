@@ -18,7 +18,7 @@ from autogen_agentchat.base import ChatAgent, Team
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 
 from ...settings import Settings
-from ...utils.llm_client import LLMClient
+from ...utils.llm_client_protocol import LLMClientProtocol
 from ..base import BaseFrameworkService
 from .wrapper import AutoGenAgentWrapper
 
@@ -62,7 +62,7 @@ class AutoGenService(BaseFrameworkService):
     conversations for book creation tasks.
     """
 
-    def __init__(self, settings: Settings, llm_client: LLMClient):
+    def __init__(self, settings: Settings, llm_client: LLMClientProtocol):
         super().__init__(settings, llm_client)
         self.wrapper = AutoGenAgentWrapper(settings, llm_client)
         self.logger = logging.getLogger(__name__)

@@ -11,7 +11,7 @@ from ..settings import Settings
 from ..utils.exceptions import LLMGenerationError
 from ..utils.file_utils import write_json_file, write_markdown_file
 from ..utils.json_utils import JSONProcessor
-from ..utils.llm_client import LLMClient
+from ..utils.llm_client_protocol import LLMClientProtocol
 from ..utils.markdown_processor import remove_h3_from_markdown
 from .agent_base import Agent
 
@@ -33,9 +33,8 @@ logger = logging.getLogger(__name__)
 class ConceptGeneratorAgent(Agent):
     """Generates book concepts."""
 
-    def __init__(self, llm_client: LLMClient, settings: Settings):
-        super().__init__("ConceptGeneratorAgent", llm_client)
-        self.settings = settings
+    def __init__(self, llm_client: LLMClientProtocol, settings: Settings):
+        super().__init__("ConceptGeneratorAgent", llm_client, settings)
 
     def _validate_prompt_length(self, prompt: str, prompt_type: str) -> bool:
         """Validate that prompt length is within acceptable limits."""
@@ -757,55 +756,3 @@ class ConceptGeneratorAgent(Agent):
             self.logger.warning(f"Failed to parse keywords JSON: {e}")
             # Return default empty keywords structure
             return {"primary_keywords": [], "secondary_keywords": [], "genre_keywords": []}, ""
-
-
-def _format_keywords_response(self, keywords_md: str) -> tuple[dict[str, Any], str]:
-    """Format the keywords response into a clean JSON structure.
-
-    Args:
-        keywords_md: The raw markdown response containing the keywords
-
-    Returns:
-        A tuple of (formatted_keywords, raw_keywords_text)
-    """
-    if not keywords_md:
-        return {}, ""
-
-    # Extract JSON content from markdown code blocks if present
-    json_match = re.search(r"```(?:json\n)?(.*?)```", keywords_md, re.DOTALL)
-    raw_keywords_text = json_match.group(1).strip() if json_match else keywords_md.strip()
-
-    try:
-        # Try to parse the raw JSON
-        keywords_data = json.loads(raw_keywords_text)
-
-        # Ensure we have the expected structure
-        if not isinstance(keywords_data, dict):
-            raise ValueError("Keywords data is not a dictionary")
-
-        # Ensure all keyword lists exist and are lists
-        for key in ["primary_keywords", "secondary_keywords", "genre_keywords"]:
-            if key not in keywords_data:
-                keywords_data[key] = []
-            elif not isinstance(keywords_data[key], list):
-                # Convert single values to a list
-                keywords_data[key] = [keywords_data[key]]
-
-        return keywords_data, raw_keywords_text
-
-    except ValueError as e:
-        self.logger.warning(f"Failed to parse keywords JSON: {e}")
-        # Fallback to extracting any list-like structures
-        keywords: dict[str, list[str]] = {"primary_keywords": [], "secondary_keywords": [], "genre_keywords": []}
-
-        # Try to extract any list-like structures
-        list_matches = re.findall(r"\[(.*?)\]", raw_keywords_text)
-        if list_matches:
-            # Use the first list found as primary keywords
-            try:
-                items = [item.strip("'\" ") for item in list_matches[0].split(",")]
-                keywords["primary_keywords"] = [item for item in items if item]
-            except Exception as e:
-                self.logger.debug(f"Error extracting keywords from list: {e}", exc_info=True)
-
-        return keywords, raw_keywords_text

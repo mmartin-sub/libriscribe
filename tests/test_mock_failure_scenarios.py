@@ -16,6 +16,7 @@ import shutil
 import tempfile
 from collections.abc import AsyncGenerator
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -42,28 +43,50 @@ class FailingMockLLMClient(MockLLMClient):
 
     async def generate_content(
         self,
-        primary_prompt: str,
+        prompt: str,
         prompt_type: str = "default",
-        temperature: float = 0.7,
-        **kwargs,
+        temperature: float | None = 0.7,
+        max_tokens: int | None = None,
+        language: str | None = None,
+        timeout: int | None = None,
+        **kwargs: Any,
     ) -> str:
         # The counting and failure logic is handled by generate_streaming_content,
         # which is called by super().generate_content()
-        return await super().generate_content(primary_prompt, prompt_type, temperature, **kwargs)
+        return await super().generate_content(
+            prompt,
+            prompt_type,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            language=language,
+            timeout=timeout,
+            **kwargs,
+        )
 
     async def generate_streaming_content(
         self,
-        primary_prompt: str,
+        prompt: str,
         prompt_type: str = "default",
-        temperature: float = 0.7,
-        **kwargs,
+        temperature: float | None = 0.7,
+        max_tokens: int | None = None,
+        language: str | None = None,
+        timeout: int | None = None,
+        **kwargs: Any,
     ) -> AsyncGenerator[str, None]:
         self.call_count += 1
         if self.call_count >= self.fail_after_calls:
             if self.actual_call_count_for_failure == 0:
                 self.actual_call_count_for_failure = self.call_count
             raise RuntimeError(f"Mock LLM client failed after {self.fail_after_calls} calls")
-        async for chunk in super().generate_streaming_content(primary_prompt, prompt_type, temperature, **kwargs):
+        async for chunk in super().generate_streaming_content(
+            prompt,
+            prompt_type,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            language=language,
+            timeout=timeout,
+            **kwargs,
+        ):
             yield chunk
 
 

@@ -343,6 +343,10 @@ testpaths = ["tests"]
 addopts = "-ra -q --strict-markers"
 asyncio_mode = "auto"
 norecursedirs = ["tests/utils"]
+markers = [
+    "integration: marks tests as integration tests (requires network access)",
+    "asyncio: marks tests as asyncio tests",
+]
 
 # --- BANDIT CONFIGURATION ---
 [tool.bandit]

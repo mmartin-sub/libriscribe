@@ -784,30 +784,21 @@ class BookCreatorService:
                     steps["generate_concept"] and steps["generate_outline"] and steps["generate_characters"]
                 )
 
-                if has_substantial_content:
-                    logger.info("Generating title based on full manuscript content...")
-                    try:
-                        from libriscribe2.agents.title_generator import TitleGeneratorAgent
+                if has_substantial_content or has_full_manuscript:
+                    if self.project_manager and self.project_manager.llm_client:
+                        logger.info("Generating title based on content...")
+                        try:
+                            from libriscribe2.agents.title_generator import TitleGeneratorAgent
 
-                        title_generator = TitleGeneratorAgent(self.project_manager.llm_client)
-                        await title_generator.execute(self.project_manager.project_knowledge_base)
-                        logger.info("✅ Title generated successfully")
-                    except Exception as e:
-                        logger.error(f"Failed to generate title: {e}")
-                        # Don't fail the entire book creation for title generation errors
-                        # but log it as an error for visibility
-                elif has_full_manuscript:
-                    logger.info("Generating title based on full manuscript...")
-                    try:
-                        from libriscribe2.agents.title_generator import TitleGeneratorAgent
-
-                        title_generator = TitleGeneratorAgent(self.project_manager.llm_client)
-                        await title_generator.execute(self.project_manager.project_knowledge_base)
-                        logger.info("✅ Title generated successfully")
-                    except Exception as e:
-                        logger.error(f"Failed to generate title: {e}")
-                        # Don't fail the entire book creation for title generation errors
-                        # but log it as an error for visibility
+                            title_generator = TitleGeneratorAgent(self.project_manager.llm_client)
+                            await title_generator.execute(self.project_manager.project_knowledge_base)
+                            logger.info("✅ Title generated successfully")
+                        except Exception as e:
+                            logger.error(f"Failed to generate title: {e}")
+                            # Don't fail the entire book creation for title generation errors
+                            # but log it as an error for visibility
+                    else:
+                        logger.error("Cannot generate title without an initialized LLM client.")
                 else:
                     logger.info("Skipping title generation (insufficient content available to base title on)")
                     logger.info("  Title generation works best with: --write-chapters or --all")

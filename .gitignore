@@ -219,3 +219,4 @@ tests/.config-test.json
 
 # For act - local github actions
 .secrets
+tests/config.json

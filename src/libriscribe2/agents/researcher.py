@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup, Tag
 from ..settings import Settings
 from ..utils import prompts_context as prompts
 from ..utils.file_utils import write_markdown_file
-from ..utils.llm_client import LLMClient
+from ..utils.llm_client_protocol import LLMClientProtocol
 from .agent_base import Agent
 
 logger = logging.getLogger(__name__)
@@ -18,9 +18,8 @@ logger = logging.getLogger(__name__)
 class ResearcherAgent(Agent):
     """Conducts web research."""
 
-    def __init__(self, llm_client: LLMClient, settings: Settings):
-        super().__init__("ResearcherAgent", llm_client)
-        self.settings = settings
+    def __init__(self, llm_client: LLMClientProtocol, settings: Settings):
+        super().__init__("ResearcherAgent", llm_client, settings)
 
     async def execute(self, project_knowledge_base: Any, output_path: str | None = None, **kwargs: Any) -> None:
         """Performs web research and saves the results to a Markdown file."""

@@ -11,7 +11,7 @@ from ..utils.file_utils import (
     read_markdown_file,
     write_markdown_file,
 )
-from ..utils.llm_client import LLMClient
+from ..utils.llm_client_protocol import LLMClientProtocol
 from ..utils.markdown_processor import remove_h3_from_markdown
 from .agent_base import Agent
 
@@ -22,10 +22,8 @@ logger = logging.getLogger(__name__)
 class StyleEditorAgent(Agent):
     """Refines the writing style of a chapter."""
 
-    def __init__(self, llm_client: LLMClient, settings: Settings):
-        super().__init__("StyleEditorAgent", llm_client)
-        self.llm_client = llm_client
-        self.settings = settings
+    def __init__(self, llm_client: LLMClientProtocol, settings: Settings):
+        super().__init__("StyleEditorAgent", llm_client, settings)
 
     async def execute(self, project_knowledge_base: Any, output_path: str | None = None, **kwargs: Any) -> None:
         """Refines style based on project settings."""
