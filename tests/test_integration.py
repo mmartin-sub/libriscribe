@@ -37,7 +37,7 @@ async def test_openai_integration():
         os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
     settings = Settings()
-    llm_client = LLMClient(llm_provider="openai", settings=settings, model_config={"default": "gpt-4o-mini"})
+    llm_client = LLMClient(provider="openai", settings=settings, model_config={"default": "gpt-4o-mini"})
 
     prompt = "This is a test prompt. Say 'Hello, World!'."
     response = await llm_client.generate_content(prompt)
