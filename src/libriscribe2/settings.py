@@ -96,7 +96,8 @@ class Settings(BaseSettings):
         description="Manually sets the number of chapters. This is only active when 'auto_size' is False. Ranges (e.g., '8-12') are handled at the CLI level and are not set here.",
     )
     scenes_per_chapter: str = Field(
-        default="3-6", description="Manually sets the range of scenes per chapter (e.g., '3-6'). Only active when 'auto_size' is False."
+        default="3-6",
+        description="Manually sets the range of scenes per chapter (e.g., '3-6'). Only active when 'auto_size' is False.",
     )
 
     # Mock settings

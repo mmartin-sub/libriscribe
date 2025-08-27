@@ -14,6 +14,7 @@ Based on analysis, a typical book creation makes 18 LLM calls:
 import asyncio
 import shutil
 import tempfile
+from collections.abc import AsyncGenerator
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -22,9 +23,6 @@ import pytest
 from libriscribe2.services.book_creator import BookCreatorService
 from libriscribe2.settings import Settings
 from libriscribe2.utils.mock_llm_client import MockLLMClient
-
-
-from typing import AsyncGenerator
 
 
 class FailingMockLLMClient(MockLLMClient):
@@ -65,9 +63,7 @@ class FailingMockLLMClient(MockLLMClient):
             if self.actual_call_count_for_failure == 0:
                 self.actual_call_count_for_failure = self.call_count
             raise RuntimeError(f"Mock LLM client failed after {self.fail_after_calls} calls")
-        async for chunk in super().generate_streaming_content(
-            primary_prompt, prompt_type, temperature, **kwargs
-        ):
+        async for chunk in super().generate_streaming_content(primary_prompt, prompt_type, temperature, **kwargs):
             yield chunk
 
 
@@ -116,7 +112,9 @@ class TestMockFailureScenarios:
     async def test_mock_fails_at_specific_call(self, mock_settings_class, fail_after_calls):
         """Test that CLI fails properly when mock LLM fails at specific call position."""
         mock_settings_class.return_value = self._create_mock_settings()
-        failing_client = FailingMockLLMClient(fail_after_calls=fail_after_calls, settings=mock_settings_class.return_value)
+        failing_client = FailingMockLLMClient(
+            fail_after_calls=fail_after_calls, settings=mock_settings_class.return_value
+        )
         book_creator = BookCreatorService(mock=True, llm_client=failing_client)
 
         # A successful run has 8 calls.

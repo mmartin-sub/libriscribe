@@ -15,6 +15,7 @@ from libriscribe2.knowledge_base import ProjectKnowledgeBase
 from libriscribe2.settings import Settings
 from libriscribe2.utils.content_exporters import export_characters_to_markdown, export_worldbuilding_to_markdown
 from libriscribe2.utils.exceptions import LLMGenerationError
+
 from ..utils.llm_client_protocol import LLMClientProtocol
 
 # Configure warnings to be treated as errors
@@ -264,7 +265,9 @@ class BookCreatorService:
             kb = self._create_knowledge_base(args, project_name)
 
             # Initialize project manager with model configuration
-            self.project_manager = ProjectManagerAgent(settings=self.settings, model_config=self.model_config, llm_client=self.llm_client)
+            self.project_manager = ProjectManagerAgent(
+                settings=self.settings, model_config=self.model_config, llm_client=self.llm_client
+            )
 
             if not self.llm_client:
                 # Initialize LLM client and agents

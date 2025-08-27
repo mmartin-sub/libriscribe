@@ -86,6 +86,7 @@ libriscribe2 create-book --title="My Global Book" --mock --generate-concept
 ```
 
 To uninstall the tool, you can run:
+
 ```bash
 uv tool uninstall libriscribe2
 ```
@@ -485,10 +486,10 @@ projects/
 
 ### File Formats and Revisions
 
--   **Content Files (`.md`):** All generated content, including outlines, character profiles, and chapters, are saved as Markdown files. They do not contain any frontmatter or metadata headers; they are pure content.
--   **Data Files (`.json`):** The `project_data.json` file contains all the structured data for your project, including the knowledge base, character details, and chapter summaries.
--   **Revisions:** When a step is run more than once (e.g., re-generating a concept or a chapter), the existing file is typically overwritten with the new version. The system does not currently save multiple versioned revisions with a `_revised` suffix.
--   **Final Output:** The `manuscript.md` is the final consolidated output of the book, created by the `format-book` command. It combines all the individual chapter files into a single, cohesive document.
+- **Content Files (`.md`):** All generated content, including outlines, character profiles, and chapters, are saved as Markdown files. They do not contain any frontmatter or metadata headers; they are pure content.
+- **Data Files (`.json`):** The `project_data.json` file contains all the structured data for your project, including the knowledge base, character details, and chapter summaries.
+- **Revisions:** When a step is run more than once (e.g., re-generating a concept or a chapter), the existing file is typically overwritten with the new version. The system does not currently save multiple versioned revisions with a `_revised` suffix.
+- **Final Output:** The `manuscript.md` is the final consolidated output of the book, created by the `format-book` command. It combines all the individual chapter files into a single, cohesive document.
 
 ## 🔧 Troubleshooting
 
