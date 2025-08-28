@@ -61,7 +61,7 @@ repos:
 
     # 2. CODE FORMATTING & LINTING (Ruff) - REORDERED FOR OPTIMAL EXECUTION
     - repo: https://github.com/astral-sh/ruff-pre-commit
-      rev: v0.12.10 # Updated version
+      rev: v0.12.11 # Updated version
       hooks:
         - id: ruff-format
           name: "Format with Ruff"
@@ -176,3 +176,26 @@ repos:
       rev: v0.24.1
       hooks:
       - id: validate-pyproject
+
+# === Python Vulnerability Scanning (hatch/uv integrated) ===
+    -   repo: local
+        hooks:
+        -   id: pip-audit-hatch
+            name: Python vulnerability scan with pip-audit
+            # The entry point is now the hatch command
+            entry: hatch run security:audit
+            # We use 'python' as the language so pre-commit knows it's a Python-related tool
+            language: python
+            # This hook should run if the dependency specification changes
+            files: ^(pyproject\.toml|hatch\.lock)$
+            pass_filenames: false
+
+# === NPM Vulnerability Scanning (self-contained Node.js env) ===
+    -   repo: local
+        hooks:
+        -   id: npm-audit-in-docs
+            name: NPM vulnerability scan in docs/
+            language: node
+            entry: bash -c 'cd docs/ && npm install && npm audit --audit-level=high'
+            files: ^docs/(package\.json|package-lock\.json)$
+            pass_filenames: false

@@ -293,7 +293,6 @@ class TestConfigurationLoading:
         config_data = {
             "openai_api_key": "integration-test-key",
             "openai_base_url": "http://integration-test.com",
-            "openai_default_model": "integration-test-model",
             "default_llm": "integration-test-llm",
             "llm_timeout": 750,
             "projects_dir": "./integration-test-projects",
@@ -325,7 +324,6 @@ class TestConfigurationLoading:
             # Check that all configuration values are properly loaded
             assert book_creator.settings.openai_api_key == "integration-test-key"
             assert book_creator.settings.openai_base_url == "http://integration-test.com"
-            assert book_creator.settings.openai_default_model == "integration-test-model"
             assert book_creator.settings.default_llm == "integration-test-llm"
             assert book_creator.settings.llm_timeout == 750.0
             assert book_creator.settings.projects_dir == "./integration-test-projects"

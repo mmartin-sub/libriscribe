@@ -397,3 +397,15 @@ exclude_lines = [
 
 [tool.coverage.html]
 directory = "tests/htmlcov"
+
+[tool.hatch.envs.security]
+# This environment is detached, so it doesn't install your project, just the tools.
+detached = true
+dependencies = [
+  "pip-audit"
+]
+
+[tool.hatch.envs.security.scripts]
+# Defines a script named 'audit' that simply runs pip-audit.
+# Hatch ensures it runs inside the 'security' environment.
+audit = "pip-audit"

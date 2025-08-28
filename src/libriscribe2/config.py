@@ -92,10 +92,7 @@ class EnvironmentConfig:
         # Map configuration keys to environment variable names
         env_mapping = {
             "openai_api_key": "OPENAI_API_KEY",
-            "anthropic_api_key": "ANTHROPIC_API_KEY",
-            "google_api_key": "GOOGLE_API_KEY",
             "openai_base_url": "OPENAI_BASE_URL",
-            "openai_default_model": "OPENAI_DEFAULT_MODEL",
             "default_llm": "DEFAULT_LLM",
             "llm_timeout": "LLM_TIMEOUT",
             "projects_dir": "PROJECTS_DIR",

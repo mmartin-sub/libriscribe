@@ -31,9 +31,9 @@ async def test_api():
     if not base_url:
         pytest.skip("Skipping API test: 'openai_base_url' not found in config.")
 
-    model = config.get("openai_default_model")
+    model = config.get("models", {}).get("default")
     if not model:
-        pytest.skip("Skipping API test: 'openai_default_model' not found in config.")
+        pytest.skip("Skipping API test: 'models.default' not found in config.")
 
     print(f"Testing API: {base_url}")
     print(f"Model: {model}")

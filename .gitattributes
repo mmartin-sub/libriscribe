@@ -55,3 +55,5 @@
 # Lock files
 *.lock binary
 package-lock.json text merge=npm-merge-driver
+
+.secrets.baseline merge=ours
