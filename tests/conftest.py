@@ -17,6 +17,16 @@ from libriscribe2.settings import Settings
 logger = logging.getLogger(__name__)
 
 
+def pytest_addoption(parser):
+    """Add a command-line option to specify the test config file."""
+    parser.addoption(
+        "--test-config-file",
+        action="store",
+        default="tests/.config-test.json",
+        help="Path to the test configuration file.",
+    )
+
+
 @pytest.fixture(scope="session")
 def test_projects_dir() -> Path:
     """Create and return the test projects directory."""
@@ -119,3 +129,65 @@ def mock_outline_response() -> str:
 ## Chapter 3: The End
 - Scene 1: Resolution
 - Scene 2: Conclusion"""
+
+
+@pytest.fixture(scope="function")
+def test_config(pytestconfig) -> dict:
+    """
+    Loads the test configuration from the file specified by --test-config-file,
+    if it exists, otherwise returns a default mock configuration.
+    """
+    config_path = Path(pytestconfig.getoption("--test-config-file"))
+    if config_path.is_file():
+        with open(config_path) as f:
+            import json
+            try:
+                return json.load(f)
+            except json.JSONDecodeError:
+                pytest.fail(
+                    f"Failed to decode {config_path}. "
+                    "Please ensure it is a valid JSON file."
+                )
+    else:
+        # Return a default mock configuration if the file doesn't exist
+        return {"default_llm": "mock", "mock": True}
+
+
+@pytest.fixture(scope="function")
+def integration_settings(pytestconfig) -> Settings:
+    """
+    Creates a Settings instance for integration tests.
+    If the config file specified by --test-config-file exists, it's used.
+    Otherwise, mock settings are created.
+    """
+    config_path = Path(pytestconfig.getoption("--test-config-file"))
+    if config_path.is_file():
+        return Settings(config_file=str(config_path))
+    else:
+        # Create a default settings object which will be in mock mode
+        return Settings()
+
+
+@pytest.fixture
+def handle_llm_client_error():
+    """
+    A fixture that wraps test execution in a try-except block to catch
+    LLMClientError and provide more informative messages.
+    """
+    from libriscribe2.utils.llm_client import LLMClientError
+
+    try:
+        yield
+    except LLMClientError as e:
+        if "invalid_api_key" in str(e) or "401" in str(e):
+            pytest.skip(
+                "Skipping test due to an invalid API key. "
+                "Please check the key in your .config-test.json."
+            )
+        elif "rate_limit" in str(e):
+            pytest.skip(
+                "Skipping test due to rate limiting. "
+                "Check your API plan or try again later."
+            )
+        else:
+            pytest.fail(f"LLMClientError occurred during test execution: {e}")

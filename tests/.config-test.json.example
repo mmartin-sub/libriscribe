@@ -1,0 +1,10 @@
+{
+  "openai_api_key": "your-real-openai-api-key-here",
+  "openai_base_url": "https://api.openai.com/v1",
+  "default_llm": "openai",
+  "llm_timeout": 60,
+  "models": {
+    "default": "gpt-4o-mini",
+    "chapter": "gpt-4o-mini"
+  }
+}

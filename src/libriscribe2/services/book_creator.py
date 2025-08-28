@@ -48,7 +48,7 @@ class BookCreatorService:
         self.settings = Settings(config_file=config_file)
         self.config: dict[str, Any] = {}  # Config is now handled by Settings
         self.model_config = self.settings.get_model_config()
-        self.mock = mock
+        self.mock = mock or self.settings.mock
         self.project_manager: ProjectManagerAgent | None = None
         self.log_file = log_file
         self.llm_client = llm_client
