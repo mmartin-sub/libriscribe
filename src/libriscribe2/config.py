@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 from typing import Any
 
+import pyjson5 as json5
 import yaml
 from dotenv import load_dotenv
 
@@ -52,7 +53,7 @@ class EnvironmentConfig:
                 return
 
             # Handle YAML and JSON files
-            if config_path.suffix.lower() == ".json":
+            if config_path.suffix.lower() in [".json", ".json5"]:
                 from .schemas.config_schema import CONFIG_SCHEMA
                 from .utils.json_utils import load_json_with_schema
 
@@ -91,6 +92,8 @@ class EnvironmentConfig:
         # Map configuration keys to environment variable names
         env_mapping = {
             "openai_api_key": "OPENAI_API_KEY",
+            "anthropic_api_key": "ANTHROPIC_API_KEY",
+            "google_api_key": "GOOGLE_API_KEY",
             "openai_base_url": "OPENAI_BASE_URL",
             "openai_default_model": "OPENAI_DEFAULT_MODEL",
             "default_llm": "DEFAULT_LLM",
@@ -166,9 +169,10 @@ def load_model_config(model_config_file: str | None = None) -> dict[str, str]:
         return {}
 
     try:
-        if config_path.suffix.lower() == ".json":
+        if config_path.suffix.lower() in [".json", ".json5"]:
             with open(config_path, encoding="utf-8") as f:
-                config_data = json.load(f)
+                content = f.read()
+            config_data = json5.loads(content)
         elif config_path.suffix.lower() in [".yaml", ".yml"]:
             with open(config_path, encoding="utf-8") as f:
                 config_data = yaml.safe_load(f) or {}

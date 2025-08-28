@@ -78,6 +78,8 @@ class Settings(BaseSettings):
     openai_api_key: str | None = Field(
         default=None, description="Your main OpenAI API token. This is the primary key for authentication."
     )
+    anthropic_api_key: str | None = Field(default=None, description="Your Anthropic API key.")
+    google_api_key: str | None = Field(default=None, description="Your Google API key.")
     openai_base_url: str | None = Field(default=None, description="OpenAI base URL")
     openai_default_model: str | None = Field(default=None, description="OpenAI default model")
 
@@ -158,6 +160,8 @@ class Settings(BaseSettings):
 
                 env_mapping = {
                     "openai_api_key": "OPENAI_API_KEY",
+                    "anthropic_api_key": "ANTHROPIC_API_KEY",
+                    "google_api_key": "GOOGLE_API_KEY",
                     "openai_base_url": "OPENAI_BASE_URL",
                     "openai_default_model": "OPENAI_DEFAULT_MODEL",
                     "default_llm": "DEFAULT_LLM",

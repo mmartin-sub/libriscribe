@@ -1,12 +1,16 @@
 {
+  // This is a comment, which is allowed in JSON5
   "openai_api_key": "your-openai-api-key-here",
+  "anthropic_api_key": "your-anthropic-api-key", "# pragma: allowlist secret",
+  "google_api_key": "your-google-api-key", "# pragma: allowlist secret",
   "openai_base_url": "https://api.openai.com/v1",
   "openai_default_model": "gpt-4o-mini",
-  "default_llm": "openai",
+  "default_llm": "openai", // can be "openai", "anthropic", "google", or "mock"
   "llm_timeout": 360,
   "projects_dir": "./projects",
   "hide_generated_by": true,
   "models": {
+    // You can specify different models for different tasks
     "default": "gpt-4o-mini",
     "outline": "gpt-4o",
     "worldbuilding": "gpt-4o",
@@ -19,6 +23,6 @@
     "research": "gpt-4o-mini",
     "scene": "gpt-4o-mini",
     "keyword_generation": "gpt-4o-mini",
-    "title_generation": "gpt-4o"
-  }
+    "title_generation": "gpt-4o",
+  },
 }

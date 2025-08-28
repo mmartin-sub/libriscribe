@@ -33,5 +33,5 @@ CONFIG_SCHEMA = {
             "required": ["default"],
         },
     },
-    "required": ["openai_api_key", "default_llm", "models"],
+    "required": ["default_llm", "models"],
 }
