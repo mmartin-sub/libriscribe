@@ -152,18 +152,47 @@ def test_config(pytestconfig) -> dict:
 
 
 @pytest.fixture(scope="function")
-def integration_settings(pytestconfig) -> Settings:
+def integration_settings(pytestconfig) -> Generator[Settings, None, None]:
     """
     Creates a Settings instance for integration tests.
     If the config file specified by --test-config-file exists, it's used.
     Otherwise, mock settings are created.
+
+    This fixture also handles cleaning up environment variables to ensure
+    test isolation.
     """
+    import os
+
     config_path = Path(pytestconfig.getoption("--test-config-file"))
-    if config_path.is_file():
-        return Settings(config_file=str(config_path))
-    else:
-        # Create a default settings object which will be in mock mode
-        return Settings(mock=True)
+
+    env_mapping = {
+        "openai_api_key": "OPENAI_API_KEY",
+        "anthropic_api_key": "ANTHROPIC_API_KEY",
+        "google_api_key": "GOOGLE_API_KEY",
+        "openai_base_url": "OPENAI_BASE_URL",
+        "openai_default_model": "OPENAI_DEFAULT_MODEL",
+        "default_llm": "DEFAULT_LLM",
+        "llm_timeout": "LLM_TIMEOUT",
+    }
+
+    original_env = {key: os.environ.get(key) for key in env_mapping.values()}
+
+    try:
+        if config_path.is_file():
+            settings = Settings(config_file=str(config_path))
+        else:
+            settings = Settings(mock=True)
+
+        yield settings
+
+    finally:
+        # Restore original environment
+        for key, value in original_env.items():
+            if value is None:
+                if key in os.environ:
+                    del os.environ[key]
+            else:
+                os.environ[key] = value
 
 
 @pytest.fixture
