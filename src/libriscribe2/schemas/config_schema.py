@@ -6,7 +6,6 @@ CONFIG_SCHEMA = {
     "properties": {
         "openai_api_key": {"type": "string", "description": "Your OpenAI API key."},
         "openai_base_url": {"type": "string", "format": "uri", "description": "The base URL for the OpenAI API."},
-        "openai_default_model": {"type": "string", "description": "The default OpenAI model to use."},
         "default_llm": {"type": "string", "description": "The default LLM provider."},
         "llm_timeout": {"type": "integer", "description": "The timeout for LLM requests in seconds."},
         "projects_dir": {"type": "string", "description": "The directory where projects are stored."},
@@ -33,5 +32,5 @@ CONFIG_SCHEMA = {
             "required": ["default"],
         },
     },
-    "required": ["default_llm", "models"],
+    "required": [],
 }

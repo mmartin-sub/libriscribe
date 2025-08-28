@@ -140,12 +140,13 @@ def test_config(pytestconfig) -> dict:
     config_path = Path(pytestconfig.getoption("--test-config-file"))
     if config_path.is_file():
         with open(config_path) as f:
-            import json
+            import pyjson5 as json5
 
             try:
-                return json.load(f)
-            except json.JSONDecodeError:
-                pytest.fail(f"Failed to decode {config_path}. Please ensure it is a valid JSON file.")
+                content = f.read()
+                return json5.loads(content)
+            except Exception:
+                pytest.fail(f"Failed to decode {config_path}. Please ensure it is a valid JSON5 file.")
     else:
         # Return a default mock configuration if the file doesn't exist
         return {"default_llm": "mock", "mock": True}
@@ -167,10 +168,7 @@ def integration_settings(pytestconfig) -> Generator[Settings, None, None]:
 
     env_mapping = {
         "openai_api_key": "OPENAI_API_KEY",
-        "anthropic_api_key": "ANTHROPIC_API_KEY",
-        "google_api_key": "GOOGLE_API_KEY",
         "openai_base_url": "OPENAI_BASE_URL",
-        "openai_default_model": "OPENAI_DEFAULT_MODEL",
         "default_llm": "DEFAULT_LLM",
         "llm_timeout": "LLM_TIMEOUT",
     }

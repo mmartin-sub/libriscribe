@@ -22,8 +22,6 @@ if __name__ == "__main__":
     print(f"  mock: {settings.mock}")
     print(f"  openai_api_key: {settings.openai_api_key}")
     print(f"  openai_base_url: {settings.openai_base_url}")
-    print(f"  anthropic_api_key: {settings.anthropic_api_key}")
-    print(f"  google_api_key: {settings.google_api_key}")
 
     print("\n--- Initializing LLMClient ---")
     llm_client = LLMClient(provider=settings.default_llm, settings=settings)

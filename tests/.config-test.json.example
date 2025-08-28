@@ -3,13 +3,10 @@
   // For integration tests, provide your API keys here.
   // You can also specify a different base URL for providers like OpenRouter.
   "openai_api_key": "your-openai-api-key-here",
-  "anthropic_api_key": "your-anthropic-api-key", "# pragma: allowlist secret",
-  "google_api_key": "your-google-api-key", "# pragma: allowlist secret",
-
   "openai_base_url": "https://api.openai.com/v1",
 
   // To run tests in mock mode, set default_llm to "mock"
-  "default_llm": "openai", // "openai", "anthropic", "google", or "mock"
+  "default_llm": "openai", // or "mock"
 
   "llm_timeout": 60,
 

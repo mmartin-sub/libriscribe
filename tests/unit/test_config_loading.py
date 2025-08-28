@@ -48,9 +48,9 @@ def test_custom_config_loading(tmp_path, pytestconfig):
     Test that the integration_settings fixture correctly loads a custom config file.
     """
     custom_config_content = {
-        "default_llm": "anthropic",
-        "anthropic_api_key": "dummy-anthropic-key",
-        "models": {"default": "claude-3-opus-20240229"},
+        "default_llm": "openai",
+        "openai_api_key": "dummy-openai-key",
+        "models": {"default": "gpt-4o"},
     }
     custom_config_path = tmp_path / "custom_config.json"
     with open(custom_config_path, "w") as f:
@@ -59,9 +59,9 @@ def test_custom_config_loading(tmp_path, pytestconfig):
     # Use a new Settings object to avoid caching
     settings = Settings(config_file=str(custom_config_path))
 
-    assert settings.default_llm == "anthropic"
-    assert settings.anthropic_api_key == "dummy-anthropic-key"
-    assert settings.get_model_config()["default"] == "claude-3-opus-20240229"
+    assert settings.default_llm == "openai"
+    assert settings.openai_api_key == "dummy-openai-key"
+    assert settings.get_model_config()["default"] == "gpt-4o"
 
 
 def test_mock_mode_from_config(tmp_path):
@@ -90,8 +90,6 @@ def test_api_key_loading(tmp_path):
     api_key_config_content = {
         "default_llm": "openai",
         "openai_api_key": "dummy-openai-key",
-        "anthropic_api_key": "dummy-anthropic-key",
-        "google_api_key": "dummy-google-key",
         "models": {"default": "gpt-4o-mini"},
     }
     api_key_config_path = tmp_path / "api_key_config.json"
@@ -101,5 +99,3 @@ def test_api_key_loading(tmp_path):
     settings = Settings(config_file=str(api_key_config_path))
 
     assert settings.openai_api_key == "dummy-openai-key"
-    assert settings.anthropic_api_key == "dummy-anthropic-key"
-    assert settings.google_api_key == "dummy-google-key"

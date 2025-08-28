@@ -402,7 +402,7 @@ Write directly without introductions."""
         self, prompt: str, temperature: float, max_tokens: int | None, model: str | None = None, **kwargs: Any
     ) -> AsyncIterator[str]:
         """Generate streaming content using OpenAI."""
-        model = model or self.settings.openai_default_model_name
+        model = model or self.model_config.get("default", "gpt-4o-mini")
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             raise LLMClientError("OpenAI API key not found.", "openai", {"missing_api_key": True})
