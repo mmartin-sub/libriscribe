@@ -23,9 +23,17 @@ async def test_api():
     with open(config_path) as f:
         config = json.load(f)
 
-    api_key = config["openai_api_key"]
-    base_url = config["openai_base_url"]
-    model = config["openai_default_model"]
+    api_key = config.get("openai_api_key")
+    if not api_key:
+        pytest.skip("Skipping API test: 'openai_api_key' not found in config.")
+
+    base_url = config.get("openai_base_url")
+    if not base_url:
+        pytest.skip("Skipping API test: 'openai_base_url' not found in config.")
+
+    model = config.get("openai_default_model")
+    if not model:
+        pytest.skip("Skipping API test: 'openai_default_model' not found in config.")
 
     print(f"Testing API: {base_url}")
     print(f"Model: {model}")

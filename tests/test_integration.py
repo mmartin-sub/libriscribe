@@ -1,50 +1,47 @@
-import json
-import os
-from pathlib import Path
-
 import pytest
+from libriscribe2.utils.llm_client import LLMClient
+from libriscribe2.utils.mock_llm_client import MockLLMClient
 
-from libriscribe2.settings import Settings
-from libriscribe2.utils.llm_client import LLMClient, LLMClientError
-
-# Define the path to the config file
-CONFIG_PATH = Path(__file__).parent / ".config-test.json"
-
-# Load the config file to check for real API keys
-try:
-    with open(CONFIG_PATH) as f:
-        config = json.load(f)
-    OPENAI_API_KEY = config.get("openai_api_key")
-except (FileNotFoundError, json.JSONDecodeError):
-    OPENAI_API_KEY = None
-
-# A guard to check if the API key is a real key or a placeholder
-IS_REAL_KEY = OPENAI_API_KEY and "dummy-key" not in OPENAI_API_KEY
-
+def is_real_api_key(settings):
+    """
+    Checks if the provided API key is a real key or a placeholder.
+    A key is considered a placeholder if it's missing or contains 'dummy-key'.
+    """
+    api_key = settings.openai_api_key
+    return api_key and "dummy-key" not in api_key
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-@pytest.mark.skipif(
-    not IS_REAL_KEY, reason="Integration tests require a real OpenAI API key in tests/.config-test.json"
-)
-async def test_openai_integration():
+async def test_openai_integration(integration_settings, handle_llm_client_error):
     """
-    This is an integration test that calls the real OpenAI API.
-    It will be skipped if a real API key is not provided in tests/.config-test.json.
+    This is an integration test that calls the real OpenAI API or a mock client.
+    - If `default_llm` is "mock" in `.config-test.json` or if the file is missing,
+      it runs in mock mode.
+    - Otherwise, it attempts to run as a real integration test.
     """
-    # Set the API key in the environment for the LLMClient
-    if OPENAI_API_KEY:
-        os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
-
-    settings = Settings()
-    llm_client = LLMClient(provider="openai", settings=settings, model_config={"default": "gpt-4o-mini"})
-
-    prompt = "This is a test prompt. Say 'Hello, World!'."
-    try:
+    if integration_settings.mock:
+        # Run in mock mode
+        llm_client = MockLLMClient(settings=integration_settings)
+        prompt = "This is a test prompt for the mock client."
         response = await llm_client.generate_content(prompt)
-    except LLMClientError as e:
-        if "invalid_api_key" in str(e) or "401" in str(e):
-            pytest.skip("Skipping test due to invalid API key.")
-        raise
+        assert "Mock response for prompt type:" in response
 
-    assert "Hello, World!" in response
+    else:
+        # Run as a real integration test
+        if not is_real_api_key(integration_settings):
+            pytest.skip(
+                "Skipping integration test: No valid API key found in .config-test.json. "
+                "Please provide a real key to run this test."
+            )
+
+        llm_client = LLMClient(
+            provider=integration_settings.default_llm,
+            settings=integration_settings,
+            model_config=integration_settings.get_model_config(),
+        )
+
+        prompt = "This is a test prompt. Say 'Hello, World!'."
+
+        response = await llm_client.generate_content(prompt)
+
+        assert "Hello, World!" in response

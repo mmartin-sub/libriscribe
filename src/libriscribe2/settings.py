@@ -184,6 +184,10 @@ class Settings(BaseSettings):
         # Store the config_file for later use
         object.__setattr__(self, "_config_file", config_file)
 
+        # If default_llm is 'mock', enable mock mode
+        if self.default_llm == "mock":
+            object.__setattr__(self, "mock", True)
+
         # Ensure default values are used when no config file is provided or when config file fails to load
         if not config_file or (hasattr(self, "_config_data") and not self._config_data):
             # Clear environment variables that might have been set by previous tests
