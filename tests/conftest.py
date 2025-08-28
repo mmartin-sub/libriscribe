@@ -141,13 +141,11 @@ def test_config(pytestconfig) -> dict:
     if config_path.is_file():
         with open(config_path) as f:
             import json
+
             try:
                 return json.load(f)
             except json.JSONDecodeError:
-                pytest.fail(
-                    f"Failed to decode {config_path}. "
-                    "Please ensure it is a valid JSON file."
-                )
+                pytest.fail(f"Failed to decode {config_path}. Please ensure it is a valid JSON file.")
     else:
         # Return a default mock configuration if the file doesn't exist
         return {"default_llm": "mock", "mock": True}
@@ -180,14 +178,8 @@ def handle_llm_client_error():
         yield
     except LLMClientError as e:
         if "invalid_api_key" in str(e) or "401" in str(e):
-            pytest.skip(
-                "Skipping test due to an invalid API key. "
-                "Please check the key in your .config-test.json."
-            )
+            pytest.skip("Skipping test due to an invalid API key. Please check the key in your .config-test.json.")
         elif "rate_limit" in str(e):
-            pytest.skip(
-                "Skipping test due to rate limiting. "
-                "Check your API plan or try again later."
-            )
+            pytest.skip("Skipping test due to rate limiting. Check your API plan or try again later.")
         else:
             pytest.fail(f"LLMClientError occurred during test execution: {e}")

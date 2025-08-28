@@ -201,7 +201,6 @@ class TestLLMClient:
         # Act & Assert
         await client.generate_content("Test prompt")
 
-
     @pytest.mark.asyncio
     async def test_generate_content_with_fallback_basic(self, integration_settings, handle_llm_client_error):
         """Test basic content generation with fallback."""
@@ -210,7 +209,6 @@ class TestLLMClient:
 
         # Act & Assert
         await client.generate_content_with_fallback("Primary prompt", "Fallback prompt")
-
 
     def test_llm_client_error(self):
         """Test LLMClientError exception."""

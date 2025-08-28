@@ -1,6 +1,8 @@
 import pytest
+
 from libriscribe2.utils.llm_client import LLMClient
 from libriscribe2.utils.mock_llm_client import MockLLMClient
+
 
 def is_real_api_key(settings):
     """
@@ -9,6 +11,7 @@ def is_real_api_key(settings):
     """
     api_key = settings.openai_api_key
     return api_key and "dummy-key" not in api_key
+
 
 @pytest.mark.integration
 @pytest.mark.asyncio

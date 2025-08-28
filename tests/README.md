@@ -187,13 +187,14 @@ Integration tests can interact with external services like the OpenAI API or run
 
 To run integration tests against a real API provider:
 
-1.  **Create the config file:**
+1. **Create the config file:**
     Create a file named `.config-test.json` in the `tests/` directory. You can copy `tests/.config-test.json.example` to get started.
 
-2.  **Add your API keys:**
+2. **Add your API keys:**
     Edit `tests/.config-test.json` and add your real API keys. This file is in `.gitignore`, so your keys won't be committed to the repository. Set the `default_llm` to your desired provider (e.g., "openai").
 
     An example configuration for a real integration test:
+
     ```json
     {
       "openai_api_key": "your-real-openai-api-key",
@@ -213,8 +214,8 @@ If the API key is invalid or missing, the test will be skipped with an informati
 
 The integration tests will automatically run in mock mode in the following scenarios:
 
--   If the `tests/.config-test.json` file is missing.
--   If `default_llm` is set to `"mock"` in `tests/.config-test.json`.
+- If the `tests/.config-test.json` file is missing.
+- If `default_llm` is set to `"mock"` in `tests/.config-test.json`.
 
 When running in mock mode, the tests use a `MockLLMClient` that returns predefined responses, so no external API calls are made. This is useful for running tests in environments without API access.
 
