@@ -163,11 +163,11 @@ def integration_settings(pytestconfig) -> Settings:
         return Settings(config_file=str(config_path))
     else:
         # Create a default settings object which will be in mock mode
-        return Settings()
+        return Settings(mock=True)
 
 
 @pytest.fixture
-def handle_llm_client_error():
+def _handle_llm_client_error():
     """
     A fixture that wraps test execution in a try-except block to catch
     LLMClientError and provide more informative messages.

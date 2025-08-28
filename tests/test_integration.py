@@ -15,7 +15,7 @@ def is_real_api_key(settings):
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-async def test_openai_integration(integration_settings, handle_llm_client_error):
+async def test_openai_integration(integration_settings, _handle_llm_client_error):
     """
     This is an integration test that calls the real OpenAI API or a mock client.
     - If `default_llm` is "mock" in `.config-test.json` or if the file is missing,

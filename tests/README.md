@@ -181,7 +181,7 @@ hatch run test-cov
 
 ## Integration Tests Configuration
 
-Integration tests can interact with external services like the OpenAI API or run in a mock mode. The behavior is controlled by the `tests/.config-test.json` file.
+Integration tests can interact with external services like the OpenAI API or run in a mock mode. The behavior is controlled by the `tests/.config-test.json` file. The configuration files are parsed as `json5`, which means you can use comments and other `json5` features in your configuration.
 
 ### Running with a Real API Key
 

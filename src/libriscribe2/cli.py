@@ -323,7 +323,7 @@ def create_book(
         create-book --project-name="my custom project" --project-type=novel --all --auto-title --mock
 
         # Create with custom configuration (using mock for testing)
-        create-book --config-file=config-example.json --project-type=novel --all --auto-title --mock
+        create-book --config-file=config-example.json5 --project-type=novel --all --auto-title --mock
 
     NOTE: Use --mock flag for testing without API keys. For production use, provide a configuration file with your API keys.
     """

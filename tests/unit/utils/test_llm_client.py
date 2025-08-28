@@ -193,7 +193,7 @@ class TestLLMClient:
         # Assert - should not raise exception
 
     @pytest.mark.asyncio
-    async def test_generate_content_basic(self, integration_settings, handle_llm_client_error):
+    async def test_generate_content_basic(self, integration_settings, _handle_llm_client_error):
         """Test basic content generation."""
         # Arrange
         client = LLMClient(integration_settings.default_llm, integration_settings)
@@ -202,7 +202,7 @@ class TestLLMClient:
         await client.generate_content("Test prompt")
 
     @pytest.mark.asyncio
-    async def test_generate_content_with_fallback_basic(self, integration_settings, handle_llm_client_error):
+    async def test_generate_content_with_fallback_basic(self, integration_settings, _handle_llm_client_error):
         """Test basic content generation with fallback."""
         # Arrange
         client = LLMClient(integration_settings.default_llm, integration_settings)
