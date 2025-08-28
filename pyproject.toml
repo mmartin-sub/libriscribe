@@ -8,7 +8,7 @@ name = "libriscribe2"
 dynamic = ["version"]
 description = "Modern book creation CLI with rich output and type safety."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 authors = [
     {name = "Michel Martin", email = "172776424+mmartin-sub@users.noreply.github.com"},
     ]
@@ -125,7 +125,7 @@ python = "3.12"
 
 # This forces Hatch to use the stable pip-based editable install,
 # which correctly uses your hatchling backend and avoids the uv build conflict.
-dev-mode-builder = "pip"
+# dev-mode-builder = "pip"
 
 # This section enables the `hatch fmt` command.
 [tool.hatch.formatting]
@@ -336,6 +336,13 @@ ignore_decorators = [
     "@typer.command",
     "@contextmanager",
 ]
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.10", "3.11", "3.12"]
+
+# Configure hatch to use uv
+[tool.hatch.env.test]
+installer = "uv"
 
 # --- PYTEST CONFIGURATION ---
 [tool.pytest.ini_options]
