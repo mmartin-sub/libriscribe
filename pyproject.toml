@@ -35,7 +35,7 @@ dependencies = [
     "openai~=1.30",
     "typer~=0.12",
     "fpdf2~=2.7",
-    "pyjson5~=1.6",
+    "pyjson5~=2.0",
     "autogen-agentchat~=0.7",
     "autogen-ext[openai]",
     "pyyaml~=6.0",
